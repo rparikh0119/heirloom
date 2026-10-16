@@ -1,0 +1,18 @@
+{
+  "format": "heirloom-personality",
+  "format_version": 0,
+  "droid_name": "Example",
+  "created": "2026-10-16",
+  "layers": [
+    {
+      "owner": "Owner 1",
+      "since": "2026-10-16",
+      "status": "active",
+      "learned": {
+        "wait_before_checkin_s": 20.0,
+        "checkin_rate": 0.5,
+        "response_style": "gentle"
+      }
+    }
+  ]
+}

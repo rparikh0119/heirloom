@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "heirloom-brain"
+version = "0.0.1"
+description = "Heirloom's brain. One brain, any body."
+requires-python = ">=3.11"
+dependencies = [
+  "numpy",
+  "websockets>=12",
+]
+
+[project.optional-dependencies]
+reachy = ["reachy-mini[mujoco]==1.12.0"]  # [mujoco] is needed for the simulator
+
+[tool.setuptools.packages.find]
+include = ["heirloom*"]
