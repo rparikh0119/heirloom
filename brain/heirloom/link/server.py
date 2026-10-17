@@ -1,7 +1,9 @@
 """WebSocket server that streams Heirloom state to Unity (or any client).
 
-Protocol v0, brain -> client, JSON text frames:
-    {"type": "pose", "ch": {"head_pitch": 0.0, ...all channels...}}
+Protocol v0, JSON text frames:
+    brain -> client   {"type": "pose", "ch": {"head_pitch": 0.0, ...all channels...}}
+                      {"type": "state", ...}            (what the brain is doing, for the MR overlay)
+    client -> brain   {"type": "user", "head": [x, y, z]}  (user's head, metres, robot space)
 """
 from __future__ import annotations
 
@@ -28,6 +30,7 @@ class LinkServer:
         self._clients: set = set()
         self._lock = threading.Lock()
         self._latest: str | None = None
+        self._incoming: dict[str, tuple[dict, float]] = {}
         self._server = None
 
     def start(self) -> None:
@@ -54,9 +57,21 @@ class LinkServer:
             time.sleep(0.1)
         return True
 
+    def latest(self, msg_type: str, max_age: float | None = None) -> dict | None:
+        """Newest message of a type received from any client, or None if missing or older than max_age seconds."""
+        with self._lock:
+            item = self._incoming.get(msg_type)
+        if item is None:
+            return None
+        msg, stamp = item
+        if max_age is not None and time.monotonic() - stamp > max_age:
+            return None
+        return msg
+
     def broadcast(self, msg: dict) -> None:
         data = json.dumps(msg)
-        self._latest = data
+        if msg.get("type") == "pose":
+            self._latest = data  # sent to clients as soon as they connect
         with self._lock:
             clients = list(self._clients)
         for ws in clients:
@@ -73,8 +88,15 @@ class LinkServer:
         try:
             if self._latest is not None:
                 ws.send(self._latest)
-            for _ in ws:  # incoming messages are ignored in v0
-                pass
+            for raw in ws:
+                try:
+                    msg = json.loads(raw)
+                    msg_type = msg.get("type")
+                except (ValueError, AttributeError):
+                    continue
+                if msg_type:
+                    with self._lock:
+                        self._incoming[msg_type] = (msg, time.monotonic())
         except Exception:
             pass
         finally:

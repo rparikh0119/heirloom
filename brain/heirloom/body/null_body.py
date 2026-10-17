@@ -10,3 +10,6 @@ class NullBody(Body):
     def move(self, pose: Pose, duration: float = 0.5) -> None:
         print(f"[null] {duration:.2f}s -> {pose.channels()}")
         time.sleep(duration)
+
+    def set_target(self, pose: Pose) -> None:
+        pass  # called ~30x a second, so stay quiet

@@ -47,5 +47,10 @@ class Body(ABC):
     def move(self, pose: Pose, duration: float = 0.5) -> None:
         """Move smoothly to a pose over `duration` seconds. Blocks until done."""
 
+    def set_target(self, pose: Pose) -> None:
+        """Jump to a pose right now, without interpolation. For continuous control loops
+        (the caller does the smoothing). Default: a very short move."""
+        self.move(pose, 0.02)
+
     def rest(self, duration: float = 1.0) -> None:
         self.move(REST, duration)

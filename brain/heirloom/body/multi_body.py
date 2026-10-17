@@ -25,3 +25,7 @@ class MultiBody(Body):
             t.start()
         for t in threads:
             t.join()
+
+    def set_target(self, pose: Pose) -> None:
+        for b in self.bodies:
+            b.set_target(pose)

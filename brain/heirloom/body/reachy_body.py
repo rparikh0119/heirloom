@@ -35,7 +35,8 @@ class ReachyBody(Body):
             self._mini.__exit__(None, None, None)
             self._mini = None
 
-    def move(self, pose: Pose, duration: float = 0.5) -> None:
+    def _convert(self, pose: Pose):
+        """Heirloom pose -> (head matrix, antennas [right, left] rad, body_yaw rad), in Reachy units."""
         from reachy_mini.utils import create_head_pose
 
         # Fill unset channels from the last commanded pose so partial poses work.
@@ -53,9 +54,12 @@ class ReachyBody(Body):
             ANTENNA_SIGN * math.radians(merged.antenna_right),
             ANTENNA_SIGN * math.radians(merged.antenna_left),
         ]
-        self._mini.goto_target(
-            head=head,
-            antennas=antennas,
-            body_yaw=BASE_YAW_SIGN * math.radians(merged.base_yaw),
-            duration=max(duration, 0.05),
-        )
+        return head, antennas, BASE_YAW_SIGN * math.radians(merged.base_yaw)
+
+    def move(self, pose: Pose, duration: float = 0.5) -> None:
+        head, antennas, body_yaw = self._convert(pose)
+        self._mini.goto_target(head=head, antennas=antennas, body_yaw=body_yaw, duration=max(duration, 0.05))
+
+    def set_target(self, pose: Pose) -> None:
+        head, antennas, body_yaw = self._convert(pose)
+        self._mini.set_target(head=head, antennas=antennas, body_yaw=body_yaw)

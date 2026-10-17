@@ -37,3 +37,7 @@ class UnityBody(Body):
             if delay > 0:
                 time.sleep(delay)
         self._pose = Pose(**target)
+
+    def set_target(self, pose: Pose) -> None:
+        self._pose = Pose(**{**self._pose.channels(), **pose.channels()})
+        self._link.broadcast({"type": "pose", "ch": self._pose.channels()})
