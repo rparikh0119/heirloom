@@ -103,5 +103,5 @@ class Presence:
             tau = c.base_ease if k == "base_yaw" else (0.12 if k in ("iris", "antenna_left", "antenna_right") else head_tau)
             self.pose[k] = _ease(self.pose[k], target[k], dt, tau)
 
-        info = {"mode": self.mode, "user_distance": user_dist}
+        info = {"mode": self.mode, "user_distance": user_dist if user_dist is not None else -1}
         return Pose(**self.pose), info
