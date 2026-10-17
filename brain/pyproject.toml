@@ -9,7 +9,7 @@ description = "Heirloom's brain. One brain, any body."
 requires-python = ">=3.11"
 dependencies = [
   "numpy",
-  "websockets>=12",
+  "websockets>=13,<16",  # matches reachy-mini
 ]
 
 [project.optional-dependencies]

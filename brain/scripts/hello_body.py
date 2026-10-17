@@ -1,7 +1,9 @@
 """Heirloom says hi through any body.
 
     python scripts/hello_body.py --body null
-    python scripts/hello_body.py --body reachy   (run `reachy-mini-daemon --sim` first)
+    python scripts/hello_body.py --body unity          (press Play in Unity)
+    python scripts/hello_body.py --body reachy         (run `reachy-mini-daemon --sim --no-media` first)
+    python scripts/hello_body.py --body reachy+unity
 """
 import argparse
 
@@ -19,9 +21,13 @@ def greet(body) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--body", default="null", choices=["null", "reachy"])
+    parser.add_argument("--body", default="null", help="null, reachy, unity, or combined like reachy+unity")
     args = parser.parse_args()
     with make_body(args.body) as body:
+        if "unity" in args.body:
+            from heirloom.link import LinkServer
+            print("Waiting for Unity to connect (press Play)...")
+            LinkServer.get().wait_for_client()
         greet(body)
     print("Heirloom says hi.")
 
