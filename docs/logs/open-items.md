@@ -9,7 +9,6 @@ Anything that could fall through the cracks. Tick when done.
 - [ ] Verify the DLP2000 specs (T04)
 - [ ] Read Quartz / Kakoudaki (R05), Reactor (R06), r/movies WALL-E (R08)
 - [ ] Identify IEEE paper 9223478 (R07)
-- [ ] Add the author name for R14 (The Conversation)
 - [ ] Check chosen gestures and touch (wave, head pat) for cultural differences (R14)
 
 **Design calls (Wear System)**

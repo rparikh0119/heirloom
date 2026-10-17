@@ -55,16 +55,22 @@ Status: Not read. Couldn't identify the paper from the link. To do: Riya to shar
 Status: Not read (Reddit blocked for Claude). To do: screenshots.
 - https://www.reddit.com/r/movies/comments/dz8mzk/why_i_love_walle/
 
-**R14 · The Conversation, "Why are so many robots white?" (2023 or later)**
-By a sociologist who studies human-robot interaction (the author's name didn't load for Claude, so add it from the page). Status: Read.
+**R14 · Mark Paterson, "Why are so many robots white?" The Conversation (2023), republished by Fast Company Jan 29, 2024**
+Mark Paterson is a sociology professor at the University of Pittsburgh. Status: Read (both versions, same article).
 - Social robots, including ones used with autistic children and stroke patients, mostly look white and are often coded female. That fails the diverse people they serve.
 - Two causes: manufacturers' fixed "white, clinical" designs, and a sci-fi and European-art "cultural imaginary" linking robots with whiteness and servitude. The author calls the result "the poverty of the engineered imaginary."
 - "The solution is not simply to encase machines in brown or black plastic." Interaction itself (gesture, touch, vocalisation) needs cross-cultural design.
+- "Robotics teams are therefore constrained by design choices that the original developers made." Labs buy platforms (Pepper, Nao, iCub) and inherit their shiny white plastic.
 - Cites Cave and Dihal (*The Whiteness of AI*), Atanasoski and Vora (*Surrogate Humanity*), Jennifer Rhee (*The Robotic Imaginary*), Lucy Suchman, Maja Matarić.
-- Informs: research grounding for Heirloom's **rejection of the glossy white clinical look** (warm enamel, used-future, non-humanoid, no skin) · not gendered and not a servant (a companion and witness) · **gestures and touch must be checked across cultures** (a wave or a head pat doesn't mean the same thing everywhere).
+- Informs: **why Reachy Mini (white, bought-in) is only a test body** and the brain never inherits its design (D08) · research grounding for Heirloom's **rejection of the glossy white clinical look** (warm enamel, used-future, non-humanoid, no skin) · not gendered and not a servant (a companion and witness) · **gestures and touch must be checked across cultures** (a wave or a head pat doesn't mean the same thing everywhere).
 - Caution: the article is about socially assistive robots, mostly human-like ones. Heirloom's non-humanoid form sidesteps skin and gender coding, but the interaction point still applies.
 - Leads worth reading for the write-up: *The Whiteness of AI* (Cave and Dihal), *The Robotic Imaginary* (Rhee).
 - https://theconversation.com/why-are-so-many-robots-white-213336
+- https://www.fastcompany.com/91018855/why-are-robots-so-white
+
+**R15 · Quora, "Why are robots white?"**
+Status: Not read (Quora blocks Claude). Low credibility as a source. Use only for public perception, and only from screenshots.
+- https://www.quora.com/Why-are-robots-white
 
 ---
 
