@@ -52,5 +52,8 @@ class Body(ABC):
         (the caller does the smoothing). Default: a very short move."""
         self.move(pose, 0.02)
 
+    def play_sound(self, name: str) -> None:  # noqa: B027
+        """Chirp. Bodies without a speaker ignore it."""
+
     def rest(self, duration: float = 1.0) -> None:
         self.move(REST, duration)

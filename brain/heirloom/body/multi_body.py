@@ -29,3 +29,7 @@ class MultiBody(Body):
     def set_target(self, pose: Pose) -> None:
         for b in self.bodies:
             b.set_target(pose)
+
+    def play_sound(self, name: str) -> None:
+        for b in self.bodies:
+            b.play_sound(name)

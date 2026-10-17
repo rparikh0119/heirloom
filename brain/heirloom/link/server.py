@@ -3,13 +3,16 @@
 Protocol v0, JSON text frames:
     brain -> client   {"type": "pose", "ch": {"head_pitch": 0.0, ...all channels...}}
                       {"type": "state", ...}            (what the brain is doing, for the MR overlay)
+                      {"type": "sound", "name": "happy", "wav_b64": "..."}  (16-bit mono WAV)
     client -> brain   {"type": "user", "head": [x, y, z]}  (user's head, metres, robot space)
+                      {"type": "event", "name": "wave"}    (gestures, voice commands, buttons)
 """
 from __future__ import annotations
 
 import json
 import threading
 import time
+from collections import deque
 
 from websockets.sync.server import serve
 
@@ -31,6 +34,7 @@ class LinkServer:
         self._lock = threading.Lock()
         self._latest: str | None = None
         self._incoming: dict[str, tuple[dict, float]] = {}
+        self._events: deque[str] = deque(maxlen=50)
         self._server = None
 
     def start(self) -> None:
@@ -68,6 +72,13 @@ class LinkServer:
             return None
         return msg
 
+    def pop_events(self) -> list[str]:
+        """All event names received since the last call, oldest first."""
+        with self._lock:
+            events = list(self._events)
+            self._events.clear()
+        return events
+
     def broadcast(self, msg: dict) -> None:
         data = json.dumps(msg)
         if msg.get("type") == "pose":
@@ -94,7 +105,10 @@ class LinkServer:
                     msg_type = msg.get("type")
                 except (ValueError, AttributeError):
                     continue
-                if msg_type:
+                if msg_type == "event" and msg.get("name"):
+                    with self._lock:
+                        self._events.append(msg["name"])
+                elif msg_type:
                     with self._lock:
                         self._incoming[msg_type] = (msg, time.monotonic())
         except Exception:

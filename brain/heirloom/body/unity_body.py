@@ -1,9 +1,11 @@
 """A body that lives in Unity. Interpolates moves and streams every frame over the link."""
 from __future__ import annotations
 
+import base64
 import time
 
 from ..link import LinkServer
+from ..sound import render, to_wav_bytes
 from .base import REST, Body, Pose
 
 FPS = 60
@@ -41,3 +43,7 @@ class UnityBody(Body):
     def set_target(self, pose: Pose) -> None:
         self._pose = Pose(**{**self._pose.channels(), **pose.channels()})
         self._link.broadcast({"type": "pose", "ch": self._pose.channels()})
+
+    def play_sound(self, name: str) -> None:
+        wav = to_wav_bytes(render(name))
+        self._link.broadcast({"type": "sound", "name": name, "wav_b64": base64.b64encode(wav).decode("ascii")})

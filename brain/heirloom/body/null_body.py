@@ -13,3 +13,6 @@ class NullBody(Body):
 
     def set_target(self, pose: Pose) -> None:
         pass  # called ~30x a second, so stay quiet
+
+    def play_sound(self, name: str) -> None:
+        print(f"[null] chirp: {name}")
