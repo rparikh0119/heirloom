@@ -29,9 +29,21 @@ Sound and projector are events, sent separately.
 
 | Body | When | Adapter |
 |---|---|---|
-| NullBody | fall | prints commands. Unity is the only visual |
+| NullBody | fall | prints commands |
+| UnityBody | fall | streams poses to the MR app over the link (ws://<pc>:8765) |
 | ReachyBody (sim) | fall | validates the real Reachy API |
 | ReachyBody (lab robot) | winter | same adapter, real hardware |
 | DroidBody | winter to spring | Pi 5, smart servos, iris servo, LEDs, projector |
 
 The transfer test in spring moves one cartridge from DroidBody to ReachyBody. That only works because neither body owns the brain.
+
+## Link protocol (v0)
+
+Brain → Unity, JSON text frames over WebSocket on port 8765:
+
+```json
+{"type": "pose", "ch": {"head_pitch": 0, "head_yaw": 0, "head_roll": 0, "base_yaw": 0,
+                        "antenna_left": 0, "antenna_right": 0, "iris": 0.6, "light": 0.5}}
+```
+
+Every frame carries every channel. Bodies can be combined with `+` (e.g. `reachy+unity`) to drive the sim and the MR view at once.
