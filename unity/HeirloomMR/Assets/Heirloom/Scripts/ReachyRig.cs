@@ -39,6 +39,11 @@ namespace Heirloom
 
         public Channels Current { get; private set; } = new Channels();
 
+        /// <summary>Head position at rest, in world space. The brain measures the user from here.</summary>
+        public Vector3 HeadRestWorld => transform.TransformPoint(_headRestInRoot);
+
+        Vector3 _headRestInRoot;
+
         Quaternion _headRest, _baseRest, _antLRest, _antRRest;
         Vector3 _pitchB, _yawB, _rollB, _baseUpP;   // axes converted into the frames we rotate in
         bool _ready;
@@ -71,6 +76,7 @@ namespace Heirloom
 
             _headRest = head.localRotation;
             _baseRest = baseLink.localRotation;
+            _headRestInRoot = transform.InverseTransformPoint(head.position);
 
             // The URDF's internal link frames point in arbitrary directions, so express every axis
             // relative to the robot root (which faces the way you see it) and convert once at rest.
