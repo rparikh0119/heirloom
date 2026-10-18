@@ -35,6 +35,19 @@ EXPRESSIONS: dict[str, list[tuple[float, dict]]] = {
         (0.80, {"head_pitch": -8, "head_roll": -4, "antenna_left": -20, "antenna_right": -20, "iris": -0.25}),
         (1.20, {}),
     ],
+    "offended": [   # middle finger: recoils, antennas pinned flat (the sulk takes over after)
+        (0.00, {}),
+        (0.08, {"head_pitch": 14, "head_roll": -6, "antenna_left": -55, "antenna_right": -55, "iris": -0.4}),
+        (0.30, {"head_pitch": 10, "head_roll": 5, "antenna_left": -50, "antenna_right": -50, "iris": -0.35}),
+        (0.50, {"head_pitch": 12, "head_roll": -3, "antenna_left": -50, "antenna_right": -50, "iris": -0.35}),
+        (0.90, {}),
+    ],
+    "listen": [     # heard its name: quick perk up (the listening hold takes over after)
+        (0.00, {}),
+        (0.12, {"antenna_left": 30, "antenna_right": 30, "head_pitch": 7, "iris": 0.3}),
+        (0.40, {"antenna_left": 15, "antenna_right": 15, "head_pitch": 3, "iris": 0.15}),
+        (0.60, {}),
+    ],
     "stretch": [    # waking up
         (0.00, {}),
         (0.50, {"head_pitch": 22, "antenna_left": 50, "antenna_right": 50, "iris": 0.4}),

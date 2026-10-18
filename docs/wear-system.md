@@ -4,6 +4,34 @@ Heirloom's signature idea in code: **every interaction leaves a trace, traces bu
 
 The brain built so far (presence, reactions, chirps, modes) is the canvas. Wear is what makes a 10-year-old Heirloom different from a new one.
 
+## Design target
+
+**The everyday person:** never opens a settings menu, never reads a manual. Every choice happens through the droid itself and its physical controls. Approach: "solve for one, extend to many."
+
+## Rules (every learning behaviour must follow these)
+
+1. **It learns your warmth.** It learns which responses mean "warm" in your home: voice, gestures, body language, distance, touch.
+2. **Relationships, not accounts.** Learning belongs to the household or place. No logins, no profiles. Inside the household it learns its regulars through nuance (voice, height, rhythm). Strangers are guests. It can get you wrong and do a double-take.
+3. **Nothing is erased unless you choose.** Every layer can be kept, rested (kept but quiet) or wiped.
+4. **The core never changes.** Its temperament is fixed for life. Always recognisably itself, always predictable.
+5. **Absence leaves a trace.** Time apart changes it. It's shy at first, then warms back up faster than a new droid. It can never die.
+6. **Ownership changes through a ritual.** Moving the cartridge is the handoff. You see its history before you choose what to keep. Only one droid ever holds the wear.
+7. **It isn't built to please you.** It has moods, preferences and opinions. That's what makes its affection mean something.
+
+## Scenarios (the rules must survive all of these)
+
+| # | Scenario | Answer | Rules |
+|---|---|---|---|
+| 1 | The owner dies | The grandchild rests Grandma's layer. Kept, never erased, memories only when invited | 3, 4, 6 |
+| 2 | A family shares one droid | One household. Inside it, it learns its regulars. Strangers are guests | 1, 2 |
+| 3 | Sold to a stranger | It shows a few moments from its past. The stranger chooses keep, rest or wipe | 3, 6 |
+| 4 | Split household | Only one droid keeps the wear. Journal photos can be copied | 3, 6 |
+| 5 | Different bodies and abilities | Warmth through any channel. Wear changes style, never meaning | 1, 4 |
+| 6 | Different cultures | It learns a home's warmth instead of assuming one | 1 |
+| 7 | Neglect | Shy after time on the shelf, warms back up fast. It remembers you. It can't die | 5, 7 |
+| 8 | Wear is fundamental | It changes slowly enough that it never feels like a different droid | 4 |
+| 9 | An institution | The household layer becomes a place layer: the classroom's droid | 1, 2 |
+
 ## Four faces of wear
 
 | | What wears in | What you notice | Physical analogy |
@@ -63,7 +91,8 @@ Wear needs years, and a demo has minutes. A **simulator** runs a synthetic house
 
 ## Open design questions (Riya's calls)
 
-- What counts as a **warm response**? Draft: praise, waving back, staying close, later touch.
-- Does wear ever **fade** if unused, or is it permanent like patina on metal?
-- What does the **handoff ritual** look like and sound like?
+- What counts as a **warm response**, per channel?
+- Does wear ever **fade** if unused, or is it permanent like patina on metal? (leaning permanent)
+- What does the **handoff ritual** look and sound like?
 - How rare should **memory surfacing** be?
+- **Core temperament:** which traits, and how many?

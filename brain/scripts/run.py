@@ -1,10 +1,13 @@
-"""Run Heirloom: presence + reactions + chirps. Ctrl+C to stop.
+"""Run Heirloom: presence + reactions + chirps (+ voice). Ctrl+C to stop.
 
     python scripts/run.py --body unity
+    python scripts/run.py --body unity --voice          # talk to it (say "Heirloom" first)
+    python scripts/run.py --body unity --voice --mic 3  # pick a microphone (see scripts/voice_test.py --list)
     python scripts/run.py --body reachy+unity
 
 In the Unity Editor, number keys (Game view focused) send events:
     1 wave   2 good job   3 not now   4 go to sleep   5 wake up   6 curious
+    7 offended   8 scold ("no")   9 sorry
 """
 import argparse
 import time
@@ -19,7 +22,14 @@ HZ = 30
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--body", default="unity")
+    parser.add_argument("--voice", action="store_true", help="listen through the microphone")
+    parser.add_argument("--mic", type=int, default=None, help="microphone number")
     args = parser.parse_args()
+
+    voice = None
+    if args.voice:
+        from heirloom.perception.voice import VoiceListener   # only needs vosk when used
+        voice = VoiceListener(mic=args.mic).start()
 
     link = LinkServer.get()
     with make_body(args.body) as body:
@@ -32,7 +42,8 @@ def main() -> None:
                 now = time.perf_counter()
                 dt, last = now - last, now
 
-                for event in link.pop_events():
+                events = link.pop_events() + (voice.pop_events() if voice else [])
+                for event in events:
                     print(f"[event] {event}")
                     brain.handle(event)
 
@@ -47,6 +58,9 @@ def main() -> None:
                 time.sleep(max(0.0, 1.0 / HZ - (time.perf_counter() - now)))
         except KeyboardInterrupt:
             body.rest(1.0)
+        finally:
+            if voice:
+                voice.stop()
 
 
 if __name__ == "__main__":

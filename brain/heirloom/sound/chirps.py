@@ -50,6 +50,11 @@ CHIRPS = {
     "sleepy":  lambda p, s: [tone(900 * p, 280 * p, .7 * s, wobble=.08, wobble_hz=5, amp=.4)],
     "wake":    lambda p, s: [tone(300 * p, 1250 * p, .28 * s), tone(1250 * p, 2100 * p, .09 * s)],
     "notice":  lambda p, s: [tone(1300 * p, 1900 * p, .07 * s, amp=.35)],
+    "listen":  lambda p, s: [tone(1000 * p, 1600 * p, .06 * s, amp=.35), rest(.02 * s),
+                             tone(1600 * p, 2200 * p, .05 * s, amp=.3)],
+    "grumble": lambda p, s: [tone(420 * p, 260 * p, .22 * s, "square", wobble=.12, wobble_hz=28, amp=.4),
+                             rest(.04 * s),
+                             tone(300 * p, 170 * p, .38 * s, "square", wobble=.18, wobble_hz=18, amp=.4)],
 }
 
 

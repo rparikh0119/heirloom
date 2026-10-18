@@ -9,12 +9,13 @@ namespace Heirloom
     /// Editor stand-ins for gestures and voice, until the headset session.
     /// Click the Game view first so it receives key presses.
     /// 1 wave · 2 good job · 3 not now · 4 go to sleep · 5 wake up · 6 curious
+    /// 7 offended · 8 scold ("no") · 9 sorry
     /// </summary>
     public class KeyboardEvents : MonoBehaviour
     {
         public HeirloomLink link;
 
-        static readonly string[] Events = { "wave", "good", "not_now", "sleep", "wake", "curious" };
+        static readonly string[] Events = { "wave", "good", "not_now", "sleep", "wake", "curious", "offended", "scold", "sorry" };
 
         void Update()
         {
@@ -42,6 +43,9 @@ namespace Heirloom
                 case 4: return kb.digit4Key.wasPressedThisFrame;
                 case 5: return kb.digit5Key.wasPressedThisFrame;
                 case 6: return kb.digit6Key.wasPressedThisFrame;
+                case 7: return kb.digit7Key.wasPressedThisFrame;
+                case 8: return kb.digit8Key.wasPressedThisFrame;
+                case 9: return kb.digit9Key.wasPressedThisFrame;
                 default: return false;
             }
 #else

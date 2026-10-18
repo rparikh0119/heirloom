@@ -39,6 +39,8 @@ namespace Heirloom
                 case "idle": line = "IDLE"; break;
                 case "back_off": line = "GIVING YOU SPACE"; break;
                 case "sleep": line = "ASLEEP"; break;
+                case "sulk": line = "<color=#C0504D>OFFENDED</color>"; break;
+                case "listening": line = "<color=#7FB3D5>LISTENING...</color>"; break;
                 default: line = (link.BrainMode ?? "").ToUpperInvariant(); break;
             }
             if (!string.IsNullOrEmpty(link.BrainExpression))

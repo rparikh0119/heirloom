@@ -28,3 +28,17 @@
 
 **Next**
 - Review these logs. Write the Wear System brief. Answer the four design calls.
+
+---
+
+## Oct 18, 2026
+
+**Built**
+- Quest 3 over Meta Horizon Link: first headset test. Reachy sits on the real desk in MR, follows your head, every reaction triggers. Slightly sunk into the desk.
+- Talk and Gesture v0 brief (D25). Brain side: offline voice listener (Vosk) with a wake word (D27) and intent phrases. New reactions: scold ("no"), offended + sulk + forgive (D26), listening perk-up. Every mode now eases in and out. Keys 7 to 9 added in Unity.
+
+**Broke, and why**
+- Left controller won't connect → not needed, hands work.
+
+**Next**
+- Test voice with a real mic. Hand poses in Unity. Fix desk height.

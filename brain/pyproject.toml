@@ -14,6 +14,7 @@ dependencies = [
 
 [project.optional-dependencies]
 reachy = ["reachy-mini[mujoco]==1.12.0"]  # [mujoco] is needed for the simulator
+voice = ["vosk==0.3.45", "sounddevice"]     # offline speech, runs on this computer
 
 [tool.setuptools.packages.find]
 include = ["heirloom*"]

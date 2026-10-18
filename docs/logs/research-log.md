@@ -68,6 +68,11 @@ Mark Paterson is a sociology professor at the University of Pittsburgh. Status: 
 - https://theconversation.com/why-are-so-many-robots-white-213336
 - https://www.fastcompany.com/91018855/why-are-robots-so-white
 
+**R16 · Tamagotchi (Bandai, 1996)**
+Status: **Needs a proper source.** Riya's observation: Tamagotchi's neglect mechanic makes you feel guilty, "and it works." Well known that a neglected Tamagotchi could die.
+- Informs: neglect as a designed feature (D19) · the key difference that Heirloom can't die.
+- To do: find a credible source on Tamagotchi's design and its neglect mechanic (design history or a study on attachment to virtual pets).
+
 **R15 · Quora, "Why are robots white?"**
 Status: Not read (Quora blocks Claude). Low credibility as a source. Use only for public perception, and only from screenshots.
 - https://www.quora.com/Why-are-robots-white
@@ -114,3 +119,17 @@ Status: **Needs a source.** Indoor light ≈ 1/100 to 1/1000 of sunlight, so a p
 
 **T06 · NativeWebSocket vs Meta Voice SDK**
 Status: Verified in this project. The Voice SDK bundles its own copy with the same GUIDs, so the package can't be installed alongside it.
+
+**T07 · Local speaker recognition (SpeechBrain ECAPA models, Hugging Face)**
+Status: **Needs verifying.** Open-source speaker recognition that can run locally. Not yet confirmed whether it runs fast enough on a Raspberry Pi 5.
+- Informs: telling people apart through nuance (D18).
+
+**T08 · Offline speech recognition: Vosk** · Oct 18
+- Vosk (Apache 2.0, built on Kaldi) runs fully offline in Python, and can be limited to a fixed phrase list, which makes recognition fast and accurate. Small English model is about 40 MB. Python package on PyPI: https://pypi.org/project/vosk
+- Confidence: high for the API. Accuracy in a noisy exhibition room is untested.
+- Uncertain: whether "heirloom" is in the small model's vocabulary. The listener checks on startup, and "air loom" is a backup.
+
+**T09 · Hand gestures: Meta Interaction SDK pose detection** · Oct 18
+- The Interaction SDK detects static hand poses from finger states. Its examples include thumbs up, thumbs down and stop. Custom poses (middle finger) are built with the same tools. Docs: https://developers.meta.com/horizon/documentation/unity/unity-isdk-hand-pose-detection/ and https://developers.meta.com/horizon/documentation/unity/unity-isdk-building-hand-pose-recognizer/
+- A wave is motion, so it needs a small custom detector (hand raised, wrist swinging side to side). A beckon probably does too.
+- Hands over Link need Developer Runtime Features turned on in the Meta Horizon Link app.
