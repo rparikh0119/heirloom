@@ -48,6 +48,18 @@ EXPRESSIONS: dict[str, list[tuple[float, dict]]] = {
         (0.40, {"antenna_left": 15, "antenna_right": 15, "head_pitch": 3, "iris": 0.15}),
         (0.60, {}),
     ],
+    "love": [       # a heart: shy head tilt, antennas sway together, the light beats like a heart
+        (0.00, {}),
+        (0.25, {"head_roll": 12, "head_pitch": 5, "antenna_left": 25, "antenna_right": 25, "iris": 0.35, "light": 0.5}),
+        (0.40, {"head_roll": 12, "head_pitch": 5, "antenna_left": 30, "antenna_right": 20, "iris": 0.35, "light": 0.1}),
+        (0.55, {"head_roll": 12, "head_pitch": 5, "antenna_left": 25, "antenna_right": 25, "iris": 0.35, "light": 0.45}),
+        (0.90, {"head_roll": 10, "head_pitch": 4, "antenna_left": 20, "antenna_right": 30, "iris": 0.35, "light": 0.1}),
+        (1.20, {"head_roll": -8, "head_pitch": 4, "antenna_left": 30, "antenna_right": 20, "iris": 0.35, "light": 0.5}),
+        (1.35, {"head_roll": -8, "head_pitch": 4, "antenna_left": 25, "antenna_right": 25, "iris": 0.35, "light": 0.1}),
+        (1.50, {"head_roll": -8, "head_pitch": 4, "antenna_left": 25, "antenna_right": 25, "iris": 0.35, "light": 0.45}),
+        (1.90, {"head_roll": 4, "head_pitch": 2, "antenna_left": 15, "antenna_right": 15, "iris": 0.2, "light": 0.1}),
+        (2.30, {}),
+    ],
     "stretch": [    # waking up
         (0.00, {}),
         (0.50, {"head_pitch": 22, "antenna_left": 50, "antenna_right": 50, "iris": 0.4}),

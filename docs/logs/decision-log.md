@@ -116,3 +116,17 @@ One entry per real decision. **Status:** Decided · Proposed (waiting on Riya) �
 **D27 · Wake word "Heirloom"** · Oct 18 · Decided (placeholder)
 - It only listens for about 5 s after hearing its name, or takes "Heirloom, good job" in one breath. Stops it reacting to every stray "no" in the room.
 - Placeholder until the naming question is answered. Strong candidate: the owner names it and that name becomes the wake word (ties to R12, Roomba naming).
+
+**D28 · Gestures are read in the brain** · Oct 18 · Decided (changes D25)
+- Unity streams 26 hand joints per hand (XR Hands, 30 Hz) in robot space. The brain spots gestures from finger straightness, palm direction and motion (brain/heirloom/perception/gestures.py).
+- Why: one brain, any body. In winter the robot's camera can give the same hand points (MediaPipe), and the gesture code carries over unchanged. It also avoids swapping in Meta's Interaction Rig, which only exists on Quest. Riya chose to build it from scratch.
+- Gestures fire once per hold (let go to repeat). Wave is checked before palm-out, so a waving hand isn't read as "stop".
+
+**D29 · Heart → love** · Oct 18 · Decided
+- Both hands make a heart (index tips touching on top, thumb tips touching below), or say "Heirloom, I love you", or key 0. It tilts its head shyly, sways its antennas, and its light beats twice like a heart, with a soft warm coo.
+- First two-hand gesture. While both hands form a heart, single-hand gestures are ignored.
+- Open: in the Wear System, does affection count for more than a thumbs up?
+
+**Beckon tuning** · Oct 18
+- First real-hand test: every gesture read well except beckon. Real beckons only hook the index partway, so fixed curl thresholds missed them, and opening and closing a palm-up hand caused false triggers. Now it counts relative dips in index straightness (2+ in 2.5 s), with the palm staying up and the hand held still.
+- Update: a heart also ends a sulk (it melts). Thumbs up and wave are still ignored while it sulks. Riya: the sulk is still the favourite reaction, "so expressive and funny".

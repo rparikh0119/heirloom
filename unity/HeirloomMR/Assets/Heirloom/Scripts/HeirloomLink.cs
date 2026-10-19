@@ -62,6 +62,12 @@ namespace Heirloom
             _outbox.Enqueue(JsonUtility.ToJson(new EventMessage { name = eventName }));
         }
 
+        /// <summary>Send any JSON message to the brain (used by HandStream). Dropped while disconnected.</summary>
+        public void Send(string json)
+        {
+            if (_connected && _outbox.Count < 10) _outbox.Enqueue(json);
+        }
+
         void OnEnable()
         {
             _cts = new CancellationTokenSource();

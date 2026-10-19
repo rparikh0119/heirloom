@@ -33,8 +33,8 @@ Anything that could fall through the cracks. Tick when done.
 - [x] Headset test of the Presence scene (passthrough + hands) → works over Link, Oct 18
 - [ ] Reachy sits slightly inside the desk in MR (raise robot Position Y)
 - [ ] Log the bugs seen in the first headset test
-- [ ] Talk and Gesture v0: voice listener built, test with a real mic (scripts/voice_test.py)
-- [ ] Talk and Gesture v0: hand poses in Unity (thumbs up, palm out, middle finger) + wave and beckon detectors
+- [x] Talk and Gesture v0: voice listener tested with the laptop mic, and in Unity
+- [ ] Talk and Gesture v0: hand gestures (brain-side, D28), built and passing synthetic tests. Test with real hands and tune thresholds
 - [ ] Left Quest controller not connecting (battery or re-pair)
 - [x] Reachy antennas not showing in Unity → visible and moving in the Oct 18 recording
 - [ ] Head-yaw and base-yaw directions on the Reachy simulator (only pitch confirmed there)

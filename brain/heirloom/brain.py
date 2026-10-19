@@ -67,7 +67,11 @@ class HeirloomBrain:
                 self.mode = "awake"
                 self.expr.play("curious")
                 self.play_sound("notice")
-            return  # otherwise ignores you. It isn't built to please you (Rule 7).
+            elif event == "heart":            # so does a heart: it melts
+                self.mode = "awake"
+                self.expr.play("love")
+                self.play_sound("love")
+            return  # anything else (thumbs up, wave...) is ignored. It isn't built to please you (Rule 7).
 
         if event == "listen":
             self._listen_left = LISTEN_SECONDS
@@ -80,6 +84,9 @@ class HeirloomBrain:
         elif event == "good":
             self.expr.play("happy")
             self.play_sound("happy")
+        elif event == "heart":
+            self.expr.play("love")
+            self.play_sound("love")
         elif event == "scold":
             self.expr.play("sheepish")
             self.play_sound("no")
