@@ -1,0 +1,10 @@
+{
+  "note": "Said sorry while it’s sulking: it peeks back at you and forgives you.",
+  "when": "sorry",
+  "motion": "curious",
+  "sound": "notice",
+  "mode": "awake",
+  "only_while": [
+    "sulk"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "note": "A heart melts a sulk.",
+  "when": "heart",
+  "only_while": [
+    "sulk"
+  ],
+  "motion": "love",
+  "sound": "love",
+  "mode": "awake"
+}

@@ -1,0 +1,10 @@
+{
+  "note": "Middle finger: recoils, grumbles, turns its back. Doing it again mid-sulk restarts the sulk.",
+  "when": "offended",
+  "motion": "offended",
+  "sound": "grumble",
+  "mode": "sulk",
+  "works_while": [
+    "sulk"
+  ]
+}

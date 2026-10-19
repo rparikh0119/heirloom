@@ -1,0 +1,7 @@
+{
+  "note": "Heard its name: perks up and waits for what you say.",
+  "when": "listen",
+  "motion": "listen",
+  "sound": "listen",
+  "mode": "listening"
+}

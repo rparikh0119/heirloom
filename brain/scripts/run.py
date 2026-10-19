@@ -19,6 +19,7 @@ import time
 
 from heirloom.body import make_body
 from heirloom.brain import HeirloomBrain
+from heirloom.events import as_event
 from heirloom.link import LinkServer
 from heirloom.perception.gestures import GestureDetector
 
@@ -50,8 +51,10 @@ def main() -> None:
                 now = time.perf_counter()
                 dt, last = now - last, now
 
-                events = link.pop_events() + (voice.pop_events() if voice else [])
-                events += gestures.step(dt, link.latest("hands", max_age=0.3))
+                # Every sense feeds the same stream. The source is kept so the brain knows how it heard.
+                events = [as_event(e, "unity") for e in link.pop_events()]
+                events += [as_event(e, "voice") for e in (voice.pop_events() if voice else [])]
+                events += [as_event(e, "hands") for e in gestures.step(dt, link.latest("hands", max_age=0.3))]
                 for event in events:
                     print(f"[event] {event}")
                     brain.handle(event)

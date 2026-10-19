@@ -1,0 +1,7 @@
+{
+  "note": "Told “not now”: looks away and dims, and gives you space for a while.",
+  "when": "not_now",
+  "motion": "sheepish",
+  "sound": "sad",
+  "mode": "back_off"
+}

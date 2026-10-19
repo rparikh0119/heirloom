@@ -1,0 +1,7 @@
+{
+  "note": "You waved or said hi: it says hello back and drops whatever mood it was in.",
+  "when": "wave",
+  "motion": "hello",
+  "sound": "hello",
+  "mode": "awake"
+}

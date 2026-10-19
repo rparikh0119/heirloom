@@ -1,124 +1,77 @@
-"""Heirloom's brain: modes, reactions and presence, combined into one pose per tick.
+"""Heirloom's brain core. It doesn't know any specific reaction or mode by name.
 
-Modes:
-    awake     presence runs normally (idle or attending to you)
-    back_off  told "not now": looks away, dims, ignores you for a while
-    sulk      offended (middle finger): turns its back on you, then peeks and forgives
-    sleep     head down, iris closed, ignores you until woken
+Every tick:  events -> reactions (reactions/*.json) -> modes (heirloom/modes/) -> one pose.
 
-On top of the mode, "listening" holds the antennas up for a few seconds after it hears its name.
-Every mode eases in and out, because set_target sends poses straight to the body.
+    awake      the default: presence runs (idle, or attending to you)
+    any mode   loaded from heirloom/modes/, started and ended by reactions
+
+To add behaviour, add a reaction file or a mode file. This file shouldn't need to change.
 """
 from __future__ import annotations
 
-from .behavior.expressions import ExpressionPlayer
-from .behavior.presence import CHANNELS, Presence
+from .behavior.expressions import EXPRESSIONS, ExpressionPlayer
+from .behavior.presence import Presence
 from .body.base import Pose
+from .events import Event, as_event
+from .modes import load_modes
+from .reactions import choose, load_reactions
+from .sound.chirps import CHIRPS
 
-SLEEP_POSE = {"head_pitch": -22, "head_yaw": 0, "head_roll": 4, "base_yaw": 0,
-              "antenna_left": -40, "antenna_right": -40, "iris": 0.03, "light": 0.08}
-
-# Offsets added on top of presence while a mode is active (scaled by how far it has eased in).
-MODE_OFFSETS = {
-    "back_off": {"head_pitch": -8, "head_yaw": 25, "iris": -0.2, "light": -0.25},
-    "sulk":     {"base_yaw": 70, "head_yaw": 20, "head_pitch": 6, "head_roll": -4,   # back turned, chin up
-                 "antenna_left": -45, "antenna_right": -45, "iris": -0.3, "light": -0.2},
-    "listen":   {"antenna_left": 22, "antenna_right": 22, "head_pitch": 4, "iris": 0.15},
-}
-EASE_IN = {"back_off": 3.0, "sulk": 4.0, "listen": 6.0, "sleep": 0.6}
-EASE_OUT = {"back_off": 2.0, "sulk": 1.2, "listen": 3.0, "sleep": 1.5}
-
-BACK_OFF_SECONDS = 20.0
-SULK_SECONDS = 6.0
-PEEK_SECONDS = 1.8      # last part of the sulk: half turns back to check on you
-LISTEN_SECONDS = 5.0
+AWAKE = "awake"
 
 
 class HeirloomBrain:
-    def __init__(self, play_sound) -> None:
+    def __init__(self, play_sound, reactions_dir=None) -> None:
         """play_sound(name) is called whenever the brain wants to chirp."""
         self.presence = Presence()
         self.expr = ExpressionPlayer()
         self.play_sound = play_sound
-        self.mode = "awake"
-        self._mode_left = 0.0       # seconds left in back_off or sulk
-        self._listen_left = 0.0
-        self._blend = {k: 0.0 for k in EASE_IN}   # 0 = off .. 1 = fully in that mode
+        self.modes = load_modes()
+        kwargs = {"motions": EXPRESSIONS, "sounds": CHIRPS, "modes": self.modes}
+        if reactions_dir is not None:
+            kwargs["folder"] = reactions_dir
+        self.reactions = load_reactions(**kwargs)
+        self.mode = AWAKE
+        self._blend = {name: 0.0 for name in self.modes}   # 0 = off .. 1 = fully in that mode
         self._last_attending = False
 
-    # ---------- reactions to events ----------
-    def handle(self, event: str) -> None:
-        if event != "listen":
-            self._listen_left = 0.0   # any real command ends the listening window
+    # ---------- events ----------
+    def handle(self, event: "Event | str") -> str | None:
+        """React to one event. Returns the reaction file used, or None if it was ignored."""
+        e = as_event(event)
+        current = self.modes.get(self.mode)
+        if current and current.ends_on_any_event and e.name != current.name:
+            self.mode = AWAKE              # e.g. listening ends when you say the actual command
+            current = None
 
-        if self.mode == "sleep":
-            if event in ("wave", "wake"):
-                self.mode = "awake"
-                self.expr.play("stretch")
-                self.play_sound("wake")
-            return  # asleep: ignores everything else, even its name
+        r = choose(self.reactions, e.name, self.mode, bool(current and current.blocks_by_default))
+        if r is None:
+            if not any(e.name in x.when for x in self.reactions):
+                print(f"[brain] no reaction file for '{e.name}' (add one in brain/reactions/)")
+            return None
 
-        if self.mode == "sulk":
-            if event == "offended":           # doing it again: grumbles louder, sulks longer
-                self._mode_left = SULK_SECONDS
-                self.expr.play("offended")
-                self.play_sound("grumble")
-            elif event == "sorry":            # an apology ends it early
-                self.mode = "awake"
-                self.expr.play("curious")
-                self.play_sound("notice")
-            elif event == "heart":            # so does a heart: it melts
-                self.mode = "awake"
-                self.expr.play("love")
-                self.play_sound("love")
-            return  # anything else (thumbs up, wave...) is ignored. It isn't built to please you (Rule 7).
+        if r.mode:
+            self._set_mode(r.mode)
+        if r.motion:
+            self.expr.play(r.motion)
+        if r.sound:
+            self.play_sound(r.sound)
+        return r.file
 
-        if event == "listen":
-            self._listen_left = LISTEN_SECONDS
-            self.expr.play("listen")
-            self.play_sound("listen")
-        elif event == "wave":
-            self.mode = "awake"
-            self.expr.play("hello")
-            self.play_sound("hello")
-        elif event == "good":
-            self.expr.play("happy")
-            self.play_sound("happy")
-        elif event == "heart":
-            self.expr.play("love")
-            self.play_sound("love")
-        elif event == "scold":
-            self.expr.play("sheepish")
-            self.play_sound("no")
-        elif event == "not_now":
-            self.mode = "back_off"
-            self._mode_left = BACK_OFF_SECONDS
-            self.expr.play("sheepish")
-            self.play_sound("sad")
-        elif event == "offended":
-            self.mode = "sulk"
-            self._mode_left = SULK_SECONDS
-            self.expr.play("offended")
-            self.play_sound("grumble")
-        elif event == "sleep":
-            self.mode = "sleep"
-            self.play_sound("sleepy")
-        elif event == "curious":
-            self.expr.play("curious")
-            self.play_sound("curious")
-        # "wake" and "sorry" while awake: nothing to do
+    def _set_mode(self, name: str) -> None:
+        self.mode = name
+        if name != AWAKE:
+            self.modes[name].enter()
 
     # ---------- every tick ----------
     def step(self, dt: float, user_head) -> tuple[Pose, dict]:
-        if self.mode in ("back_off", "sulk"):
-            self._mode_left -= dt
-            if self._mode_left <= 0:
-                self.mode = "awake"
-        self._listen_left = max(0.0, self._listen_left - dt)
+        current = self.modes.get(self.mode)
+        if current and not current.step(dt):
+            self.mode, current = AWAKE, None
 
-        # Only pay attention to the user when awake.
-        attending_input = user_head if self.mode == "awake" else None
-        pose, info = self.presence.step(dt, attending_input)
+        # Presence only follows you when the mode allows it (sulking, sleeping and backing off don't).
+        attentive = current is None or current.attentive
+        pose, info = self.presence.step(dt, user_head if attentive else None)
         ch = pose.channels()
 
         # Notice chirp the moment it starts attending.
@@ -127,37 +80,18 @@ class HeirloomBrain:
             self.play_sound("notice")
         self._last_attending = attending
 
-        # Ease every mode in or out.
-        targets = {
-            "back_off": 1.0 if self.mode == "back_off" else 0.0,
-            "sulk": (0.0 if self.mode != "sulk" else 0.45 if self._mode_left < PEEK_SECONDS else 1.0),
-            "listen": 1.0 if self._listen_left > 0 else 0.0,
-            "sleep": 1.0 if self.mode == "sleep" else 0.0,
-        }
-        for k, target in targets.items():
-            rate = EASE_IN[k] if target > self._blend[k] else EASE_OUT[k]
-            self._blend[k] += (target - self._blend[k]) * min(1.0, rate * dt)
-
-        for k, offsets in MODE_OFFSETS.items():
-            if self._blend[k] > 0.001:
-                for ch_name, v in offsets.items():
-                    ch[ch_name] += v * self._blend[k]
-
-        if self._blend["sleep"] > 0.001:
-            for k in CHANNELS:
-                ch[k] += (SLEEP_POSE[k] - ch[k]) * self._blend["sleep"]
+        # Ease every mode in or out, then let each one shape the pose.
+        for name, mode in self.modes.items():
+            target = mode.target() if name == self.mode else 0.0
+            rate = mode.ease_in if target > self._blend[name] else mode.ease_out
+            self._blend[name] += (target - self._blend[name]) * min(1.0, rate * dt)
+            if self._blend[name] > 0.001:
+                mode.apply(ch, self._blend[name])
 
         for k, v in self.expr.step(dt).items():
             ch[k] += v
-
         ch["iris"] = min(1.0, max(0.0, ch["iris"]))
         ch["light"] = min(1.0, max(0.0, ch["light"]))
 
-        if self.mode != "awake":
-            shown = self.mode
-        elif self._listen_left > 0:
-            shown = "listening"
-        else:
-            shown = info["mode"]
-        info = {**info, "mode": shown, "expression": self.expr.name or ""}
-        return Pose(**ch), info
+        shown = self.mode if self.mode != AWAKE else info["mode"]
+        return Pose(**ch), {**info, "mode": shown, "expression": self.expr.name or ""}

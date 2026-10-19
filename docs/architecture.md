@@ -11,6 +11,21 @@ Reachy Mini is a test body. The final output is a custom droid. These rules keep
 5. **The cartridge format is Heirloom's own.** Plain JSON and JPEG. Nothing robot-specific inside (see `cartridge-format.md`).
 6. **Unity listens to the brain, never to the robot.** The MR app gets body pose, brain state and learned values from the brain's own WebSocket. Unity swaps the 3D model (Reachy now, custom droid later) without changing the protocol.
 
+7. **The brain core names nothing specific.** It loads reactions (`brain/reactions/*.json`) and modes (`brain/heirloom/modes/`) from their folders. Adding behaviour means adding a file. See `modularity-brief.md`.
+8. **Senses only measure, the brain decides.** Unity sends raw hand joints and head position. Voice is heard in the brain. Gestures, words and tone are interpreted in the brain, so they carry over to the robot's own camera and mics.
+9. **Every module can report its health** (`health()`), for the future self-maintenance feature.
+
+## The loop
+
+```
+SENSES (voice, hands, keys, later camera / touch / mute switch)
+   -> EVENTS  {name, source, strength, data}
+   -> REACTIONS  (reactions/*.json: motion, sound, mode change, when allowed)
+   -> MODES  (sulk, sleep, back_off, listening: behaviour over time)
+   -> PRESENCE + EXPRESSIONS  -> one pose per tick
+   -> BODY  (Unity, Reachy, later the droid)
+```
+
 ## Heirloom channels (v0)
 
 | Channel | Unit | Notes |
@@ -47,3 +62,17 @@ Brain → Unity, JSON text frames over WebSocket on port 8765:
 ```
 
 Every frame carries every channel. Bodies can be combined with `+` (e.g. `reachy+unity`) to drive the sim and the MR view at once.
+
+Also brain → Unity:
+```json
+{"type": "state", "mode": "sulk", "user_distance": 0.8, "expression": "offended"}
+{"type": "sound", "name": "grumble", "wav_b64": "..."}
+```
+
+Unity → brain:
+```json
+{"type": "user", "head": [x, y, z]}
+{"type": "event", "name": "good"}
+{"type": "hands", "left_tracked": true, "left": [x, y, z, ...26 joints], "right_tracked": false, "right": [...]}
+```
+Positions are metres in robot space: from the robot's head at rest, x right, y up, z forward. Hand joints follow the OpenXR / Unity XR Hands order (see `brain/heirloom/perception/gestures.py`). In winter, MediaPipe hand points from the robot's camera will be mapped into the same format.

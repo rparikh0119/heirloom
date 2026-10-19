@@ -1,0 +1,13 @@
+{
+  "note": "Wave or 'wake up' while asleep: stretches awake.",
+  "when": [
+    "wave",
+    "wake"
+  ],
+  "only_while": [
+    "sleep"
+  ],
+  "motion": "stretch",
+  "sound": "wake",
+  "mode": "awake"
+}

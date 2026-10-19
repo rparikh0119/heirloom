@@ -130,3 +130,24 @@ One entry per real decision. **Status:** Decided · Proposed (waiting on Riya) �
 **Beckon tuning** · Oct 18
 - First real-hand test: every gesture read well except beckon. Real beckons only hook the index partway, so fixed curl thresholds missed them, and opening and closing a palm-up hand caused false triggers. Now it counts relative dips in index straightness (2+ in 2.5 s), with the palm staying up and the hand held still.
 - Update: a heart also ends a sulk (it melts). Thumbs up and wave are still ignored while it sulks. Riya: the sulk is still the favourite reaction, "so expressive and funny".
+
+**D30 · No large language model** · Oct 18 · Decided
+- Heirloom's understanding is built from its own parts (speech recognition, small meaning matching, its learning loop), never an LLM. Keeps it organic, local, and away from people-pleasing chatbot behaviour. Also keeps it clearly separate from AugTwins.
+
+**D31 · A companion, not a pet** · Oct 18 · Decided
+- It learns by association (the way animals do), but its character is a companion with its own opinions: R2-D2, WALL-E, Bumblebee. No dog or pet framing in behaviour or language.
+
+**D32 · Tone of voice is read, alongside words** · Oct 18 · Decided (scope to define)
+- Loudness, pitch and pace work in tandem with words and gestures, the way voice and hands already do.
+- Proposed guard: it reacts to tone (soft, loud, fast, flat) but never names an emotion ("you seem sad"). Keeps it honest and consistent with "physical cues only".
+
+**D33 · Voice memories** · Oct 18 · Proposed
+- "Heirloom, record this" captures the owner's voice (a recipe, a message). It replays only that recording, through a slightly mechanical, tape-like filter. It never speaks for itself and never makes new words in anyone's voice.
+- Pairs with the photo journal: a photo and its sound, projected and played together.
+- Why: R17 (Bumblebee), R18 (Build-A-Bear), "we keep what holds our story". The real line from AugTwins: they synthesise new speech from a person, Heirloom only replays what was really said.
+- Open: how recordings are named and found without full speech recognition, whether it ever uses clips to respond (Bumblebee-style), grief safeguards (only on request, never a surprise).
+
+**D34 · Modular brain: reactions as files, modes as plug-ins** · Oct 18 · Decided, step 1 built
+- Reactions are JSON files in brain/reactions/ (no code). Behaviour over time (sulk, sleep, back off, listening) is a mode plug-in in heirloom/modes/. The core brain names nothing specific. Events now carry their source and data.
+- Missing body parts are skipped silently. Later feature instead: **self-maintenance**, Heirloom indicates when something isn't working (ties to Jibo/Vector/Moxie dying and the visible-repairs look). Every module gets a health() hook now.
+- See docs/modularity-brief.md.
