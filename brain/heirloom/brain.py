@@ -55,8 +55,13 @@ class HeirloomBrain:
         if r.motion:
             self.expr.play(r.motion)
         if r.sound:
-            self.play_sound(r.sound)
+            self._sound(r.sound)
         return r.file
+
+    def _sound(self, name: str) -> None:
+        current = self.modes.get(self.mode)
+        if not (current and current.silent):
+            self.play_sound(name)
 
     def _set_mode(self, name: str) -> None:
         self.mode = name
@@ -77,7 +82,7 @@ class HeirloomBrain:
         # Notice chirp the moment it starts attending.
         attending = info["mode"] == "attend"
         if attending and not self._last_attending:
-            self.play_sound("notice")
+            self._sound("notice")
         self._last_attending = attending
 
         # Ease every mode in or out, then let each one shape the pose.

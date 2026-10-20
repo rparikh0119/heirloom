@@ -1,0 +1,31 @@
+{
+  "note": "Heard its name: quick perk up.",
+  "keys": [
+    {
+      "t": 0.0,
+      "ch": {}
+    },
+    {
+      "t": 0.12,
+      "ch": {
+        "antenna_left": 30,
+        "antenna_right": 30,
+        "head_pitch": 7,
+        "iris": 0.3
+      }
+    },
+    {
+      "t": 0.4,
+      "ch": {
+        "antenna_left": 15,
+        "antenna_right": 15,
+        "head_pitch": 3,
+        "iris": 0.15
+      }
+    },
+    {
+      "t": 0.6,
+      "ch": {}
+    }
+  ]
+}

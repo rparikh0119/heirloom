@@ -1,6 +1,7 @@
 {
-  "note": "Told goodnight: droops slowly and goes to sleep until you wake it.",
+  "note": "Told goodnight: yawns, droops slowly and goes to sleep until you wake it.",
   "when": "sleep",
+  "motion": "yawn",
   "sound": "sleepy",
   "mode": "sleep"
 }

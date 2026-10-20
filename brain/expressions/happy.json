@@ -1,0 +1,65 @@
+{
+  "note": "Praised: bouncy nods with antennas waving.",
+  "keys": [
+    {
+      "t": 0.0,
+      "ch": {}
+    },
+    {
+      "t": 0.12,
+      "ch": {
+        "head_pitch": 7,
+        "antenna_left": 30,
+        "antenna_right": 30,
+        "iris": 0.35,
+        "light": 0.3
+      }
+    },
+    {
+      "t": 0.24,
+      "ch": {
+        "head_pitch": -2,
+        "head_roll": 6,
+        "antenna_left": 10,
+        "antenna_right": 35,
+        "iris": 0.35,
+        "light": 0.3
+      }
+    },
+    {
+      "t": 0.36,
+      "ch": {
+        "head_pitch": 7,
+        "antenna_left": 35,
+        "antenna_right": 10,
+        "iris": 0.35,
+        "light": 0.3
+      }
+    },
+    {
+      "t": 0.48,
+      "ch": {
+        "head_pitch": -2,
+        "head_roll": -6,
+        "antenna_left": 10,
+        "antenna_right": 35,
+        "iris": 0.35,
+        "light": 0.3
+      }
+    },
+    {
+      "t": 0.6,
+      "ch": {
+        "head_pitch": 6,
+        "antenna_left": 30,
+        "antenna_right": 30,
+        "iris": 0.35,
+        "light": 0.3
+      }
+    },
+    {
+      "t": 0.95,
+      "ch": {}
+    }
+  ]
+}

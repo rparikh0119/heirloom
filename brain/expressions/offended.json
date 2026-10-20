@@ -1,0 +1,43 @@
+{
+  "note": "Middle finger: recoils, antennas pinned flat (the sulk mode takes over after).",
+  "keys": [
+    {
+      "t": 0.0,
+      "ch": {}
+    },
+    {
+      "t": 0.08,
+      "ch": {
+        "head_pitch": 14,
+        "head_roll": -6,
+        "antenna_left": -55,
+        "antenna_right": -55,
+        "iris": -0.4
+      }
+    },
+    {
+      "t": 0.3,
+      "ch": {
+        "head_pitch": 10,
+        "head_roll": 5,
+        "antenna_left": -50,
+        "antenna_right": -50,
+        "iris": -0.35
+      }
+    },
+    {
+      "t": 0.5,
+      "ch": {
+        "head_pitch": 12,
+        "head_roll": -3,
+        "antenna_left": -50,
+        "antenna_right": -50,
+        "iris": -0.35
+      }
+    },
+    {
+      "t": 0.9,
+      "ch": {}
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "note": "Waking up: big stretch upward.",
+  "keys": [
+    {
+      "t": 0.0,
+      "ch": {}
+    },
+    {
+      "t": 0.5,
+      "ch": {
+        "head_pitch": 22,
+        "antenna_left": 50,
+        "antenna_right": 50,
+        "iris": 0.4
+      }
+    },
+    {
+      "t": 0.9,
+      "ch": {
+        "head_pitch": 18,
+        "head_roll": 8,
+        "antenna_left": 45,
+        "antenna_right": 50,
+        "iris": 0.4
+      }
+    },
+    {
+      "t": 1.15,
+      "ch": {
+        "head_pitch": 18,
+        "head_roll": -8,
+        "antenna_left": 50,
+        "antenna_right": 45,
+        "iris": 0.4
+      }
+    },
+    {
+      "t": 1.6,
+      "ch": {}
+    }
+  ]
+}

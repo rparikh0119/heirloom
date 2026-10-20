@@ -1,0 +1,33 @@
+{
+  "note": "Told off or told 'not now': head down, antennas droop.",
+  "keys": [
+    {
+      "t": 0.0,
+      "ch": {}
+    },
+    {
+      "t": 0.3,
+      "ch": {
+        "head_pitch": -10,
+        "head_roll": -6,
+        "antenna_left": -25,
+        "antenna_right": -25,
+        "iris": -0.3
+      }
+    },
+    {
+      "t": 0.8,
+      "ch": {
+        "head_pitch": -8,
+        "head_roll": -4,
+        "antenna_left": -20,
+        "antenna_right": -20,
+        "iris": -0.25
+      }
+    },
+    {
+      "t": 1.2,
+      "ch": {}
+    }
+  ]
+}

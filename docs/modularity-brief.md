@@ -45,7 +45,7 @@ SENSES  ->  EVENT BUS  ->  BRAIN CORE  ->  BODY
 
 ## Build steps
 1. **Done:** events with data, mode plug-ins (`heirloom/modes/`), reaction files (`brain/reactions/`), core brain that names nothing specific. Riya writes the remaining reaction files (`tests/test_reactions.py` tracks them).
-2. Gesture detectors as plug-ins, one file each. Riya writes `shh.py`.
-3. Expressions as JSON files + the pose recorder in Unity (Riya).
+2. **Done:** gesture detectors as plug-ins, one file each (`heirloom/perception/gestures/`). Gestures now also get the person's head position. Modes can be `silent`. Riya writes `shh.py` (`tests/test_shh.py` checks it), plus `shh.json` and a `quiet` mode.
+3. **Done:** expressions are JSON files in `brain/expressions/`. Pose recorder in Unity (`PoseRecorder.cs`) saves new ones. Riya animates the first new expression with it.
 4. Character dials (`character.json`) scaling reactions.
 5. Capabilities: voice memories first.

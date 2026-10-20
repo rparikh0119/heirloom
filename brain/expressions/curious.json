@@ -1,0 +1,29 @@
+{
+  "note": "Head tilt, held for a beat.",
+  "keys": [
+    {
+      "t": 0.0,
+      "ch": {}
+    },
+    {
+      "t": 0.25,
+      "ch": {
+        "head_roll": 15,
+        "head_pitch": 5,
+        "iris": 0.25
+      }
+    },
+    {
+      "t": 1.0,
+      "ch": {
+        "head_roll": 15,
+        "head_pitch": 5,
+        "iris": 0.25
+      }
+    },
+    {
+      "t": 1.35,
+      "ch": {}
+    }
+  ]
+}

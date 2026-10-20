@@ -54,12 +54,13 @@ def main() -> None:
                 # Every sense feeds the same stream. The source is kept so the brain knows how it heard.
                 events = [as_event(e, "unity") for e in link.pop_events()]
                 events += [as_event(e, "voice") for e in (voice.pop_events() if voice else [])]
-                events += [as_event(e, "hands") for e in gestures.step(dt, link.latest("hands", max_age=0.3))]
+                user = link.latest("user", max_age=0.5)
+                head = user["head"] if user else None
+                events += [as_event(e, "hands") for e in gestures.step(dt, link.latest("hands", max_age=0.3), head)]
                 for event in events:
                     print(f"[event] {event}")
                     brain.handle(event)
 
-                user = link.latest("user", max_age=0.5)
                 pose, info = brain.step(dt, tuple(user["head"]) if user else None)
                 body.set_target(pose)
                 link.broadcast({"type": "state", **info})

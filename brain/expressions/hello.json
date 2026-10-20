@@ -1,0 +1,49 @@
+{
+  "note": "Greeting wiggle: antennas up and rocking side to side.",
+  "keys": [
+    {
+      "t": 0.0,
+      "ch": {}
+    },
+    {
+      "t": 0.15,
+      "ch": {
+        "antenna_left": 35,
+        "antenna_right": 35,
+        "head_pitch": 8,
+        "iris": 0.3
+      }
+    },
+    {
+      "t": 0.35,
+      "ch": {
+        "antenna_left": 10,
+        "antenna_right": 40,
+        "head_roll": 7,
+        "iris": 0.3
+      }
+    },
+    {
+      "t": 0.55,
+      "ch": {
+        "antenna_left": 40,
+        "antenna_right": 10,
+        "head_roll": -7,
+        "iris": 0.3
+      }
+    },
+    {
+      "t": 0.8,
+      "ch": {
+        "antenna_left": 30,
+        "antenna_right": 30,
+        "head_pitch": 4,
+        "iris": 0.2
+      }
+    },
+    {
+      "t": 1.1,
+      "ch": {}
+    }
+  ]
+}

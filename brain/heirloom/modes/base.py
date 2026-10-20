@@ -12,6 +12,7 @@ class Mode:
     blocks_by_default = False       # True: only reactions that list this mode can fire while it's on
     ends_on_any_event = False       # True: any new event ends it (listening)
     attentive = True                # False: stops looking at you while the mode is on
+    silent = False                  # True: no chirps while the mode is on (it still moves)
     ease_in = 3.0                   # how fast it blends in and out (higher = faster)
     ease_out = 2.0
     offsets: dict[str, float] = {}  # added to the pose while active, scaled by the blend

@@ -151,3 +151,13 @@ One entry per real decision. **Status:** Decided · Proposed (waiting on Riya) �
 - Reactions are JSON files in brain/reactions/ (no code). Behaviour over time (sulk, sleep, back off, listening) is a mode plug-in in heirloom/modes/. The core brain names nothing specific. Events now carry their source and data.
 - Missing body parts are skipped silently. Later feature instead: **self-maintenance**, Heirloom indicates when something isn't working (ties to Jibo/Vector/Moxie dying and the visible-repairs look). Every module gets a health() hook now.
 - See docs/modularity-brief.md.
+
+**D35 · Gestures are plug-ins** · Oct 19 · Decided, built
+- Each gesture is one file in heirloom/perception/gestures/ (thumbs_up, middle_finger, palm_out, wave, beckon, heart). Shared hand maths in hand.py, motion history in memory.py, holding and cooldowns handled once in the detector.
+- Gestures receive the person's head position, so face-relative gestures work (shh = finger to lips).
+- Modes can be silent (no chirps). First use: a "quiet" mode after shh.
+- Riya writes shh.py as her first Python module.
+
+**D36 · Expressions are files, made with a pose recorder** · Oct 19 · Built
+- Every expression is a JSON file of keyframes in brain/expressions/. The brain checks them on startup, like reactions.
+- PoseRecorder.cs in Unity: pose Reachy with sliders, capture keyframes (K), play back (P), save (Enter). Riya animates Heirloom's mannerisms directly, no code.

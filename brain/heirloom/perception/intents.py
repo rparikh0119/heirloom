@@ -25,6 +25,7 @@ INTENTS: dict[str, list[str]] = {
     "curious": ["come here", "look at me", "over here"],
     "sorry":   ["sorry", "i'm sorry"],
     "heart":   ["i love you", "love you"],
+    "shh":     ["be quiet", "quiet", "hush"],
 }
 
 

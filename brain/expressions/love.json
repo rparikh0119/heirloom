@@ -1,0 +1,101 @@
+{
+  "note": "A heart: shy head tilt side to side, light beats twice like a heartbeat.",
+  "keys": [
+    {
+      "t": 0.0,
+      "ch": {}
+    },
+    {
+      "t": 0.25,
+      "ch": {
+        "head_roll": 12,
+        "head_pitch": 5,
+        "antenna_left": 25,
+        "antenna_right": 25,
+        "iris": 0.35,
+        "light": 0.5
+      }
+    },
+    {
+      "t": 0.4,
+      "ch": {
+        "head_roll": 12,
+        "head_pitch": 5,
+        "antenna_left": 30,
+        "antenna_right": 20,
+        "iris": 0.35,
+        "light": 0.1
+      }
+    },
+    {
+      "t": 0.55,
+      "ch": {
+        "head_roll": 12,
+        "head_pitch": 5,
+        "antenna_left": 25,
+        "antenna_right": 25,
+        "iris": 0.35,
+        "light": 0.45
+      }
+    },
+    {
+      "t": 0.9,
+      "ch": {
+        "head_roll": 10,
+        "head_pitch": 4,
+        "antenna_left": 20,
+        "antenna_right": 30,
+        "iris": 0.35,
+        "light": 0.1
+      }
+    },
+    {
+      "t": 1.2,
+      "ch": {
+        "head_roll": -8,
+        "head_pitch": 4,
+        "antenna_left": 30,
+        "antenna_right": 20,
+        "iris": 0.35,
+        "light": 0.5
+      }
+    },
+    {
+      "t": 1.35,
+      "ch": {
+        "head_roll": -8,
+        "head_pitch": 4,
+        "antenna_left": 25,
+        "antenna_right": 25,
+        "iris": 0.35,
+        "light": 0.1
+      }
+    },
+    {
+      "t": 1.5,
+      "ch": {
+        "head_roll": -8,
+        "head_pitch": 4,
+        "antenna_left": 25,
+        "antenna_right": 25,
+        "iris": 0.35,
+        "light": 0.45
+      }
+    },
+    {
+      "t": 1.9,
+      "ch": {
+        "head_roll": 4,
+        "head_pitch": 2,
+        "antenna_left": 15,
+        "antenna_right": 15,
+        "iris": 0.2,
+        "light": 0.1
+      }
+    },
+    {
+      "t": 2.3,
+      "ch": {}
+    }
+  ]
+}

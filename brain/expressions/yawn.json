@@ -1,0 +1,11 @@
+{
+  "note": "Going to sleep: a little dip, a big stretch with the iris wide open, then everything sags.",
+  "keys": [
+    {"t": 0.0, "ch": {}},
+    {"t": 0.35, "ch": {"head_pitch": -4, "antenna_left": -8, "antenna_right": -8}},
+    {"t": 0.9, "ch": {"head_pitch": 18, "head_roll": 5, "antenna_left": 45, "antenna_right": 40, "iris": 0.4, "light": 0.15}},
+    {"t": 1.4, "ch": {"head_pitch": 20, "head_roll": 6, "antenna_left": 48, "antenna_right": 44, "iris": 0.4, "light": 0.15}},
+    {"t": 1.9, "ch": {"head_pitch": -6, "head_roll": 3, "antenna_left": -20, "antenna_right": -22, "iris": -0.3}},
+    {"t": 2.5, "ch": {}}
+  ]
+}
