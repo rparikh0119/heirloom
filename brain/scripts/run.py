@@ -5,6 +5,7 @@
     python scripts/run.py --body unity --voice --mic 3  # pick a microphone (see scripts/voice_test.py --list)
     python scripts/run.py --body reachy+unity
     python scripts/run.py --body unity --gesture-debug  # print finger states twice a second, for tuning
+    python scripts/run.py --body unity --cartridge cartridges/riya   # learn into a cartridge (made if missing)
 
 Hand gestures arrive from Unity (HandStream on the BrainLink object) and are read in the brain:
     thumbs up = good · palm out = not now · wave = hello · beckon = curious · middle finger = offended
@@ -19,6 +20,7 @@ import time
 
 from heirloom.body import make_body
 from heirloom.brain import HeirloomBrain
+from heirloom.cartridge import Cartridge
 from heirloom.events import as_event
 from heirloom.link import LinkServer
 from heirloom.perception.gestures import GestureDetector
@@ -32,7 +34,16 @@ def main() -> None:
     parser.add_argument("--voice", action="store_true", help="listen through the microphone")
     parser.add_argument("--mic", type=int, default=None, help="microphone number")
     parser.add_argument("--gesture-debug", action="store_true", help="print what each finger is doing")
+    parser.add_argument("--cartridge", default=None, help="folder of the cartridge to learn into")
     args = parser.parse_args()
+
+    cartridge = None
+    if args.cartridge:
+        from pathlib import Path
+        path = Path(args.cartridge)
+        cartridge = Cartridge.open(path) if (path / "cartridge.json").exists() else Cartridge.create(path)
+        cartridge.seat(args.body)
+        print(f"[cartridge] {path}  droid {cartridge.droid.get('id')}  {cartridge.health()[1]}")
 
     voice = None
     if args.voice:
@@ -43,7 +54,9 @@ def main() -> None:
     with make_body(args.body) as body:
         print("Waiting for Unity to connect (press Play)...")
         link.wait_for_client()
-        brain = HeirloomBrain(play_sound=body.play_sound)
+        brain = HeirloomBrain(play_sound=body.play_sound, cartridge=cartridge)
+        if cartridge:
+            print("[dials] " + "  ".join(f"{k} {v:.3f}" for k, v in brain.character.dials.items()))
         gestures = GestureDetector(debug=args.gesture_debug)
         last_mode, last = None, time.perf_counter()
         try:

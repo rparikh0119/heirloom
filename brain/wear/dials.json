@@ -1,0 +1,25 @@
+{
+  "note": "What nudges each temperament dial (D37, D41). One step is tiny, so it takes hundreds of moments to notice. The total is capped at wear_limit in character.json.",
+  "step": 0.001,
+  "rules": [
+    { "note": "Flipped off: grumpier over time. Character and charm (Riya, Oct 21)",
+      "when": "offended", "dial": "sass", "nudge": 1 },
+    { "note": "Told off: a little more back-talk",
+      "when": "scold", "dial": "sass", "nudge": 1 },
+    { "note": "Making up after a sulk softens it",
+      "when": ["heart", "sorry"], "while": "sulk", "dial": "sass", "nudge": -1 },
+
+    { "note": "Coming to say hi makes it bolder. Stand-in until presence can tell 'stayed close'",
+      "when": "wave", "dial": "boldness", "nudge": 1 },
+    { "note": "Told 'not now' a lot: hangs back more",
+      "when": "not_now", "dial": "boldness", "nudge": -1 },
+
+    { "note": "Praised right after a big reaction: more bounce",
+      "when": "good", "after": ["wave", "heart", "curious"], "within": 5, "dial": "energy", "nudge": 1 },
+    { "note": "Shushed or sent away: calmer",
+      "when": ["shh", "not_now"], "dial": "energy", "nudge": -1 },
+
+    { "note": "Praised for being curious: investigates more",
+      "when": "good", "after": "curious", "within": 5, "dial": "curiosity", "nudge": 1 }
+  ]
+}

@@ -6,6 +6,9 @@ Every tick:  events -> reactions (reactions/*.json) -> modes (heirloom/modes/) -
     any mode   loaded from heirloom/modes/, started and ended by reactions
 
 To add behaviour, add a reaction file or a mode file. This file shouldn't need to change.
+
+With a cartridge, wear plug-ins (heirloom/wear/) learn from every event and shape the character.
+Without one, it behaves exactly like the out-of-the-box droid.
 """
 from __future__ import annotations
 
@@ -17,13 +20,15 @@ from .events import Event, as_event
 from .modes import load_modes
 from .reactions import choose, load_reactions
 from .sound.chirps import CHIRPS
+from .wear import load_wear
 
 AWAKE = "awake"
 
 
 class HeirloomBrain:
-    def __init__(self, play_sound, reactions_dir=None) -> None:
-        """play_sound(name) is called whenever the brain wants to chirp."""
+    def __init__(self, play_sound, reactions_dir=None, cartridge=None) -> None:
+        """play_sound(name) is called whenever the brain wants to chirp.
+        cartridge: an opened Cartridge, or None to run without learning."""
         self.character = load_character()
         c = self.character
         self.presence = Presence(PresenceConfig(notice_distance=c.notice_distance, glance_gap=c.glance_gap))
@@ -39,11 +44,33 @@ class HeirloomBrain:
         self.mode = AWAKE
         self._blend = {name: 0.0 for name in self.modes}   # 0 = off .. 1 = fully in that mode
         self._last_attending = False
+        self.t = 0.0                                         # seconds since it woke up
+
+        # Wear: only with a cartridge. Each plug-in blends its layers into the brain.
+        self.cartridge = cartridge
+        self.wear = load_wear() if cartridge is not None else []
+        for w in self.wear:
+            w.attach(cartridge, self)
+            w.apply(self)
+        self._refresh_character()
+
+    def _refresh_character(self) -> None:
+        """Push the current dials into the parts that use them. Modes read them live."""
+        c = self.character
+        self.presence.cfg.notice_distance = c.notice_distance
+        self.presence.cfg.glance_gap = c.glance_gap
+        self.expr.scale = c.motion_scale
 
     # ---------- events ----------
     def handle(self, event: "Event | str") -> str | None:
         """React to one event. Returns the reaction file used, or None if it was ignored."""
         e = as_event(event)
+        changed = [w for w in self.wear if w.record(e, self.mode, self.t)]
+        for w in changed:
+            w.apply(self)
+        if changed:
+            self._refresh_character()
+
         current = self.modes.get(self.mode)
         if current and current.ends_on_any_event and e.name != current.name:
             self.mode = AWAKE              # e.g. listening ends when you say the actual command
@@ -75,6 +102,7 @@ class HeirloomBrain:
 
     # ---------- every tick ----------
     def step(self, dt: float, user_head) -> tuple[Pose, dict]:
+        self.t += dt
         current = self.modes.get(self.mode)
         if current and not current.step(dt):
             self.mode, current = AWAKE, None
