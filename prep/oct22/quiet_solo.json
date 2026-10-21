@@ -1,0 +1,23 @@
+{
+  "note": "One person who works from home. Gentle, a little busy, rarely rude.",
+  "label": "a quiet solo owner",
+  "sources": [
+    "Total: Bentley et al. 2018 (IMWUT), light-user cluster, about 2.3 sessions a day, fewer on weekends",
+    "Novelty: Cagiltay et al. 2022 (IDC) and Weiss et al. 2021 (RO-MAN), fades over 2 to 3 weeks",
+    "Long term: Zhao & McEwen 2025 (Luka), sharp drop after year 1, low but stable by years 3 to 4 (family recall)",
+    "Mix of moments: design assumption"
+  ],
+  "moments_per_day": 2.3,
+  "weekend": 0.9,
+  "novelty": { "peak": 3.0, "days": 21 },
+  "long_term": { "floor": 0.5, "from_day": 365, "to_day": 1095 },
+  "mix": [
+    { "note": "Morning and evening hello",          "events": ["wave"],              "weight": 2 },
+    { "note": "Beckons it over, praises curiosity", "events": ["curious", "good"],   "gap": 2, "weight": 0.7 },
+    { "note": "Occasional heart",                   "events": ["heart"],             "weight": 0.3 },
+    { "note": "'Not now' while working",            "events": ["not_now"],           "weight": 1.2 },
+    { "note": "Shushed on calls",                   "events": ["shh"],               "weight": 1 },
+    { "note": "A rare bad day, says sorry after",   "events": ["offended", "sorry"], "gap": 4, "weight": 0.02 },
+    { "note": "Told off now and then",              "events": ["scold"],             "weight": 0.05 }
+  ]
+}

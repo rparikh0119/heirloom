@@ -1,0 +1,24 @@
+{
+  "note": "Someone who plays with it all the time. The ceiling, not the typical owner.",
+  "label": "an enthusiast",
+  "sources": [
+    "Total: Bentley et al. 2018 (IMWUT), super-user cluster (8 of 88 homes), about 5.9 sessions a day",
+    "Ceiling check: company claims of 60+ interactions a day (bibo, ThePaper Oct 2026) count single interactions from active users only, so they overstate typical use",
+    "Novelty: Cagiltay et al. 2022, Weiss et al. 2021",
+    "Long term: assumed to stay engaged (floor 0.8), like the long-term AIBO owners in Kertesz & Turunen 2017",
+    "Mix of moments: design assumption"
+  ],
+  "moments_per_day": 5.9,
+  "weekend": 1.3,
+  "novelty": { "peak": 2.0, "days": 21 },
+  "long_term": { "floor": 0.8, "from_day": 365, "to_day": 1095 },
+  "mix": [
+    { "note": "Says hi a lot",                      "events": ["wave"],              "weight": 3 },
+    { "note": "Praised after a greeting",           "events": ["wave", "good"],      "gap": 2, "weight": 2 },
+    { "note": "Beckons it over, praises curiosity", "events": ["curious", "good"],   "gap": 2, "weight": 2 },
+    { "note": "Hearts",                             "events": ["heart"],             "weight": 1.5 },
+    { "note": "Teasing, then making up",            "events": ["offended", "heart"], "gap": 3, "weight": 0.2 },
+    { "note": "'Not now'",                          "events": ["not_now"],           "weight": 0.6 },
+    { "note": "Shushed",                            "events": ["shh"],               "weight": 0.6 }
+  ]
+}

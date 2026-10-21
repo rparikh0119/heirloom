@@ -4,12 +4,16 @@ Anything that could fall through the cracks. Tick when done.
 
 **Research**
 - [x] Verify the Roomba naming study (R12) → Sung et al. 2007, UbiComp, 21 of 30 owners named theirs
-- [ ] Verify the aibo funeral details (R13)
+- [x] Verify the aibo funeral details (R13) → Knox & Watanabe 2018 (R46)
 - [ ] Find a source for the indoor solar estimate (T05)
 - [ ] Verify the DLP2000 specs (T04)
 - [ ] Find a source for Tamagotchi's neglect design (R16)
 - [ ] Check local speaker recognition speed on a Pi 5 (T07)
 - [ ] Read Quartz / Kakoudaki (R05), Reactor (R06), r/movies WALL-E (R08)
+- [ ] Read Mori 1970 uncanny valley, primary source (R65)
+- [ ] Re-download Okada JRSJ 2016 from J-STAGE (body text didn't render) (R51)
+- [ ] Read leads: Weiss et al. 2021 Vector (R69), Kamino et al. 2025 (R41), Gygi dolls (R68), Values in repair (R55), Ostrowski 2022 full (R39)
+- [ ] Check Elon AI Companions topline methodology before citing (R34)
 - [ ] Identify IEEE paper 9223478 (R07)
 - [ ] Check chosen gestures and touch (wave, head pat) for cultural differences (R14)
 
@@ -54,6 +58,17 @@ Anything that could fall through the cracks. Tick when done.
 - [ ] Update architecture.md and modularity-brief.md for the cartridge + wear plug-ins
 - [ ] Replace the v0 example cartridge (brain/cartridges/example)
 - [ ] Decide: commit cartridges/riya to git (backup) or gitignore it
+
+**Rework from research (Oct 22, see docs/rework-plan-oct22.md)**
+- [ ] D50 settling learning + D51 households v2 (code ready in prep/oct22/)
+- [ ] D52 positioning line · D53 two-key handoff · D54 scenario 10 (living handoff) · D55 patina carries the demo · D56 weak-robot boundary · D57 pillar revisions · D58 wake word hold
+- [ ] Handoff ritual brief: pick a direction (docs/handoff-ritual-brief.md)
+- [ ] Direct fresh-droid hesitation on wave and happy (C3)
+- [ ] Patina plug-in (moved up, carries the fresh vs worn demo)
+- [ ] Rule 5 absence has no code (shy after time apart)
+- [ ] Cartridge "pass on" flags for the will (C2), once D53 is decided
+- [ ] Heirloom part that moves bodies (C4): raise with the ID collaborator
+- [ ] Update deck positioning + speaker notes with prior art (LOVOT, RoBoHoN, aibo)
 
 **Hardware**
 - [ ] Update the hardware sheet: supercapacitor, NiMH pack, modular connectors, ID chips

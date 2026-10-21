@@ -1,0 +1,21 @@
+{
+  "note": "Bought with excitement, used less and less, then mostly left on a shelf. Tests absence (Rule 5) and what a neglected droid inherits.",
+  "label": "a droid that got shelved",
+  "sources": [
+    "Shen & Guan 2025 (国际新闻界): 47 homes, 9 months, nobody used the robot past 6 months, most stopped within 2 to 3",
+    "Total before shelving: Bentley et al. 2018, light-user cluster, about 2.3 sessions a day",
+    "Novelty: Cagiltay et al. 2022, Weiss et al. 2021",
+    "Mix of moments: design assumption"
+  ],
+  "moments_per_day": 2.3,
+  "weekend": 1.0,
+  "novelty": { "peak": 3.0, "days": 21 },
+  "long_term": { "floor": 0.03, "from_day": 45, "to_day": 150 },
+  "mix": [
+    { "note": "Hello",                              "events": ["wave"],              "weight": 2 },
+    { "note": "Praise",                             "events": ["good"],              "weight": 1 },
+    { "note": "Beckons it over",                    "events": ["curious", "good"],   "gap": 2, "weight": 0.5 },
+    { "note": "'Not now'",                          "events": ["not_now"],           "weight": 1.5 },
+    { "note": "Shushed",                            "events": ["shh"],               "weight": 1 }
+  ]
+}

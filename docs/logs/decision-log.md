@@ -211,3 +211,9 @@ One entry per real decision. **Status:** Decided · Proposed (waiting on Riya) �
 
 **D48 · Warm response v0** · Oct 20 · Decided
 - Warm: thumbs up, heart, a wave back, staying close. Cold: "not now", walking away.
+
+**D49 · Dials wear: treated badly, it gets grumpier** · Oct 21 · Decided, built
+- Being offended or scolded nudges sass up. Making up during a sulk (heart, sorry) nudges it down. Riya: grumpier "shows character and charm" (Rule 7). The alternative, getting more cautious (boldness down), was rejected.
+- Other nudges: wave = bolder, "not now" = less bold and calmer, shh = calmer, praise after a big reaction = more energy, praise after curious = more curious. Warmth speed stays fixed for now.
+- One step = 0.001, capped at wear_limit 0.25 per layer and in total (D41). Rules live in brain/wear/dials.json, code in heirloom/wear/dials.py.
+- Gaps: boldness up should come from "stayed close" and curiosity down from "ignored its glances". Both need presence events first.

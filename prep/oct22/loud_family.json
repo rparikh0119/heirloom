@@ -1,0 +1,26 @@
+{
+  "note": "Two parents, two kids. Lots of attention and praise, and the kids flip it off for fun.",
+  "label": "a loud family",
+  "sources": [
+    "Total: Bentley et al. 2018 (IMWUT), medium-user cluster, about 2.4 sessions a day. Household size did not raise use, larger homes used it more on weekends",
+    "Novelty: Cagiltay et al. 2022 (IDC) and Weiss et al. 2021 (RO-MAN), fades over 2 to 3 weeks",
+    "Long term: Zhao & McEwen 2025 (Luka), sharp drop after year 1, low but stable by years 3 to 4 (family recall)",
+    "Mix of moments: design assumption"
+  ],
+  "moments_per_day": 2.4,
+  "weekend": 1.4,
+  "novelty": { "peak": 3.0, "days": 21 },
+  "long_term": { "floor": 0.5, "from_day": 365, "to_day": 1095 },
+  "mix": [
+    { "note": "Kids saying hi",                     "events": ["wave"],              "weight": 6 },
+    { "note": "Praise for nothing in particular",   "events": ["good"],              "weight": 2 },
+    { "note": "Praised right after a greeting",     "events": ["wave", "good"],      "gap": 2, "weight": 2 },
+    { "note": "Beckoned over, then praised",        "events": ["curious", "good"],   "gap": 2, "weight": 1 },
+    { "note": "Hearts",                             "events": ["heart"],             "weight": 1 },
+    { "note": "Kids flip it off, then make up",     "events": ["offended", "heart"], "gap": 3, "weight": 0.25 },
+    { "note": "Kids flip it off and walk away",     "events": ["offended"],          "weight": 0.2 },
+    { "note": "Told off when it's in the way",      "events": ["scold"],             "weight": 0.4 },
+    { "note": "'Not now' during homework",          "events": ["not_now"],           "weight": 1 },
+    { "note": "Shushed during calls and TV",        "events": ["shh"],               "weight": 1.5 }
+  ]
+}
