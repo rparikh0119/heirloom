@@ -3,7 +3,7 @@
 Anything that could fall through the cracks. Tick when done.
 
 **Research**
-- [ ] Verify the Roomba naming study (R12)
+- [x] Verify the Roomba naming study (R12) → Sung et al. 2007, UbiComp, 21 of 30 owners named theirs
 - [ ] Verify the aibo funeral details (R13)
 - [ ] Find a source for the indoor solar estimate (T05)
 - [ ] Verify the DLP2000 specs (T04)
@@ -18,12 +18,12 @@ Anything that could fall through the cracks. Tick when done.
 - [x] Per-person learning? → Yes, through nuance (D18)
 - [x] Neglect? → Yes, shy then recovers, can't die (D19)
 - [x] Hold switch? → Cut (D21)
-- [ ] What counts as a warm response, per channel?
+- [x] What counts as a warm response, per channel? → v0 (D48)
 - [ ] Does wear fade, or is it permanent? (leaning permanent)
 - [ ] What does the handoff ritual look and sound like?
 - [ ] How rare is memory surfacing?
 - [x] Core temperament traits → five dials (D22)
-- [ ] Is every droid born different, or one designed personality?
+- [x] Is every droid born different, or one designed personality? → one designed personality (D37)
 - [ ] Demo droid dial settings
 - [ ] Does it hold a grudge if you keep offending it? (D26)
 - [ ] Naming: does the owner name it, and does that become the wake word? (D27)
@@ -39,6 +39,9 @@ Anything that could fall through the cracks. Tick when done.
 - [x] Reachy antennas not showing in Unity → visible and moving in the Oct 18 recording
 - [ ] Head-yaw and base-yaw directions on the Reachy simulator (only pitch confirmed there)
 - [ ] Write the Wear System design brief
+- [x] Wear System risks R-1 to R-8 answered (D40 to D47)
+- [ ] Cartridge v1 format brief (must cover D43, D45, D46)
+- [ ] Check whether the Quest passthrough camera API works over Link
 
 **Hardware**
 - [ ] Update the hardware sheet: supercapacitor, NiMH pack, modular connectors, ID chips
@@ -46,7 +49,7 @@ Anything that could fall through the cracks. Tick when done.
 - [ ] Contents of the lab sensor kit
 - [ ] Projector choice
 - [x] Rolling vs turntable → rolls (D23)
-- [ ] Power for a rolling droid: charging dock + non-lithium pack? Runtime target? (reopens D05)
+- [x] Power for a rolling droid → rechargeable lithium allowed (D39)
 - [ ] Cliff sensors + wheel module
 - [ ] Internal packaging: block out every component at real size (Blender boxes or foam) before any more styling. Likely total height 25 to 30 cm, not 18 cm
 - [ ] Verify sizes: ReSpeaker XVF3800 board, Dynamixel XL330, laser pico module, Reachy Mini overall height

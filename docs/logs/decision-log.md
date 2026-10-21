@@ -172,3 +172,42 @@ One entry per real decision. **Status:** Decided · Proposed (waiting on Riya) �
 **D38 · Body differences to plan for (no build yet)** · Oct 19 · Noted
 - The custom droid has an aperture eye (the iris channel already covers it), rolls (needs drive channels: forward/back and turn, beyond base_yaw), and an unknown number of antennas.
 - Expressions should stay body-agnostic: e.g. antennas expressed as intent (up/down, spread) that each body spreads over however many it has. Settle once the form is set with the ID collaborator.
+
+**D39 · Rechargeable lithium allowed** · Oct 20 · Decided (reopens D05)
+- Rechargeable lithium cells are allowed (Geekworm X1202 UPS HAT + 4 x 18650, ~40 Wh, ~2.4 h off the dock by first estimate). The battery is the one part designed to be replaced. See docs/hardware/Heirloom-Hardware-Breakdown.xlsx.
+
+**D40 · Wear shows without the headset (R-1)** · Oct 20 · Decided
+- Patina in motion, dialect in chirps, and recognising its regulars. The MR overlay is the lens for the demo and debugging, never the only place wear shows.
+- Wear is the answer to the novelty effect.
+- Research: Hill et al. 1992 (edit wear / read wear), Li 2016 via Yang et al. 2023 review (people respond to personalization they notice), Leite et al. 2013 and Leite PhD (novelty fades, memory and incremental novelty sustain).
+
+**D41 · Praise can't pass the dial limits (R-2)** · Oct 20 · Decided
+- Rewards soften temperament only within wear_limit. A sassy droid stays a little sassy.
+- Research: De Freitas (HBS), companion apps manipulate in ~37% of farewells to keep engagement. The people-pleaser failure mode.
+
+**D42 · Predictable what, variable how (R-3)** · Oct 20 · Decided
+- The same input always gets the same kind of reaction. The style of that reaction wears in and keeps a little randomness.
+- Research: Hancock et al. 2011 meta-analysis (robot performance r = +0.34 with trust, robot attributes r = +0.03). Sung et al. 2007: Roomba owners read random movement as personality, 21 of 30 named theirs.
+
+**D43 · Rhythms by default, content only on request (R-4)** · Oct 20 · Decided (clarifies D33)
+- By default it learns rhythms only (when you're around, what lands warmly). Voice memories and photos are saved only when asked, with a clear sign while recording, a hardware mute that cuts the mics, and nothing leaving the cartridge. Guests leave no wear.
+- Research: MIT Technology Review 2022, Roomba test-unit photos leaked via data-labelling gig workers, one person consenting for a whole home.
+
+**D44 · No guilt (R-5)** · Oct 20 · Decided
+- It never reacts to you leaving. Shyness on return is short, fixed and cautious, with no sad sounds.
+- Research: De Freitas (HBS), guilt tactics raise engagement up to 14x but cause anger and churn. Pollmann et al. 2023 (via Yang et al. 2023) warn against robot "guilt trips".
+
+**D45 · Memories can be retired (R-6)** · Oct 20 · Decided
+- Rested layers surface only on request. "Not now" during a memory retires that memory for good. No settings menu.
+- Research: Facebook Memories research 2017 ("contamination sequences", filters by people and dates), Massimi 2013 (mementos can dredge up pain, limit availability).
+
+**D46 · Time skip with household profiles (R-7)** · Oct 20 · Decided
+- The simulator runs 2 or 3 synthetic homes (e.g. quiet solo owner, loud family) so worn droids differ. The write-up labels the wear as simulated.
+- Research: Sung et al. via Leite PhD, about 2 months to stable use patterns. No quarter playtest can show real wear.
+
+**D47 · Full Wear System across weeks 8 and 9 (R-8)** · Oct 20 · Decided
+- Cartridge layers, patina, dialect, time-skip simulator, rings overlay, handoff and transfer. Journal photos preloaded and shown on the desk in MR. Live photo capture waits for winter.
+- Cut order if behind: rings polish, then dialect. Patina and transfer are not cuttable.
+
+**D48 · Warm response v0** · Oct 20 · Decided
+- Warm: thumbs up, heart, a wave back, staying close. Cold: "not now", walking away.
