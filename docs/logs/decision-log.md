@@ -161,3 +161,14 @@ One entry per real decision. **Status:** Decided · Proposed (waiting on Riya) �
 **D36 · Expressions are files, made with a pose recorder** · Oct 19 · Built
 - Every expression is a JSON file of keyframes in brain/expressions/. The brain checks them on startup, like reactions.
 - PoseRecorder.cs in Unity: pose Reachy with sliders, capture keyframes (K), play back (P), save (Enter). Riya animates Heirloom's mannerisms directly, no code.
+
+**D37 · Same character out of the box, wears in with you** · Oct 19 · Decided (revises D14 and D22)
+- Every Heirloom starts with the same character: all five dials at a modest middle (brain/character.json). One designed personality, not born different.
+- Fixed forever: what it can do and what it values (it can sulk, get shy, it won't just please you).
+- Wears in: the dials drift with how the owner lives with it, within a limit (wear_limit 0.25). Two owners end up with two different droids from the same canvas.
+- Why: Riya wants a blank-canvas start that builds with the owner. Pure blank was rejected because a personality made only from the owner is a mirror, which breaks Rule 7, and is dull on day one (novelty effect).
+- Built: the dials now drive behaviour. Sass = sulk length, boldness = notice distance, energy = size and speed of expressions, curiosity = how often it glances around. Warmth speed waits for the Wear System.
+
+**D38 · Body differences to plan for (no build yet)** · Oct 19 · Noted
+- The custom droid has an aperture eye (the iris channel already covers it), rolls (needs drive channels: forward/back and turn, beyond base_yaw), and an unknown number of antennas.
+- Expressions should stay body-agnostic: e.g. antennas expressed as intent (up/down, spread) that each body spreads over however many it has. Settle once the form is set with the ID collaborator.

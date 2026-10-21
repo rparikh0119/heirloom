@@ -61,9 +61,10 @@ def _smooth(s: float) -> float:
 
 
 class ExpressionPlayer:
-    def __init__(self) -> None:
+    def __init__(self, scale: float = 1.0) -> None:
         self.name: str | None = None
         self._t = 0.0
+        self.scale = scale     # character energy: >1 bigger and faster, <1 smaller and slower
 
     def play(self, name: str) -> None:
         if name not in EXPRESSIONS:
@@ -75,12 +76,12 @@ class ExpressionPlayer:
         if self.name is None:
             return {}
         keys = EXPRESSIONS[self.name]
-        self._t += dt
+        self._t += dt * self.scale
         if self._t >= keys[-1][0]:
             self.name = None
             return {}
         for (t0, a), (t1, b) in zip(keys, keys[1:]):
             if t0 <= self._t < t1:
                 s = _smooth((self._t - t0) / (t1 - t0))
-                return {k: a.get(k, 0.0) + (b.get(k, 0.0) - a.get(k, 0.0)) * s for k in set(a) | set(b)}
+                return {k: (a.get(k, 0.0) + (b.get(k, 0.0) - a.get(k, 0.0)) * s) * self.scale for k in set(a) | set(b)}
         return {}

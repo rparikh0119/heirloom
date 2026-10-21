@@ -133,3 +133,22 @@ Status: **Needs verifying.** Open-source speaker recognition that can run locall
 - The Interaction SDK detects static hand poses from finger states. Its examples include thumbs up, thumbs down and stop. Custom poses (middle finger) are built with the same tools. Docs: https://developers.meta.com/horizon/documentation/unity/unity-isdk-hand-pose-detection/ and https://developers.meta.com/horizon/documentation/unity/unity-isdk-building-hand-pose-recognizer/
 - A wave is motion, so it needs a small custom detector (hand raised, wrist swinging side to side). A beckon probably does too.
 - Hands over Link need Developer Runtime Features turned on in the Meta Horizon Link app.
+
+**R17 · Bumblebee (Transformers)** · Oct 18 · Riya's find
+- A loved robot whose voice box is damaged, so he speaks by stitching together radio, film and song clips. Expressive without his own voice.
+- Informs: voice memories (D33). Heirloom's only human-sounding audio is recordings of its own family, replayed.
+- Source to cite: fan wiki only so far (https://hero.fandom.com/wiki/Bumblebee_(Transformers_Original_Films)). Needs a better source (film, interviews) before the write-up.
+
+**R18 · Build-A-Bear voice recordings and grief** · Oct 18 · Riya's find
+- Build-A-Bear sells a "Record Your Voice" sound box placed inside the bear. Staff report becoming informal grief counsellors as customers put recordings of loved ones who have died into bears.
+- Sources: https://businessinsider.nl/build-a-bear-workers-say-theyve-become-grief-counselors-as-they-put-voice-recordings-of-dead-loved-ones-in-bears/ · https://wsvn.com/news/us-world/sisters-get-touching-christmas-gifts-to-remember-their-late-father/
+- Informs: voice memories (D33), grief ambush risk (R-6), "we keep what holds our story".
+
+**T10 · Hardware sweep: projectors, power, rolling, part sizes** · Oct 19
+- DLP2000 (DLPDLCR2000EVM): verified on ti.com. nHD (640 x 360), up to 30 lumens, 54 x 76 mm, 5 V 3 A, parallel RGB, BeagleBone Black out of the box. Resolves T04. https://www.ti.com/tool/DLPDLCR2000EVM
+- DLPDLCR230NPEVM: 1080p, up to 100 lumens, 81 x 87 mm, 5 V 4 A, Pi 4 out of the box via the Pi's parallel display pins (GPIO 0 to 21, per TI E2E). Pi 5 not documented. https://ti.com/tool/DLPDLCR230NPEVM · https://e2e.ti.com/support/dlp-products-group/dlp/f/dlp-products-forum/1129005/dlpdlcr230npevm-dlpdlcr230npevm
+- Nebra AnyBeam: ~3 W, 5 V 1.5 A, 720p input, Pi HAT. Sale status unclear. https://github.com/NebraLtd/AnyBeam
+- Pi 5 power: ~3 W idle, 8.8 W full CPU load, up to ~16 W extreme. https://raspberry.tips/en/raspberrypi-tutorials/raspberry-pi-power-consumption-update-2026-all-models-compared
+- NiMH 40 to 120 Wh/kg, much safer than lithium. LiFePO4 90 to 120 Wh/kg, safer lithium chemistry. https://husarion.com/blog/batteries-for-mobile-robots/
+- First power budget: ~13 W average, 24 Wh NiMH pack, ~1.3 h off the dock. Estimates, see the hardware sheet.
+- ReSpeaker XVF3800 board is 108 x 108 mm (too big for a small head). XL330: 20 x 34 x 26 mm, 18 g. STS3215: 45 x 24.7 x 35 mm, 55 g. VL6180X cliff sensor: 5 to 200 mm, $13.95.

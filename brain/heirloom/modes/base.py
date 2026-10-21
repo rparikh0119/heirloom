@@ -19,6 +19,7 @@ class Mode:
 
     def __init__(self) -> None:
         self.left = 0.0
+        self.character = None   # set by the brain, so a mode can read the temperament dials
 
     def enter(self) -> None:
         """Called every time the mode starts, including restarting it while it's already on."""

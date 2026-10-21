@@ -1,0 +1,11 @@
+{
+  "note": "Heirloom's out-of-the-box character. Every droid starts here (D37). The dials then wear in with its owner, within wear_limit, once the Wear System exists. 0 = low, 1 = high, 0.5 = a modest middle.",
+  "dials": {
+    "curiosity": 0.5,
+    "sass": 0.5,
+    "boldness": 0.5,
+    "energy": 0.5,
+    "warmth_speed": 0.5
+  },
+  "wear_limit": 0.25
+}

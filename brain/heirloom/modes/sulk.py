@@ -13,5 +13,9 @@ class Sulk(Mode):
     offsets = {"base_yaw": 70, "head_yaw": 20, "head_pitch": 6, "head_roll": -4,
                "antenna_left": -45, "antenna_right": -45, "iris": -0.3, "light": -0.2}
 
+    def enter(self) -> None:
+        # Sass decides how long it holds a grudge (character.json)
+        self.left = self.character.sulk_seconds if self.character else self.duration
+
     def target(self) -> float:
         return 0.45 if self.left < PEEK_SECONDS else 1.0

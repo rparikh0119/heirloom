@@ -27,6 +27,7 @@ class PresenceConfig:
     attend_ease: float = 0.25      # seconds. Lower = snappier head
     idle_ease: float = 0.7
     base_ease: float = 1.5
+    glance_gap: float = 1.0        # multiplies the wait between glances (character: curiosity)
 
 
 def _clamp(v: float, lo: float, hi: float) -> float:
@@ -45,7 +46,7 @@ class Presence:
         self.mode = "idle"
         self._perk = 0.0            # seconds left of the "oh, hi" reaction
         self._glance_yaw = 0.0
-        self._next_glance = random.uniform(4, 8)
+        self._next_glance = random.uniform(4, 8) * self.cfg.glance_gap
         self._glance_end = 0.0
 
     def step(self, dt: float, user_head: tuple[float, float, float] | None) -> tuple[Pose, dict]:
@@ -80,7 +81,7 @@ class Presence:
             if self.t > self._next_glance:
                 self._glance_yaw = random.choice([-1, 1]) * random.uniform(10, 22)
                 self._glance_end = self.t + random.uniform(1.0, 2.0)
-                self._next_glance = self._glance_end + random.uniform(4, 8)
+                self._next_glance = self._glance_end + random.uniform(4, 8) * c.glance_gap
             target["head_yaw"] = self._glance_yaw if self.t < self._glance_end else 0.0
             target["head_roll"] = -0.25 * target["head_yaw"]
             target["iris"], target["light"] = 0.6, 0.5

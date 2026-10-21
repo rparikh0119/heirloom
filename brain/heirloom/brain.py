@@ -10,8 +10,9 @@ To add behaviour, add a reaction file or a mode file. This file shouldn't need t
 from __future__ import annotations
 
 from .behavior.expressions import EXPRESSIONS, ExpressionPlayer
-from .behavior.presence import Presence
+from .behavior.presence import Presence, PresenceConfig
 from .body.base import Pose
+from .character import load_character
 from .events import Event, as_event
 from .modes import load_modes
 from .reactions import choose, load_reactions
@@ -23,10 +24,14 @@ AWAKE = "awake"
 class HeirloomBrain:
     def __init__(self, play_sound, reactions_dir=None) -> None:
         """play_sound(name) is called whenever the brain wants to chirp."""
-        self.presence = Presence()
-        self.expr = ExpressionPlayer()
+        self.character = load_character()
+        c = self.character
+        self.presence = Presence(PresenceConfig(notice_distance=c.notice_distance, glance_gap=c.glance_gap))
+        self.expr = ExpressionPlayer(scale=c.motion_scale)
         self.play_sound = play_sound
         self.modes = load_modes()
+        for mode in self.modes.values():
+            mode.character = c
         kwargs = {"motions": EXPRESSIONS, "sounds": CHIRPS, "modes": self.modes}
         if reactions_dir is not None:
             kwargs["folder"] = reactions_dir
