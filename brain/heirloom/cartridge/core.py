@@ -21,6 +21,7 @@ from __future__ import annotations
 import json
 import os
 import uuid
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
@@ -135,6 +136,7 @@ class Cartridge:
         self.history = history
         self.version = version
         self.extra = extra or {}          # top-level fields a newer brain added. Kept as they are
+        self._batch: dict | None = None   # pages held in memory during batch()
 
     # ---- making and opening ----
 
@@ -251,12 +253,33 @@ class Cartridge:
     def read_page(self, layer_id: str, name: str) -> dict:
         """A plug-in's file in one layer, e.g. read_page("L1", "patina"). Missing = {} (nothing learned yet)."""
         self.layer(layer_id)
+        if self._batch is not None and (layer_id, name) in self._batch:
+            return dict(self._batch[(layer_id, name)])
         path = self.folder / "layers" / layer_id / f"{name}.json"
-        return _read_json(path) if path.exists() else {}
+        data = _read_json(path) if path.exists() else {}
+        if self._batch is not None:
+            self._batch[(layer_id, name)] = data
+        return dict(data)
 
     def write_page(self, layer_id: str, name: str, data: dict) -> None:
         self.layer(layer_id)
+        if self._batch is not None:
+            self._batch[(layer_id, name)] = dict(data)
+            return
         _write_json(self.folder / "layers" / layer_id / f"{name}.json", data)
+
+    @contextmanager
+    def batch(self):
+        """Hold page changes in memory and write them once at the end.
+        The time skip uses this, so 12 years of moments don't mean 100,000 file writes."""
+        self._batch = {}
+        try:
+            yield self
+        finally:
+            pages, self._batch = self._batch, None
+            for (lid, name), data in pages.items():
+                if data:
+                    _write_json(self.folder / "layers" / lid / f"{name}.json", data)
 
     # ---- bodies ----
 

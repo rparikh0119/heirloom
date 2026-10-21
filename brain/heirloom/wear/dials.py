@@ -105,7 +105,7 @@ class DialsWear(Wear):
         return out
 
     def apply(self, brain) -> None:
-        brain.character.dials.update(self.effective())
+        brain.character.dials.update(self.effective(brain.today))
 
     def validate(self, data: dict, where: str) -> None:
         for k, v in data.items():

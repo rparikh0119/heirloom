@@ -1,0 +1,16 @@
+{
+  "note": "Two parents, two kids. Lots of attention, lots of praise, and the kids flip it off for fun. Numbers are average moments per day.",
+  "label": "a loud family",
+  "moments": [
+    { "note": "Kids saying hi all day",               "events": ["wave"],                 "per_day": 6 },
+    { "note": "Praise for nothing in particular",     "events": ["good"],                 "per_day": 2 },
+    { "note": "Praised right after a greeting",       "events": ["wave", "good"],         "gap": 2, "per_day": 2 },
+    { "note": "Beckoned over, then praised",          "events": ["curious", "good"],      "gap": 2, "per_day": 1 },
+    { "note": "Hearts",                                "events": ["heart"],                "per_day": 1 },
+    { "note": "Kids flip it off, then make up",       "events": ["offended", "heart"],    "gap": 3, "per_day": 0.25 },
+    { "note": "Kids flip it off and walk away",       "events": ["offended"],             "per_day": 0.2 },
+    { "note": "Told off when it's in the way",        "events": ["scold"],                "per_day": 0.4 },
+    { "note": "'Not now' during homework",            "events": ["not_now"],              "per_day": 1 },
+    { "note": "Shushed during calls and TV",          "events": ["shh"],                  "per_day": 1.5 }
+  ]
+}

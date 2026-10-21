@@ -31,7 +31,7 @@ Anything that could fall through the cracks. Tick when done.
 
 **Build**
 - [x] Headset test of the Presence scene (passthrough + hands) → works over Link, Oct 18
-- [ ] Reachy sits slightly inside the desk in MR (raise robot Position Y)
+- [x] Reachy sits slightly inside the desk in MR → fixed Oct 18
 - [ ] Log the bugs seen in the first headset test
 - [x] Talk and Gesture v0: voice listener tested with the laptop mic, and in Unity
 - [ ] Talk and Gesture v0: hand gestures (brain-side, D28), built and passing synthetic tests. Test with real hands and tune thresholds
@@ -42,6 +42,18 @@ Anything that could fall through the cracks. Tick when done.
 - [x] Wear System risks R-1 to R-8 answered (D40 to D47)
 - [ ] Cartridge v1 format brief (must cover D43, D45, D46)
 - [ ] Check whether the Quest passthrough camera API works over Link
+
+**Gaps found Oct 21 (wear system)**
+- [x] Test key presses pollute the cartridge → keys ignored unless --learn-from-keys
+- [x] Nothing calls health() → run.py prints a health report at startup
+- [ ] Wear can't be seen: send effective dials in the state message, overlay toggle with five bars (needs headset)
+- [ ] Presence events: noticed, stayed_close, left, glance_ignored (unblocks boldness up, curiosity down, D44, D48)
+- [ ] Shared warm/cold signal after each reaction (before dialect)
+- [ ] Brain accepts a pretend date (for the time skip)
+- [ ] Handoff ritual design brief (week 7 or 8, blocks the week 9 station). No settings menu
+- [ ] Update architecture.md and modularity-brief.md for the cartridge + wear plug-ins
+- [ ] Replace the v0 example cartridge (brain/cartridges/example)
+- [ ] Decide: commit cartridges/riya to git (backup) or gitignore it
 
 **Hardware**
 - [ ] Update the hardware sheet: supercapacitor, NiMH pack, modular connectors, ID chips

@@ -1,0 +1,22 @@
+{
+  "format_version": 1,
+  "droid": {
+    "id": "hl-4ffa",
+    "born": "2014-10-24"
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "label": "a quiet solo owner",
+      "since": "2014-10-24",
+      "until": null,
+      "source": {
+        "type": "simulated",
+        "profile": "quiet_solo",
+        "seed": 42
+      },
+      "weight": "active",
+      "memories": "open"
+    }
+  ]
+}

@@ -26,9 +26,10 @@ AWAKE = "awake"
 
 
 class HeirloomBrain:
-    def __init__(self, play_sound, reactions_dir=None, cartridge=None) -> None:
+    def __init__(self, play_sound, reactions_dir=None, cartridge=None, wear_ignores=()) -> None:
         """play_sound(name) is called whenever the brain wants to chirp.
-        cartridge: an opened Cartridge, or None to run without learning."""
+        cartridge: an opened Cartridge, or None to run without learning.
+        wear_ignores: event sources that never leave wear, e.g. {"unity"} so test key presses don't count."""
         self.character = load_character()
         c = self.character
         self.presence = Presence(PresenceConfig(notice_distance=c.notice_distance, glance_gap=c.glance_gap))
@@ -45,10 +46,12 @@ class HeirloomBrain:
         self._blend = {name: 0.0 for name in self.modes}   # 0 = off .. 1 = fully in that mode
         self._last_attending = False
         self.t = 0.0                                         # seconds since it woke up
+        self.today = None                                    # None = the real date. The time skip sets a pretend one
 
         # Wear: only with a cartridge. Each plug-in blends its layers into the brain.
         self.cartridge = cartridge
         self.wear = load_wear() if cartridge is not None else []
+        self.wear_ignores = set(wear_ignores)
         for w in self.wear:
             w.attach(cartridge, self)
             w.apply(self)
@@ -65,7 +68,8 @@ class HeirloomBrain:
     def handle(self, event: "Event | str") -> str | None:
         """React to one event. Returns the reaction file used, or None if it was ignored."""
         e = as_event(event)
-        changed = [w for w in self.wear if w.record(e, self.mode, self.t)]
+        learns = e.source not in self.wear_ignores
+        changed = [w for w in self.wear if learns and w.record(e, self.mode, self.t)]
         for w in changed:
             w.apply(self)
         if changed:
@@ -100,6 +104,15 @@ class HeirloomBrain:
         if name != AWAKE:
             self.modes[name].enter()
 
+    def pass_time(self, seconds: float) -> None:
+        """Let time go by with nobody watching (no poses). The time skip uses this between moments,
+        so a sulk or a nap runs out the way it would in real life."""
+        self.t += seconds
+        current = self.modes.get(self.mode)
+        if current and not current.step(seconds):
+            self.mode = AWAKE
+        self.expr.name = None
+
     # ---------- every tick ----------
     def step(self, dt: float, user_head) -> tuple[Pose, dict]:
         self.t += dt
@@ -133,3 +146,18 @@ class HeirloomBrain:
 
         shown = self.mode if self.mode != AWAKE else info["mode"]
         return Pose(**ch), {**info, "mode": shown, "expression": self.expr.name or ""}
+
+    # ---------- self-check ----------
+    def health(self) -> list[tuple[str, bool, str]]:
+        """Every module that can check itself: (name, ok, message). For the future self-maintenance feature."""
+        parts = [(f"mode {n}", m) for n, m in self.modes.items()] + [(f"wear {w.name}", w) for w in self.wear]
+        if self.cartridge is not None:
+            parts.append(("cartridge", self.cartridge))
+        out = []
+        for name, part in parts:
+            try:
+                ok, msg = part.health()
+            except Exception as e:  # noqa: BLE001  a broken check is itself a problem worth showing
+                ok, msg = False, f"health check failed: {e}"
+            out.append((name, ok, msg))
+        return out

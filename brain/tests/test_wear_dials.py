@@ -146,6 +146,25 @@ def _(tmp):
         assert "sasss" in str(e)
 
 
+@check("key presses from Unity don't leave wear when ignored (testing stays clean)")
+def _(tmp):
+    cart = Cartridge.create(tmp, on=DAY)
+    b = HeirloomBrain(play_sound=lambda name: None, cartridge=cart, wear_ignores={"unity"})
+    b.handle(Event("offended", source="unity"))
+    assert cart.read_page("L1", "dials") == {}
+    b.handle(Event("offended", source="hands"))
+    assert cart.read_page("L1", "dials")["sass"] == 0.001
+
+
+@check("health: every module reports, all ok on a fresh cartridge")
+def _(tmp):
+    b = brain_with(Cartridge.create(tmp, on=DAY))
+    report = b.health()
+    names = [n for n, _, _ in report]
+    assert "cartridge" in names and "wear dials" in names
+    assert all(ok for _, ok, _ in report), report
+
+
 # ---------------------------------------------------------------------------------------------
 
 def main() -> None:

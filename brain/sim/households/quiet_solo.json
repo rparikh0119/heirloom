@@ -1,0 +1,13 @@
+{
+  "note": "One person who works from home. Gentle, a little busy, rarely rude. Numbers are average moments per day.",
+  "label": "a quiet solo owner",
+  "moments": [
+    { "note": "Morning and evening hello",            "events": ["wave"],                 "per_day": 2 },
+    { "note": "Beckons it over, praises curiosity",   "events": ["curious", "good"],      "gap": 2, "per_day": 0.7 },
+    { "note": "Occasional heart",                      "events": ["heart"],                "per_day": 0.3 },
+    { "note": "'Not now' while working",              "events": ["not_now"],              "per_day": 1.2 },
+    { "note": "Shushed on calls",                      "events": ["shh"],                  "per_day": 1 },
+    { "note": "A rare bad day, says sorry after",     "events": ["offended", "sorry"],    "gap": 4, "per_day": 0.02 },
+    { "note": "Told off now and then",                "events": ["scold"],                "per_day": 0.05 }
+  ]
+}
