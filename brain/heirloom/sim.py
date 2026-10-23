@@ -141,6 +141,21 @@ def _replace(folder: Path) -> None:
     shutil.rmtree(folder)
 
 
+def _ends_today(folder: Path, sim_day: date) -> None:
+    """A snapshot is meant to be put on the desk right after its last simulated day, so shift the
+    patina dates to end today. Otherwise a year-1 snapshot reads as 11 years on a shelf and rusts.
+    The gap a shelved droid really had is kept, because every date moves by the same amount."""
+    shift = date.today() - sim_day
+    cart = Cartridge.open(folder)
+    for layer in cart.layers:
+        page = cart.read_page(layer.id, "patina")
+        for rec in page.values():
+            if "last" in rec:
+                rec["last"] = (date.fromisoformat(rec["last"]) + shift).isoformat()
+        if page:
+            cart.write_page(layer.id, "patina", page)
+
+
 def time_skip(profile: str, out: Path, years: int = 12, seed: int = 42, snapshots: dict | None = None,
               draw: random.Random | None = None, quiet: bool = False) -> dict[str, dict]:
     """Live `years` with a household and write a cartridge per snapshot."""
@@ -168,10 +183,13 @@ def time_skip(profile: str, out: Path, years: int = 12, seed: int = 42, snapshot
         pat = next((w for w in brain.wear if w.name == "patina"), None)
         results[name] = {"day": day, "moments": moments, "dials": dict(brain.character.dials),
                          "sulk_s": brain.character.sulk_seconds, "notice_m": brain.character.notice_distance,
-                         "moves": dict(pat.wear) if pat else {}}
+                         "moves": dict(pat.settle) if pat else {}, "deep": dict(pat.depth) if pat else {},
+                         "rust": pat.rust_on(brain.today + timedelta(days=1)) if pat else 0.0,
+                         "uses": pat.uses(brain.today) if pat else {}}
         dest = Path(out) / f"{profile}_{name}"
         if dest != work:
             shutil.copytree(work, dest)
+            _ends_today(dest, start + timedelta(days=day - 1))
         if not quiet:
             print(f"  {name:7s} day {day:5d}  {moments:6d} moments   " +
                   "  ".join(f"{k} {x:.3f}" for k, x in brain.character.dials.items()))
@@ -188,6 +206,8 @@ def sweep(profile: str, runs: int = 30, years: int = 12, seed: int = 1) -> dict[
             r = time_skip(profile, Path(tmp) / str(i), years=years, seed=seed * 1000 + i, draw=draw, quiet=True)
             for snap, res in r.items():
                 moves = {f"worn_{m}": res["moves"].get(m, 0.0) for m in ("hello", "happy", "offended")}
+                moves |= {f"deep_{m}": res["deep"].get(m, 0.0) for m in ("hello", "happy", "offended")}
+                moves["rust"] = res["rust"]
                 for k, x in {**res["dials"], "sulk_s": res["sulk_s"], "notice_m": res["notice_m"], **moves}.items():
                     collected.setdefault(snap, {}).setdefault(k, []).append(x)
     return {snap: {k: (min(xs), statistics.median(xs), max(xs)) for k, xs in d.items()}

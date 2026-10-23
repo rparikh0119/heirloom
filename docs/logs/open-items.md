@@ -23,7 +23,7 @@ Anything that could fall through the cracks. Tick when done.
 - [x] Neglect? → Yes, shy then recovers, can't die (D19)
 - [x] Hold switch? → Cut (D21)
 - [x] What counts as a warm response, per channel? → v0 (D48)
-- [ ] Does wear fade, or is it permanent? (leaning permanent)
+- [ ] Does wear fade, or is it permanent? (leaning permanent. Patina rust is temporary and recovers, D60)
 - [ ] What does the handoff ritual look and sound like?
 - [ ] How rare is memory surfacing?
 - [x] Core temperament traits → five dials (D22)
@@ -65,8 +65,10 @@ Anything that could fall through the cracks. Tick when done.
 - [ ] Update deck and FigJam with D52 positioning and D57 pillars
 - [ ] Handoff ritual brief: pick a direction (docs/handoff-ritual-brief.md)
 - [ ] Direct fresh-droid hesitation on wave and happy (C3)
-- [ ] Patina plug-in (moved up, carries the fresh vs worn demo)
-- [ ] Rule 5 absence has no code (shy after time apart)
+- [x] Patina plug-in (moved up, carries the fresh vs worn demo) → D59, v2 D60 (Oct 23)
+- [x] Rule 5 absence has no code (shy after time apart) → patina rust, D60
+- [ ] Tune brain/wear/patina.json in the headset: fresh vs loud_family_year12 vs quiet_solo_year12 vs shelved_year1
+- [ ] Rust only shows in motion. Should absence also show in dials or presence (shy distance)?
 - [ ] Cartridge "pass on" flags for the will (C2), once D53 is decided
 - [ ] Heirloom part that moves bodies (C4): raise with the ID collaborator
 - [ ] Update deck positioning + speaker notes with prior art (LOVOT, RoBoHoN, aibo)

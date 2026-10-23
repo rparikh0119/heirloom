@@ -63,10 +63,12 @@ def _smooth(s: float) -> float:
 
 class ExpressionPlayer:
     """Plays one expression at a time. A `style` hook (set by the patina wear plug-in) can make a
-    move hesitant and stiff when it's new, or quick and confident when it's worn in. Without a
-    style, every expression plays exactly as keyframed."""
+    move hesitant and stiff when it's new, quick and confident when it's worn in, and give it a
+    home's character over years (lean, head tilt, antenna flick). Without a style, every
+    expression plays exactly as keyframed."""
 
-    PLAIN = {"hesitate_s": 0.0, "wobble_deg": 0.0, "speed": 1.0, "size": 1.0, "smooth": 1.0}
+    PLAIN = {"hesitate_s": 0.0, "wobble_deg": 0.0, "speed": 1.0, "size": 1.0, "smooth": 1.0,
+             "lean_deg": 0.0, "flick_deg": 0.0, "tilt_deg": 0.0}
 
     def __init__(self, scale: float = 1.0) -> None:
         self.name: str | None = None
@@ -106,6 +108,16 @@ class ExpressionPlayer:
                     gain = self.scale * st["size"]
                     out = {k: (a.get(k, 0.0) + (b.get(k, 0.0) - a.get(k, 0.0)) * s) * gain for k in set(a) | set(b)}
                     break
+            p = self._t / keys[-1][0]                # 0..1 through the move
+            arc = math.sin(math.pi * p)              # in and out smoothly, so nothing pops
+            if st["lean_deg"]:                       # a home's character: leans in (or hangs back)
+                out["head_pitch"] = out.get("head_pitch", 0.0) + st["lean_deg"] * arc
+            if st["tilt_deg"]:                       # a curious head tilt
+                out["head_roll"] = out.get("head_roll", 0.0) + st["tilt_deg"] * arc
+            if st["flick_deg"] and p > 0.7:          # an antenna flick to finish (or a dip)
+                f = st["flick_deg"] * math.sin(math.pi * (p - 0.7) / 0.3)
+                out["antenna_left"] = out.get("antenna_left", 0.0) + f
+                out["antenna_right"] = out.get("antenna_right", 0.0) + f
         if st["wobble_deg"]:                     # a small unsteady tremor on the head (Okada's wobble)
             w = st["wobble_deg"]
             out["head_roll"] = out.get("head_roll", 0.0) + w * math.sin(2 * math.pi * 5.0 * self._clock)

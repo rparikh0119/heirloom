@@ -1,4 +1,5 @@
-"""Checks patina: moves it does often wear in, moves it rarely does stay hesitant.
+"""Checks patina: moves wear in over weeks, take on the home over years, never repeat exactly,
+and rust after time apart.
 Run:  python tests/test_wear_patina.py
 """
 import json
@@ -145,6 +146,105 @@ def _(tmp):
     time_skip("loud_family", tmp, years=1, seed=5, quiet=True)
     page = Cartridge.open(tmp / "loud_family_year1").read_page("L1", "patina")
     assert page["hello"]["uses"] > 200, page
+
+
+def seeded(brain, seed=1):
+    patina(brain).rng = __import__("random").Random(seed)
+    return brain
+
+
+def deep_cart(tmp, uses, last=DAY):
+    """A cartridge whose hello has been played `uses` times, last on `last`."""
+    cart = Cartridge.create(tmp, on=DAY - timedelta(days=4000))
+    cart.write_page("L1", "patina", {"hello": {"uses": uses, "last": last.isoformat()}})
+    return cart
+
+
+@check("a worn move keeps a little looseness, never machine-perfect (Okada, R51)")
+def _(tmp):
+    b = brain_with(Cartridge.create(tmp, on=DAY))
+    wave_many(b, 300)
+    st = patina(b).base_style("hello")
+    assert st["wobble_deg"] > 0 and st["smooth"] < 1.0, st
+
+
+@check("no two plays are identical (Hyodol, R59)")
+def _(tmp):
+    b = seeded(brain_with(Cartridge.create(tmp, on=DAY)))
+    wave_many(b, 300)
+    a, c = performance(b, "hello"), performance(b, "hello")
+    assert a != c, (a, c)
+
+
+@check("character deepens over years: 1 year of hellos is far from 12")
+def _(tmp):
+    pat = patina(brain_with(deep_cart(tmp / "a", 870)))
+    y1 = pat.depth["hello"]
+    pat = patina(brain_with(deep_cart(tmp / "b", 6150)))
+    y12 = pat.depth["hello"]
+    assert y1 < 0.4 and y12 > 0.85, (y1, y12)
+
+
+@check("two homes, same use, different dials: the worn hello moves differently (keinen henka, R67)")
+def _(tmp):
+    bold = brain_with(deep_cart(tmp / "a", 6000))
+    calm = brain_with(deep_cart(tmp / "b", 6000))
+    bold.character.dials.update(boldness=0.7, sass=0.65, energy=0.5)
+    calm.character.dials.update(boldness=0.4, sass=0.5, energy=0.3)
+    sb, sc = patina(bold).base_style("hello"), patina(calm).base_style("hello")
+    assert sb["lean_deg"] > 5 and sc["lean_deg"] < 0, (sb, sc)          # bold leans in, shy hangs back
+    assert sb["flick_deg"] > 15 and abs(sc["flick_deg"]) < 1, (sb, sc)
+    assert sc["size"] < sb["size"] and sc["speed"] < sb["speed"], (sb, sc)
+
+
+@check("the character shows up in the motion: a bold home's hello leans in")
+def _(tmp):
+    b = seeded(brain_with(deep_cart(tmp, 6000)))
+    b.character.dials.update(boldness=0.75)
+    b.expr.play("hello")
+    pitch = max(b.expr.step(DT).get("head_pitch", 0.0) for _ in range(40))
+    assert pitch > 12, pitch          # hello's own nod peaks at 8 deg x size, the lean adds about 10
+
+
+@check("rust: after 3 months apart it's stiff again, then warms up within a few moments (Rule 5)")
+def _(tmp):
+    b = brain_with(deep_cart(tmp, 300, last=DAY - timedelta(days=90)))
+    b.today = DAY
+    pat = patina(b)
+    rusty = pat.base_style("hello")["hesitate_s"]
+    assert rusty > 0.15, rusty
+    for _ in range(5):
+        b.handle(Event("wave", source="hands"))
+        b.pass_time(5)
+    warm = pat.base_style("hello")["hesitate_s"]
+    assert warm < 0.03, warm
+
+
+@check("no rust after a normal week, and a brand new droid has none")
+def _(tmp):
+    b = brain_with(deep_cart(tmp / "a", 300, last=DAY - timedelta(days=5)))
+    b.today = DAY
+    assert patina(b).base_style("hello")["hesitate_s"] < 0.01
+    fresh = brain_with(Cartridge.create(tmp / "b", on=DAY))
+    assert patina(fresh).rust == 0.0
+
+
+@check("the time skip: a shelved droid comes back rusty, a family's keeps deepening")
+def _(tmp):
+    from heirloom.sim import time_skip
+    shelf = time_skip("shelved", tmp / "s", years=2, seed=5, quiet=True)
+    assert shelf["year2"]["rust"] > 0.5, shelf["year2"]
+    fam = time_skip("loud_family", tmp / "f", years=12, seed=5, quiet=True)
+    assert fam["year12"]["deep"]["hello"] > fam["year1"]["deep"]["hello"] + 0.3, fam
+
+
+@check("a year-1 snapshot opened today isn't rusty (its dates end today), a shelved one is")
+def _(tmp):
+    from heirloom.sim import time_skip
+    time_skip("loud_family", tmp, years=3, seed=5, quiet=True)
+    time_skip("shelved", tmp, years=3, seed=5, quiet=True)
+    assert patina(brain_with(Cartridge.open(tmp / "loud_family_year1"))).rust == 0.0
+    assert patina(brain_with(Cartridge.open(tmp / "shelved_year1"))).rust > 0.5
 
 
 # ---------------------------------------------------------------------------------------------

@@ -265,3 +265,14 @@ One entry per real decision. **Status:** Decided · Proposed (waiting on Riya) �
 - Measured in code: fresh hello 1.6 s with a 0.4 s pause. After 300 waves: 0.87 s, no pause, about 30% bigger.
 - Every value in brain/wear/patina.json is a design draft by Claude, not research. Riya tunes it by feel in the headset.
 - Open design call: at 40 uses a family's hello is fully worn inside year 1, so year 1 and year 12 look alike. Options: a slow second layer that keeps deepening over years, or a much larger uses_to_wear.
+
+**D60 · Patina v2: lived-in, a home's own, never repeats, rusts** · Oct 23 · Built, needs tuning
+- Checked patina v1 against the Oct 21 research. Three conflicts fixed:
+  - Worn was machine-perfect (no wobble, fully smooth). Okada (R51): slight unsteadiness reads as alive, people stop forgiving high-function robots. Worn now keeps a little wobble and isn't fully eased.
+  - Every home wore toward the same style. 経年変化 (R67) and wenwan (R54): the same material ends up different with different use. A slow second layer, "character", gives the most-used moves the home's dials: boldness leans in, curiosity tilts the head, sass flicks the antennas, energy changes size and speed. depth = 1 - exp(-uses / 2500).
+  - Worn moves repeated exactly. Hyodol returners cited repetition (R59). Speed and size now vary up to 6% per play.
+- Rule 5 now has code: after 7 days without a moment, settling slips back (up to 60% at 90 days). Each move loosens it by 40%. Rust comes from the date of the last moment and is never stored. Fixes the frozen shelved droid (R61).
+- Time skip (10 runs, conditional on the mix scenario): family hello character 0.20-0.39 at year 1, 0.77-0.99 at year 12. Quiet owner 0.12-0.14 at year 1, 0.43-0.74 at year 12. Shelved rust 0.60. Year 1 and year 12 now differ.
+- Measured, one run: fresh hello 1.63 s with a 0.35 s pause. Family year 12: 0.87 s, no pause, leans +7 deg, tilts +9 deg, antenna flick +17 deg. Quiet year 12: 1.03 s, smaller, mostly a head tilt.
+- Bug fixed: time-skip snapshots now end today, so a year-1 cartridge doesn't open rusty.
+- Every number in brain/wear/patina.json is a design draft by Claude. Mapping dials to lean, tilt and flick is a design call, not a finding.

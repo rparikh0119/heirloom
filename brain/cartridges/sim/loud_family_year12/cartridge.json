@@ -1,19 +1,28 @@
 {
   "format_version": 1,
   "droid": {
-    "id": "hl-653d",
-    "born": "2014-10-24"
+    "id": "hl-2bdd",
+    "born": "2014-10-26"
   },
   "layers": [
     {
       "id": "L1",
       "label": "a loud family",
-      "since": "2014-10-24",
+      "since": "2014-10-26",
       "until": null,
       "source": {
         "type": "simulated",
         "profile": "loud_family",
-        "seed": 42
+        "seed": 42,
+        "params": {
+          "moments_per_day": 3.955,
+          "weekend": 1.532,
+          "novelty.peak": 2.25,
+          "novelty.days": 21.0,
+          "long_term.floor": 0.5,
+          "long_term.from_day": 360.0,
+          "long_term.to_day": 1277.5
+        }
       },
       "weight": "active",
       "memories": "open"
