@@ -277,3 +277,22 @@ One entry per real decision. **Status:** Decided · Proposed (waiting on Riya) �
 - Rust also makes it shy (Riya, Oct 23): notice distance slides toward the shyest droid's by the rust amount. Back after 90 days, a default droid notices you at about 1.9 m instead of 2.5 m, and it's back to normal after about 5 moments. Checked about once a minute, so a droid left running alone still gets shy.
 - Bug fixed: time-skip snapshots now end today, so a year-1 cartridge doesn't open rusty.
 - Every number in brain/wear/patina.json is a design draft by Claude. Mapping dials to lean, tilt and flick is a design call, not a finding.
+
+**D61 · No wake word when it has noticed you** · Oct 23 · Built, Riya to confirm
+- Up close (inside notice distance) commands work without "Heirloom". From further away the name is still needed, so a loud room stays out. Replaces the always-on wake word in D58.
+- Why: Riya in the headset, Oct 23: "it can't even understand hi". Saying a name before "hi" to something already looking at you feels wrong. Being close and in view is how you address it, consistent with reading body language. NICOBO has no wake word (R52).
+- Voice also reacts while you're still talking when the phrase can't mean anything else ("hi" in about 0.2 s). Phrases that start another command ("good" → "good night", "no" → "not now") wait for the pause. Mic read every 0.1 s instead of 0.25 s. Vosk 0.3.45 has no setting for the end-of-sentence silence, checked against the package.
+
+**D62 · Fresh end of patina made bigger** · Oct 23 · Tuning
+- Headset, Oct 23: Riya couldn't see the fresh vs worn difference. Fresh pause 0.35 → 0.7 s, wobble 1.5 → 4 deg, speed 0.9 → 0.7, size 0.85 → 0.65. A fresh hello now pauses about 0.8 s and runs 2.4 s, peak about 26 deg vs 44 deg worn. Still design values.
+
+**D63 · Whisper replaces Vosk as the default voice** · Oct 23 · Built, needs a real test
+- Riya: "This thing is supposed to understand me." Vosk small (about 40 MB) restricted to about 40 phrases missed even "hi".
+- faster-whisper 1.2.1 (CTranslate2), base.en, int8 on the CPU, local only. Checked against the project README: small model int8 on 8 threads did 13 min of audio in 1 m 42 s, so a short phrase should take a fraction of a second. Not measured on Riya's PC yet. The model couldn't be downloaded in Claude's workspace (Hugging Face blocked), so real accuracy is untested.
+- A loudness gate cuts each sentence (ends 0.35 s after you stop). Whisper gets a prompt and the hotword "Heirloom". Loose matching adds everyday phrasings (intents.EXTRA) and spellings of the name.
+- Low-confidence results are dropped (Whisper's no-speech rule plus avg_logprob below -1.2), because Whisper is known to hear "thank you" in noise, which here would be praise.
+- Vosk stays available: --voice-engine vosk. Bigger model if needed: --voice-model small.en.
+
+**D64 · No wake word by default** · Oct 23 · Decided (Riya)
+- Riya: having to say "Heirloom" before every word is annoying. Whisper heard every phrase correctly in the Oct 23 test (about 0.4 s each), so the name isn't needed to avoid mishearing.
+- Default: just talk. --need-name brings back D61 (name needed from further away) for loud rooms like zoo stations. Supersedes D58.

@@ -4,14 +4,17 @@ Each brain event is triggered by several everyday phrases, so you never have to 
 magic words. Edit this table freely. Every word has to exist in the speech model's vocabulary,
 and the voice listener warns you on startup if one doesn't.
 
-v0 = this fixed table. v1 = hear every word and match loosely. v2 = learn the owner's own words
-(a Wear System feature, see docs/wear-system.md).
+v0 = this fixed table, heard by Vosk (only these phrases can be heard).
+v1 = Whisper hears every word, and EXTRA adds everyday ways of saying the same thing (D63).
+v2 = learn the owner's own words (a Wear System feature, see docs/wear-system.md).
 """
 from __future__ import annotations
 
 # Saying any of these opens a short listening window. "air loom" is a backup in case the
 # model hears "heirloom" as two words.
 WAKE_WORDS = ["heirloom", "air loom"]
+# Whisper spells the name all sorts of ways. These count too (only used by the Whisper listener).
+WAKE_VARIANTS = ["heir loom", "hair loom", "airloom", "hairloom", "heirlooms", "air loom", "heirloom"]
 
 # brain event -> phrases that trigger it
 INTENTS: dict[str, list[str]] = {
@@ -29,24 +32,76 @@ INTENTS: dict[str, list[str]] = {
 }
 
 
+# More ways of saying each thing. Whisper can hear any word, so these work there (not in Vosk).
+EXTRA: dict[str, list[str]] = {
+    "wave":    ["hiya", "howdy", "hi there", "hey there", "hello there", "good to see you", "what's up",
+                "whats up", "sup", "yo", "hey buddy", "hi buddy", "how are you", "i'm back", "im back"],
+    "good":    ["good boy", "good girl", "well done", "great job", "nice job", "awesome", "perfect",
+                "thanks", "you're the best", "youre the best", "that's it", "atta boy", "attaboy",
+                "amazing", "you're amazing", "youre amazing", "good robot", "smart", "so smart", "clever",
+                "you're so cute", "youre so cute", "so cute", "cutie", "proud of you", "love that"],
+    "offended": ["fuck off", "fuck you", "screw you", "i hate you", "hate you", "you suck", "shut up",
+                 "you're annoying", "youre annoying", "so annoying", "stupid", "idiot", "dumb robot",
+                 "useless", "you're useless", "youre useless", "go to hell"],
+    "scold":   ["bad boy", "bad girl", "don't do that", "dont do that", "hey stop", "cut it out", "knock it off",
+                "stop", "stop that", "no no no", "quit it"],
+    "not_now": ["not right now", "i'm busy", "im busy", "leave me alone", "back off", "one sec", "hold on"],
+    "sleep":   ["night night", "go to bed", "bedtime", "time to sleep", "rest now"],
+    "wake":    ["rise and shine", "wakey wakey", "time to get up", "get up"],
+    "curious": ["come over here", "come look", "look over here", "check this out", "look at this"],
+    "sorry":   ["my bad", "i apologize", "forgive me", "so sorry"],
+    "heart":   ["love ya", "i love ya", "love you so much", "you're my favorite", "youre my favorite"],
+    "shh":     ["shh", "shush", "shhh", "quiet please", "keep it down", "be quiet please"],
+}
+
+
+def normalize(text: str) -> str:
+    """Lowercase, keep letters, digits and apostrophes, everything else becomes a space.
+    "Hi!  Heirloom." -> "hi heirloom" """
+    import re
+    return " ".join(re.sub(r"[^a-z0-9' ]+", " ", text.lower()).split())
+
+
 def all_phrases() -> list[str]:
     return WAKE_WORDS + [p for phrases in INTENTS.values() for p in phrases]
 
 
-def match(text: str) -> tuple[bool, str | None]:
+def can_act_early(text: str) -> bool:
+    """While someone is still talking: is what we have so far safe to act on right now?
+    Yes if no other command starts with the same letters. "hi" is safe. "good" is not ("good
+    night" means sleep), and neither is "no", because a live guess of "no" can turn into "not now".
+    Those wait for the end of the sentence."""
+    woke, event = match(text)
+    if event is None:
+        return False
+    words = [w for w in text.split() if w not in " ".join(WAKE_WORDS).split()]
+    tail = " ".join(words)
+    for other, phrases in INTENTS.items():
+        if other == event:
+            continue
+        for p in phrases:
+            if p != tail and p.startswith(tail):
+                return False
+    return True
+
+
+def match(text: str, loose: bool = False) -> tuple[bool, str | None]:
     """Read one heard utterance. Returns (wake word heard?, brain event or None).
 
     The longest matching phrase wins, so "good night" means sleep, not praise.
+    loose=True (Whisper) also accepts EXTRA phrases and spellings of the name.
     """
-    words = text.split()
-    padded = f" {' '.join(words)} "
-    woke = any(f" {w} " in padded for w in WAKE_WORDS)
-    for w in WAKE_WORDS:
+    padded = f" {normalize(text)} "
+    wakes = sorted(set(WAKE_WORDS + (WAKE_VARIANTS if loose else [])), key=len, reverse=True)
+    woke = any(f" {w} " in padded for w in wakes)
+    for w in wakes:
         padded = padded.replace(f" {w} ", " ")
 
     best, best_len = None, 0
-    for event, phrases in INTENTS.items():
-        for p in phrases:
-            if f" {p} " in padded and len(p) > best_len:
-                best, best_len = event, len(p)
+    tables = [INTENTS, EXTRA] if loose else [INTENTS]
+    for table in tables:
+        for event, phrases in table.items():
+            for p in phrases:
+                if f" {p} " in padded and len(p) > best_len:
+                    best, best_len = event, len(p)
     return woke, best

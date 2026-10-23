@@ -10,7 +10,7 @@ namespace Heirloom
 {
     /// <summary>
     /// Connects to the Python brain over WebSocket.
-    /// Receives: poses (moves the rig), state (for the overlay), sounds (chirps).
+    /// Receives: poses (moves the rig), state (for the overlays, including wear), sounds (chirps).
     /// Sends: where the user's head is, and events (gestures, voice, keys).
     /// Uses .NET's built-in ClientWebSocket (works in the Editor and on Quest). Reconnects every 2 s.
     /// </summary>
@@ -32,6 +32,26 @@ namespace Heirloom
         public string BrainMode { get; private set; } = "";
         public string BrainExpression { get; private set; } = "";
         public float UserDistance { get; private set; } = -1f;
+        /// <summary>How worn in it is (dials, patina, rust). Updated about once a second. learning = false without a cartridge.</summary>
+        public Wear BrainWear { get; private set; } = new Wear();
+
+        [Serializable]
+        public class Dials { public float curiosity = 0.5f, sass = 0.5f, boldness = 0.5f, energy = 0.5f, warmth_speed = 0.5f; }
+
+        [Serializable]
+        public class Move { public string name; public float settled; public float character; public int uses; }
+
+        [Serializable]
+        public class Wear
+        {
+            public bool learning;
+            public string label;          // which droid, e.g. "FRESH TEST" or "LOUD FAMILY YEAR 12"
+            public Dials dials = new Dials();
+            public float limit = 0.25f;
+            public Move[] moves = new Move[0];
+            public float rust;
+            public float notice_m;
+        }
 
         [Serializable]
         class Message
@@ -41,6 +61,7 @@ namespace Heirloom
             public string mode;           // "state"
             public string expression;     // "state"
             public float user_distance;   // "state", -1 = nobody
+            public Wear wear;             // "state", how worn in it is
             public string name;           // "sound"
             public string wav_b64;        // "sound"
         }
@@ -157,6 +178,7 @@ namespace Heirloom
                         BrainMode = msg.mode;
                         BrainExpression = msg.expression;
                         UserDistance = msg.user_distance;
+                        if (msg.wear != null && msg.wear.dials != null) BrainWear = msg.wear;
                         break;
                     case "sound": PlaySound(msg.wav_b64); break;
                 }

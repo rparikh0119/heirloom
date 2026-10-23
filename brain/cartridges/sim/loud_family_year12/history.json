@@ -1,4 +1,17 @@
 {
   "handoffs": [],
-  "seated_in": []
+  "seated_in": [
+    {
+      "body": "unity",
+      "from": "2026-10-23T15:02"
+    },
+    {
+      "body": "unity",
+      "from": "2026-10-23T15:09"
+    },
+    {
+      "body": "unity",
+      "from": "2026-10-23T15:33"
+    }
+  ]
 }

@@ -212,12 +212,12 @@ def _(tmp):
     b.today = DAY
     pat = patina(b)
     rusty = pat.base_style("hello")["hesitate_s"]
-    assert rusty > 0.15, rusty
+    assert rusty > 0.4 * load_settings()["fresh"]["hesitate_s"], rusty
     for _ in range(5):
         b.handle(Event("wave", source="hands"))
         b.pass_time(5)
     warm = pat.base_style("hello")["hesitate_s"]
-    assert warm < 0.03, warm
+    assert warm < rusty / 4, (rusty, warm)             # most of the stiffness gone after 5 moments
 
 
 @check("no rust after a normal week, and a brand new droid has none")
@@ -276,10 +276,12 @@ def _(tmp):
     b = brain_with(deep_cart(tmp / "a", 300, last=DAY - timedelta(days=90)))
     ws = json.loads(json.dumps(b.wear_state()))
     assert ws["learning"] and set(ws["dials"]) >= {"sass", "energy"}
-    assert ws["moves"]["hello"]["settled"] > 0.99 and ws["moves"]["hello"]["uses"] == 300
+    hello = next(m for m in ws["moves"] if m["name"] == "hello")
+    assert hello["settled"] > 0.99 and hello["uses"] == 300
+    assert all(not isinstance(v, dict) for m in ws["moves"] for v in m.values())   # Unity can't read dicts
     assert ws["rust"] > 0.5 and ws["notice_m"] < 2.1, ws
     fresh = HeirloomBrain(play_sound=lambda name: None).wear_state()
-    assert not fresh["learning"] and fresh["moves"] == {} and fresh["rust"] == 0.0
+    assert not fresh["learning"] and fresh["moves"] == [] and fresh["rust"] == 0.0
 
 # ---------------------------------------------------------------------------------------------
 

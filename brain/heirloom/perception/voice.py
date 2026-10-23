@@ -1,4 +1,11 @@
-"""Offline voice listener. Hears "Heirloom", then listens a few seconds for a command.
+"""Offline voice listener. Talk to it when it has noticed you, or say "Heirloom" from further away.
+
+When you're close enough that it notices you (run.py sets `addressed`), commands work without the
+wake word, the way you'd just say "hi" to someone who's looking at you (D61). From further away,
+"Heirloom" first, then a command within a few seconds.
+
+It reacts while you're still talking when the phrase can't mean anything else ("hi" right away,
+"good" waits a beat in case it's "good night"). Otherwise it waits for the pause at the end.
 
 Runs on its own thread. Nothing leaves the computer: Vosk does speech recognition locally,
 and it is limited to the phrases in intents.py, which keeps it fast and hard to fool.
@@ -18,11 +25,14 @@ import threading
 import time
 from collections import deque
 
-from .intents import WAKE_WORDS, all_phrases, match
+from .intents import WAKE_WORDS, all_phrases, can_act_early, match
 
 MODEL_NAME = "vosk-model-small-en-us-0.15"
 SAMPLE_RATE = 16000
 LISTEN_SECONDS = 5.0
+BLOCK = 1600          # samples per read: 0.1 s, so it notices you've spoken sooner
+SETTLE = 2            # an early guess must stay the same for this many reads before it acts
+DEDUPE_SECONDS = 1.5  # after acting early, the same command is ignored this long (the end of the word)
 
 
 class VoiceListener:
@@ -37,6 +47,9 @@ class VoiceListener:
         self._listen_until = 0.0
         self._stop = threading.Event()
         self.last_heard = ""
+        self.addressed = False      # set every tick by run.py: True while it has noticed you (close by)
+        self._guess, self._guess_count = "", 0
+        self._early_event, self._early_until = None, 0.0
 
     # ---------- public ----------
     def start(self) -> "VoiceListener":
@@ -52,11 +65,11 @@ class VoiceListener:
         grammar = json.dumps(all_phrases() + ["[unk]"])
         self._rec = KaldiRecognizer(model, SAMPLE_RATE, grammar)
 
-        self._stream = sd.RawInputStream(samplerate=SAMPLE_RATE, blocksize=4000, dtype="int16",
+        self._stream = sd.RawInputStream(samplerate=SAMPLE_RATE, blocksize=BLOCK, dtype="int16",
                                          channels=1, device=self.mic, callback=self._on_audio)
         self._stream.start()
         name = sd.query_devices(self.mic, "input")["name"]
-        print(f"[voice] listening on: {name}. Say \"{WAKE_WORDS[0]}\" first.")
+        print(f"[voice] listening on: {name}. Up close just talk. From further away say \"{WAKE_WORDS[0]}\" first.")
         threading.Thread(target=self._run, daemon=True).start()
         return self
 
@@ -88,13 +101,31 @@ class VoiceListener:
                 continue
             if self._rec.AcceptWaveform(chunk):   # True when a phrase just ended (a pause)
                 text = json.loads(self._rec.Result()).get("text", "").replace("[unk]", "").strip()
-                if text:
+                self._guess, self._guess_count = "", 0
+                if text and not self._just_did(text):
                     self._heard(text)
+            else:                                 # still talking: act now if it can't mean anything else
+                text = json.loads(self._rec.PartialResult()).get("partial", "").replace("[unk]", "").strip()
+                self._guess_count = self._guess_count + 1 if text and text == self._guess else 1
+                self._guess = text
+                if (text and self._guess_count >= SETTLE and can_act_early(text)
+                        and self._would_act(text) and not self._just_did(text)):
+                    self._heard(text, early=True)
+                    self._early_event, self._early_until = match(text)[1], time.monotonic() + DEDUPE_SECONDS
+                    self._rec.Reset()             # start fresh, so the end of the sentence doesn't fire it twice
 
-    def _heard(self, text: str) -> None:
+    def _just_did(self, text: str) -> bool:
+        """The same command it just acted on early, still arriving (the tail of the word, or the final result)."""
+        return match(text)[1] == self._early_event and time.monotonic() < self._early_until
+
+    def _would_act(self, text: str) -> bool:
+        woke, event = match(text)
+        return bool(event) and (woke or self.listening or self.addressed or not self.require_wake_word)
+
+    def _heard(self, text: str, early: bool = False) -> None:
         self.last_heard = text
         woke, event = match(text)
-        open_window = self.listening or not self.require_wake_word
+        open_window = self.listening or self.addressed or not self.require_wake_word
 
         if woke and event:                 # "Heirloom, good job" in one breath
             self._emit(event)
@@ -109,10 +140,10 @@ class VoiceListener:
             self._listen_until = 0.0
             tag = event
         elif event:
-            tag = f"ignored (would be {event}, but it wasn't called by name)"
+            tag = f"ignored (would be {event}, but you're too far away. Say its name or come closer)"
         else:
             tag = "ignored"
-        print(f"[voice] heard \"{text}\" -> {tag}")
+        print(f"[voice] heard \"{text}\" -> {tag}" + ("  (early)" if early else ""))
 
     def _emit(self, event: str) -> None:
         with self._lock:

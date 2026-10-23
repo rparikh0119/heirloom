@@ -48,6 +48,7 @@ class HeirloomBrain:
         self.t = 0.0                                         # seconds since it woke up
         self.today = None                                    # None = the real date. The time skip sets a pretend one
         self.shyness = 0.0                                   # set by wear after time apart (Rule 5). 0 = normal
+        self.label = ""                                      # a name for this droid on the overlay, e.g. "FRESH"
         self._next_tick = 60.0
 
         # Wear: only with a cartridge. Each plug-in blends its layers into the brain.
@@ -165,17 +166,20 @@ class HeirloomBrain:
 
             dials      the five dials it has today, 0..1 (0.5 = out of the box)
             limit      how far wear can ever move a dial from 0.5 (D41)
-            moves      per expression: settled 0..1 (weeks), character 0..1 (years), uses
+            moves      a list, most used first: name, settled 0..1 (weeks), character 0..1 (years), uses
+        Plain fields and lists only, because Unity's JsonUtility can't read dictionaries.
             rust       0 = in practice, up to about 0.6 after months apart (Rule 5)
             notice_m   how far away it notices you right now, in metres
+            label      which droid this is, for telling two apart side by side
         """
         pat = next((w for w in self.wear if w.name == "patina"), None)
-        moves = {}
+        moves = []
         if pat is not None:
             uses = pat.uses(self.today)
-            moves = {m: {"settled": round(pat.settle.get(m, 0.0), 3), "character": round(pat.depth.get(m, 0.0), 3),
-                         "uses": round(uses.get(m, 0.0))} for m in sorted(uses)}
+            moves = [{"name": m, "settled": round(pat.settle.get(m, 0.0), 3), "character": round(pat.depth.get(m, 0.0), 3),
+                      "uses": round(uses.get(m, 0.0))} for m in sorted(uses, key=lambda m: -uses[m])]
         return {"learning": self.cartridge is not None,
+                "label": self.label,
                 "dials": {k: round(v, 3) for k, v in self.character.dials.items()},
                 "limit": self.character.wear_limit,
                 "moves": moves,

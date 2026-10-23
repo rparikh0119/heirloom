@@ -1,7 +1,7 @@
 {
   "note": "How moves wear in (D55, D56, D59, D60). Every value here is a design draft by Claude, not research. Riya tunes them in the headset. hesitate_s = pause before it commits (seconds). wobble_deg = small head tremor. speed = playback speed. size = how big. smooth = 0 stiff, 1 eased. lean_deg, tilt_deg, flick_deg = head pitch lean, head roll tilt, antenna flick at the end.",
   "uses_to_settle": 40,
-  "fresh": {"hesitate_s": 0.35, "wobble_deg": 1.5, "speed": 0.9, "size": 0.85, "smooth": 0.2},
+  "fresh": {"hesitate_s": 0.7, "wobble_deg": 4.0, "speed": 0.7, "size": 0.65, "smooth": 0.2},
   "worn":  {"hesitate_s": 0.0, "wobble_deg": 0.3, "speed": 1.3, "size": 1.1, "smooth": 0.85},
   "character": {
     "uses_to_deepen": 2500,

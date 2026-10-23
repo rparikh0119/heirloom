@@ -1,0 +1,38 @@
+{
+  "listen": {
+    "uses": 3,
+    "last": "2026-10-23"
+  },
+  "hello": {
+    "uses": 20,
+    "last": "2026-10-23"
+  },
+  "love": {
+    "uses": 6,
+    "last": "2026-10-23"
+  },
+  "offended": {
+    "uses": 3,
+    "last": "2026-10-23"
+  },
+  "curious": {
+    "uses": 1,
+    "last": "2026-10-23"
+  },
+  "happy": {
+    "uses": 6,
+    "last": "2026-10-23"
+  },
+  "sheepish": {
+    "uses": 7,
+    "last": "2026-10-23"
+  },
+  "yawn": {
+    "uses": 1,
+    "last": "2026-10-23"
+  },
+  "stretch": {
+    "uses": 1,
+    "last": "2026-10-23"
+  }
+}
