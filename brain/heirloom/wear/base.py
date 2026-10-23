@@ -22,6 +22,10 @@ class Wear:
         """Something happened. Update the active layer. Return True if anything changed."""
         return False
 
+    def played(self, kind: str, name: str, t: float) -> bool:
+        """The droid just did something (kind "motion": an expression). Return True if anything changed."""
+        return False
+
     def apply(self, brain) -> None:
         """Blend every layer by weight and push the result into the brain."""
 

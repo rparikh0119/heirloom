@@ -18,6 +18,7 @@ with an empty "ch" so it blends in and out smoothly.
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 
 EXPRESSIONS_DIR = Path(__file__).resolve().parents[2] / "expressions"
@@ -61,27 +62,52 @@ def _smooth(s: float) -> float:
 
 
 class ExpressionPlayer:
+    """Plays one expression at a time. A `style` hook (set by the patina wear plug-in) can make a
+    move hesitant and stiff when it's new, or quick and confident when it's worn in. Without a
+    style, every expression plays exactly as keyframed."""
+
+    PLAIN = {"hesitate_s": 0.0, "wobble_deg": 0.0, "speed": 1.0, "size": 1.0, "smooth": 1.0}
+
     def __init__(self, scale: float = 1.0) -> None:
         self.name: str | None = None
         self._t = 0.0
         self.scale = scale     # character energy: >1 bigger and faster, <1 smaller and slower
+        self.style = None      # callable(name) -> dict like PLAIN, or None
+        self._st = dict(self.PLAIN)
+        self._hold = 0.0
+        self._clock = 0.0
 
     def play(self, name: str) -> None:
         if name not in EXPRESSIONS:
             raise KeyError(f"No expression called {name!r}")
-        self.name, self._t = name, 0.0
+        self.name, self._t, self._clock = name, 0.0, 0.0
+        self._st = {**self.PLAIN, **(self.style(name) if self.style else {})}
+        self._hold = self._st["hesitate_s"]
 
     def step(self, dt: float) -> dict[str, float]:
         """Advance time and return the offsets to add this frame (empty when nothing is playing)."""
         if self.name is None:
             return {}
-        keys = EXPRESSIONS[self.name]
-        self._t += dt * self.scale
-        if self._t >= keys[-1][0]:
-            self.name = None
-            return {}
-        for (t0, a), (t1, b) in zip(keys, keys[1:]):
-            if t0 <= self._t < t1:
-                s = _smooth((self._t - t0) / (t1 - t0))
-                return {k: (a.get(k, 0.0) + (b.get(k, 0.0) - a.get(k, 0.0)) * s) * self.scale for k in set(a) | set(b)}
-        return {}
+        st = self._st
+        self._clock += dt
+        out: dict[str, float] = {}
+        if self._hold > 0:                       # a beat of hesitation before it commits
+            self._hold -= dt
+        else:
+            keys = EXPRESSIONS[self.name]
+            self._t += dt * self.scale * st["speed"]
+            if self._t >= keys[-1][0]:
+                self.name = None
+                return {}
+            for (t0, a), (t1, b) in zip(keys, keys[1:]):
+                if t0 <= self._t < t1:
+                    u = (self._t - t0) / (t1 - t0)
+                    s = u + (_smooth(u) - u) * st["smooth"]          # stiff (linear) .. smooth (eased)
+                    gain = self.scale * st["size"]
+                    out = {k: (a.get(k, 0.0) + (b.get(k, 0.0) - a.get(k, 0.0)) * s) * gain for k in set(a) | set(b)}
+                    break
+        if st["wobble_deg"]:                     # a small unsteady tremor on the head (Okada's wobble)
+            w = st["wobble_deg"]
+            out["head_roll"] = out.get("head_roll", 0.0) + w * math.sin(2 * math.pi * 5.0 * self._clock)
+            out["head_yaw"] = out.get("head_yaw", 0.0) + 0.6 * w * math.sin(2 * math.pi * 3.3 * self._clock + 1.0)
+        return out

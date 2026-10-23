@@ -165,8 +165,10 @@ def time_skip(profile: str, out: Path, years: int = 12, seed: int = 42, snapshot
                 brain.today = start + timedelta(days=day)
                 moments += _live_one_day(brain, household, v, rng, day)
                 day += 1
+        pat = next((w for w in brain.wear if w.name == "patina"), None)
         results[name] = {"day": day, "moments": moments, "dials": dict(brain.character.dials),
-                         "sulk_s": brain.character.sulk_seconds, "notice_m": brain.character.notice_distance}
+                         "sulk_s": brain.character.sulk_seconds, "notice_m": brain.character.notice_distance,
+                         "moves": dict(pat.wear) if pat else {}}
         dest = Path(out) / f"{profile}_{name}"
         if dest != work:
             shutil.copytree(work, dest)
@@ -185,7 +187,8 @@ def sweep(profile: str, runs: int = 30, years: int = 12, seed: int = 1) -> dict[
         for i in range(runs):
             r = time_skip(profile, Path(tmp) / str(i), years=years, seed=seed * 1000 + i, draw=draw, quiet=True)
             for snap, res in r.items():
-                for k, x in {**res["dials"], "sulk_s": res["sulk_s"], "notice_m": res["notice_m"]}.items():
+                moves = {f"worn_{m}": res["moves"].get(m, 0.0) for m in ("hello", "happy", "offended")}
+                for k, x in {**res["dials"], "sulk_s": res["sulk_s"], "notice_m": res["notice_m"], **moves}.items():
                     collected.setdefault(snap, {}).setdefault(k, []).append(x)
     return {snap: {k: (min(xs), statistics.median(xs), max(xs)) for k, xs in d.items()}
             for snap, d in collected.items()}

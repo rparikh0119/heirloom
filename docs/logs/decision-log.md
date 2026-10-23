@@ -228,3 +228,40 @@ One entry per real decision. **Status:** Decided · Proposed (waiting on Riya) �
 - `--sweep 30` runs the whole range of every unknown. Only results that hold across it may be claimed, and only as "in a home where...". The worn cartridge records every value used.
 - Four households: quiet solo, loud family, enthusiast, shelved. Sources: Bentley 2018, Cagiltay 2022, Weiss 2021, Bajones 2019, Zhao & McEwen 2025, Kertész & Turunen 2017, Shen & Guan 2025. See docs/time-skip-provenance.md.
 - First sweep: homes end up with distinct characters, wear keeps changing after year 1, dial changes alone are too small to see (→ D55), shelved droids freeze (Rule 5 missing), curiosity only climbs.
+
+**D52 · Positioning** · Oct 23 · Decided
+- Main line: "Every companion robot today either remembers you and stays, or moves to a new home and forgets. Heirloom remembers when it changes hands."
+- Tagline: "Built to be inherited."
+- Why: LOVOT, RoBoHoN and aibo already move memory into a new body for the same owner. Sony erases aibo memory before rehoming, LOVOT's memory ends with its subscription (R43, R47, R48, R49, R50). Name them as precedent. Say "as far as we found", never "no one does this".
+
+**D53 · Two-key handoff** · Oct 23 · Decided
+- The giver's key: over the years the owner marks moments "pass on" or "keep with me". At a handoff only "pass on" moments travel. After a death, the marks act as their will (katamiwake).
+- The receiver's key: for each past owner, carry, soften or let rest (keep / blend / fade in code).
+- Why: Sony erases aibo memory to protect the previous owner. Heirloom has to protect them without erasing. Fits D43 (content only on request) and D45 (grief on request).
+- Build: a "pass on" flag on journal entries in the cartridge. The marking gesture is part of the handoff ritual brief.
+
+**D54 · Scenario 10: passing it down while alive** · Oct 23 · Decided
+- A grandparent hands the droid to a grandchild. "The Introduction": when the old owner is present and warm toward the newcomer, the droid warms to them faster.
+- Why: Shen & Guan 2025 saw grandparents hand their robot to grandchildren (R61). Design hypothesis for the mechanic, not research.
+
+**D55 · Patina carries the fresh vs worn demo** · Oct 23 · Decided
+- The dials stay subtle (Rule 4). Patina (motion that wears in) becomes the top build for weeks 7 to 8.
+- Why: the D51 sweep shows the largest dial change is a sulk going from 6.0 s to 6.9 s, too small to see. Kertész & Turunen (R45) and Fernaeus et al. (R44): wear must be felt in the interaction.
+
+**D56 · Weak-robot boundary** · Oct 23 · Decided
+- Hesitation and wobble are fresh-droid traits that fade with wear. It may invite help once, never repeats the request, never sulks if ignored.
+- Why: Okada's weak robots (R51) invite people in. Guilt tactics backfire (R26, R39, D44).
+
+**D57 · Pillar revisions** · Oct 23 · Decided
+- Luka: "lasts because it has a job" → "robots last when they become part of the family's story" (R10, R47, R61).
+- New "why now": China's July 2026 rules ban dependence-building companion AI (R58). Pew 2026 privacy concern (R33).
+- Honest machines + Mori 1970 (R65), Okada (R51), NICOBO (R52), Qian 2026 (R60). Story + wenwan (R54), A-FUN scratches (R43), aibo funerals (R46), Roomba naming (R22). Companies die + LOVOT cancel erases memory (R47), Moxie twice (R63), Sony's 7-year window (R43). Trust + Hancock 2011 (R21), Scassellati's "day two" (R63).
+
+**D58 · Wake word stays for now** · Oct 23 · Decided
+- "Heirloom" stays the voice gate. It filters a loud playtest room. Revisit with owner naming. NICOBO shows a companion can skip one (R52).
+
+**D59 · Patina built (first draft)** · Oct 23 · Built, needs tuning
+- Every expression counts its own uses in the cartridge. Wear per move: w = 1 - exp(-uses / 40). A fresh move pauses about 0.35 s, wobbles, plays stiff and small. A worn move starts instantly, plays faster, bigger and eased.
+- Measured in code: fresh hello 1.6 s with a 0.4 s pause. After 300 waves: 0.87 s, no pause, about 30% bigger.
+- Every value in brain/wear/patina.json is a design draft by Claude, not research. Riya tunes it by feel in the headset.
+- Open design call: at 40 uses a family's hello is fully worn inside year 1, so year 1 and year 12 look alike. Options: a slow second layer that keeps deepening over years, or a much larger uses_to_wear.

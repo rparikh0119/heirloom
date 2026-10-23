@@ -1,0 +1,18 @@
+{
+  "note": "How a move feels when it's brand new and when it's worn smooth (D55, D56). Design values, first draft by Claude, to be tuned by Riya in the headset. hesitate_s = pause before it commits (seconds). wobble_deg = small head tremor (degrees). speed = playback speed. size = how big the move is. smooth = 0 stiff and mechanical, 1 eased and fluid.",
+  "uses_to_wear": 40,
+  "fresh": {
+    "hesitate_s": 0.35,
+    "wobble_deg": 1.5,
+    "speed": 0.9,
+    "size": 0.85,
+    "smooth": 0.2
+  },
+  "worn": {
+    "hesitate_s": 0.0,
+    "wobble_deg": 0.0,
+    "speed": 1.35,
+    "size": 1.1,
+    "smooth": 1.0
+  }
+}

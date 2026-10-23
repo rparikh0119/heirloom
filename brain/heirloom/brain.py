@@ -90,6 +90,9 @@ class HeirloomBrain:
             self._set_mode(r.mode)
         if r.motion:
             self.expr.play(r.motion)
+            worn = [w for w in self.wear if learns and w.played("motion", r.motion, self.t)]
+            for w in worn:
+                w.apply(self)
         if r.sound:
             self._sound(r.sound)
         return r.file

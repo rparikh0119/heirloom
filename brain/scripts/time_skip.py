@@ -20,6 +20,7 @@ from heirloom.sim import HOUSEHOLDS_DIR, PARAMS, load_household, sweep, time_ski
 
 OUT = Path(__file__).resolve().parents[1] / "cartridges" / "sim"
 SHOW = ("sass", "boldness", "energy", "curiosity", "sulk_s", "notice_m")
+MOVES = ("worn_hello", "worn_happy", "worn_offended")     # patina: 0 = brand new, 1 = worn smooth
 
 
 def provenance_line(profile: str) -> str:
@@ -37,7 +38,7 @@ def main() -> None:
     args = parser.parse_args()
 
     profiles = [args.profile] if args.profile else sorted(p.stem for p in HOUSEHOLDS_DIR.glob("*.json"))
-    print("Out of the box: every dial 0.500, sulks 6.0 s, notices you at 2.50 m\n")
+    print("Out of the box: every dial 0.500, sulks 6.0 s, notices you at 2.50 m, every move brand new (patina 0.00)\n")
     for p in profiles:
         t0 = time.perf_counter()
         print(f"{p}  ({args.years} years)")
@@ -48,6 +49,8 @@ def main() -> None:
                 cells = [f"{k} {lo:.2f}-{hi:.2f}" for k, (lo, mid, hi) in
                          ((k, stats[snap][k]) for k in SHOW)]
                 print(f"  {snap:7s} " + "   ".join(cells))
+                moves = [f"{k[5:]} {stats[snap][k][0]:.2f}-{stats[snap][k][2]:.2f}" for k in MOVES]
+                print(f"  {'':7s} patina: " + "   ".join(moves))
             print(f"  ranges = lowest to highest across {args.sweep} runs   [{time.perf_counter() - t0:.1f} s]\n")
         else:
             time_skip(p, OUT, years=args.years, seed=args.seed)

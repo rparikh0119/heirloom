@@ -60,8 +60,9 @@ Anything that could fall through the cracks. Tick when done.
 - [ ] Decide: commit cartridges/riya to git (backup) or gitignore it
 
 **Rework from research (Oct 22, see docs/rework-plan-oct22.md)**
-- [ ] D50 settling learning + D51 households v2 (code ready in prep/oct22/)
-- [ ] D52 positioning line · D53 two-key handoff · D54 scenario 10 (living handoff) · D55 patina carries the demo · D56 weak-robot boundary · D57 pillar revisions · D58 wake word hold
+- [x] D50 settling learning + D51 time skip with provenance (built Oct 22)
+- [x] D52 to D58 decided Oct 23
+- [ ] Update deck and FigJam with D52 positioning and D57 pillars
 - [ ] Handoff ritual brief: pick a direction (docs/handoff-ritual-brief.md)
 - [ ] Direct fresh-droid hesitation on wave and happy (C3)
 - [ ] Patina plug-in (moved up, carries the fresh vs worn demo)
