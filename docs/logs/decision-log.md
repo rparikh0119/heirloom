@@ -274,5 +274,6 @@ One entry per real decision. **Status:** Decided Â· Proposed (waiting on Riya) Â
 - Rule 5 now has code: after 7 days without a moment, settling slips back (up to 60% at 90 days). Each move loosens it by 40%. Rust comes from the date of the last moment and is never stored. Fixes the frozen shelved droid (R61).
 - Time skip (10 runs, conditional on the mix scenario): family hello character 0.20-0.39 at year 1, 0.77-0.99 at year 12. Quiet owner 0.12-0.14 at year 1, 0.43-0.74 at year 12. Shelved rust 0.60. Year 1 and year 12 now differ.
 - Measured, one run: fresh hello 1.63 s with a 0.35 s pause. Family year 12: 0.87 s, no pause, leans +7 deg, tilts +9 deg, antenna flick +17 deg. Quiet year 12: 1.03 s, smaller, mostly a head tilt.
+- Rust also makes it shy (Riya, Oct 23): notice distance slides toward the shyest droid's by the rust amount. Back after 90 days, a default droid notices you at about 1.9 m instead of 2.5 m, and it's back to normal after about 5 moments. Checked about once a minute, so a droid left running alone still gets shy.
 - Bug fixed: time-skip snapshots now end today, so a year-1 cartridge doesn't open rusty.
 - Every number in brain/wear/patina.json is a design draft by Claude. Mapping dials to lean, tilt and flick is a design call, not a finding.

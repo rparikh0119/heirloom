@@ -183,6 +183,7 @@ def time_skip(profile: str, out: Path, years: int = 12, seed: int = 42, snapshot
         pat = next((w for w in brain.wear if w.name == "patina"), None)
         results[name] = {"day": day, "moments": moments, "dials": dict(brain.character.dials),
                          "sulk_s": brain.character.sulk_seconds, "notice_m": brain.character.notice_distance,
+                         "notice_back_m": brain.character.notice_distance_when_shy(pat.rust_on(brain.today + timedelta(days=1)) if pat else 0.0),
                          "moves": dict(pat.settle) if pat else {}, "deep": dict(pat.depth) if pat else {},
                          "rust": pat.rust_on(brain.today + timedelta(days=1)) if pat else 0.0,
                          "uses": pat.uses(brain.today) if pat else {}}

@@ -47,6 +47,8 @@ class HeirloomBrain:
         self._last_attending = False
         self.t = 0.0                                         # seconds since it woke up
         self.today = None                                    # None = the real date. The time skip sets a pretend one
+        self.shyness = 0.0                                   # set by wear after time apart (Rule 5). 0 = normal
+        self._next_tick = 60.0
 
         # Wear: only with a cartridge. Each plug-in blends its layers into the brain.
         self.cartridge = cartridge
@@ -60,7 +62,7 @@ class HeirloomBrain:
     def _refresh_character(self) -> None:
         """Push the current dials into the parts that use them. Modes read them live."""
         c = self.character
-        self.presence.cfg.notice_distance = c.notice_distance
+        self.presence.cfg.notice_distance = c.notice_distance_when_shy(self.shyness)
         self.presence.cfg.glance_gap = c.glance_gap
         self.expr.scale = c.motion_scale
 
@@ -93,6 +95,8 @@ class HeirloomBrain:
             worn = [w for w in self.wear if learns and w.played("motion", r.motion, self.t)]
             for w in worn:
                 w.apply(self)
+            if worn:
+                self._refresh_character()
         if r.sound:
             self._sound(r.sound)
         return r.file
@@ -119,6 +123,10 @@ class HeirloomBrain:
     # ---------- every tick ----------
     def step(self, dt: float, user_head) -> tuple[Pose, dict]:
         self.t += dt
+        if self.t >= self._next_tick:                        # about once a minute, wear can notice time passing
+            self._next_tick = self.t + 60.0
+            if any([w.tick(self) for w in self.wear]):
+                self._refresh_character()
         current = self.modes.get(self.mode)
         if current and not current.step(dt):
             self.mode, current = AWAKE, None

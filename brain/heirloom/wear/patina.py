@@ -17,8 +17,9 @@ Every expression keeps its own count of how often it has played. Three things ha
    percent each time. Repetition is why people returned Hyodol (R59).
 
 And rust (Rule 5, D19): after days with no moments at all, settling slips partly back, so it's
-stiff and shy when you return. Each move it plays loosens it again, so it warms back up within a
-few moments. Rust is never written to the cartridge, it comes from the date of the last moment.
+stiff and shy when you return. Rust also makes it less bold: it notices you only when you're
+closer (brain.shyness). Each move it plays loosens it again, so it warms back up within a few
+moments. Rust is never written to the cartridge, it comes from the date of the last moment.
 
 Every number lives in brain/wear/patina.json. They are design values for Riya to tune, not research.
 
@@ -125,6 +126,14 @@ class PatinaWear(Wear):
 
     def _check_absence(self) -> None:
         self.rust = max(self.rust, self.rust_on(self._today()))
+        if self.brain is not None:
+            self.brain.shyness = self.rust
+
+    def tick(self, brain) -> bool:
+        """Left running for days with nobody around, it still gets rusty and shy."""
+        before = self.rust
+        self._check_absence()
+        return self.rust != before
 
     # ---- learning ----
 
@@ -134,6 +143,7 @@ class PatinaWear(Wear):
         today = self._today()
         self._check_absence()
         self.rust *= 1.0 - self.settings["rust"]["loosen"]          # each move warms it back up
+        self.brain.shyness = self.rust
         self._last = today
         page = self.cart.read_page(self.cart.active.id, self.name)
         page[name] = {"uses": page.get(name, {}).get("uses", 0) + 1, "last": today.isoformat()}

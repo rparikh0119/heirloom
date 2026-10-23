@@ -39,6 +39,11 @@ class Character:
     def notice_distance(self) -> float:
         return 1.5 + 2.0 * self.boldness             # 1.5 m (shy) .. 3.5 m (forward)
 
+    def notice_distance_when_shy(self, shyness: float) -> float:
+        """After time apart (patina rust, Rule 5) it acts less bold until it warms back up.
+        shyness 0 = normal, 1 = notices you only as close as the shyest droid would."""
+        return 1.5 + 2.0 * self.boldness * (1.0 - shyness)
+
     @property
     def motion_scale(self) -> float:
         return 0.7 + 0.6 * self.energy               # 0.7x (calm) .. 1.3x (bouncy), size and speed

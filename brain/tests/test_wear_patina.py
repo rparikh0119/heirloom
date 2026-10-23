@@ -15,7 +15,7 @@ from heirloom.cartridge import Cartridge, FADE_DAYS  # noqa: E402
 from heirloom.events import Event  # noqa: E402
 from heirloom.wear.patina import load_settings  # noqa: E402
 
-DAY = date(2026, 10, 23)
+DAY = date.today()          # the brain wakes up on the real date, so the tests do too
 DT = 1 / 30
 CHECKS = []
 
@@ -245,6 +245,29 @@ def _(tmp):
     time_skip("shelved", tmp, years=3, seed=5, quiet=True)
     assert patina(brain_with(Cartridge.open(tmp / "loud_family_year1"))).rust == 0.0
     assert patina(brain_with(Cartridge.open(tmp / "shelved_year1"))).rust > 0.5
+
+
+@check("after time apart it notices you only when you're closer, then opens back up (Rule 5)")
+def _(tmp):
+    b = brain_with(deep_cart(tmp, 300, last=DAY - timedelta(days=90)))
+    normal = b.character.notice_distance
+    shy = b.presence.cfg.notice_distance
+    assert shy < normal - 0.4, (shy, normal)                # about 1.9 m instead of 2.5 m
+    for _ in range(5):
+        b.handle(Event("wave", source="hands"))
+        b.pass_time(5)
+    assert abs(b.presence.cfg.notice_distance - normal) < 0.1, b.presence.cfg.notice_distance
+
+
+@check("left running with nobody around for weeks, it still gets shy")
+def _(tmp):
+    b = brain_with(deep_cart(tmp, 300, last=DAY))
+    b.today = DAY
+    normal = b.presence.cfg.notice_distance
+    b.today = DAY + timedelta(days=60)
+    for _ in range(70):
+        b.step(1.0, None)
+    assert b.presence.cfg.notice_distance < normal - 0.3, (b.presence.cfg.notice_distance, normal)
 
 
 # ---------------------------------------------------------------------------------------------

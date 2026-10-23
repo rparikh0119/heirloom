@@ -26,6 +26,10 @@ class Wear:
         """The droid just did something (kind "motion": an expression). Return True if anything changed."""
         return False
 
+    def tick(self, brain) -> bool:
+        """Called about once a minute while it runs. Return True if the brain needs refreshing."""
+        return False
+
     def apply(self, brain) -> None:
         """Blend every layer by weight and push the result into the brain."""
 

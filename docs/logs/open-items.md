@@ -68,7 +68,7 @@ Anything that could fall through the cracks. Tick when done.
 - [x] Patina plug-in (moved up, carries the fresh vs worn demo) → D59, v2 D60 (Oct 23)
 - [x] Rule 5 absence has no code (shy after time apart) → patina rust, D60
 - [ ] Tune brain/wear/patina.json in the headset: fresh vs loud_family_year12 vs quiet_solo_year12 vs shelved_year1
-- [ ] Rust only shows in motion. Should absence also show in dials or presence (shy distance)?
+- [x] Rust only shows in motion. Should absence also show in presence? → yes, shy notice distance (D60)
 - [ ] Cartridge "pass on" flags for the will (C2), once D53 is decided
 - [ ] Heirloom part that moves bodies (C4): raise with the ID collaborator
 - [ ] Update deck positioning + speaker notes with prior art (LOVOT, RoBoHoN, aibo)
