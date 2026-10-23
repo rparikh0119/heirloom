@@ -217,3 +217,14 @@ One entry per real decision. **Status:** Decided · Proposed (waiting on Riya) �
 - Other nudges: wave = bolder, "not now" = less bold and calmer, shh = calmer, praise after a big reaction = more energy, praise after curious = more curious. Warmth speed stays fixed for now.
 - One step = 0.001, capped at wear_limit 0.25 per layer and in total (D41). Rules live in brain/wear/dials.json, code in heirloom/wear/dials.py.
 - Gaps: boldness up should come from "stayed close" and curiosity down from "ignored its glances". Both need presence events first.
+
+**D50 · Dials settle toward the balance of how it's treated** · Oct 22 · Decided, built
+- Each nudge moves a dial a fraction of the way toward the limit in its direction. Fast at first, slower over time, and it lands where the balance of warm and cold moments puts it. Never passes wear_limit (D41).
+- Why: fixed steps raced every dial to the cap within a year (time skip, Oct 21). Pleo lost families because growth was invisible (Fernaeus et al. 2010, R44), so early change has to be noticeable.
+- Design rule for Heirloom's behaviour, not a claim about people.
+
+**D51 · Time skip: no number without a source** · Oct 22 · Decided, built (supersedes prep/oct22 households)
+- Every number in a household is declared as data (with the arithmetic from the paper), unknown (a range bounded by what is known, swept) or scenario (the mix of moments). The loader refuses undeclared numbers. Riya: "assumed" claims look credible and aren't, so they're not allowed.
+- `--sweep 30` runs the whole range of every unknown. Only results that hold across it may be claimed, and only as "in a home where...". The worn cartridge records every value used.
+- Four households: quiet solo, loud family, enthusiast, shelved. Sources: Bentley 2018, Cagiltay 2022, Weiss 2021, Bajones 2019, Zhao & McEwen 2025, Kertész & Turunen 2017, Shen & Guan 2025. See docs/time-skip-provenance.md.
+- First sweep: homes end up with distinct characters, wear keeps changing after year 1, dial changes alone are too small to see (→ D55), shelved droids freeze (Rule 5 missing), curiosity only climbs.

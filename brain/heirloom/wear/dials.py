@@ -10,9 +10,17 @@ What nudges which dial lives in brain/wear/dials.json, so it can change without 
     while    only counts in this mode (optional)
     after    only counts if this event happened in the last `within` seconds (optional)
     dial     which of the five dials
-    nudge    +1 or -1 (times "step", e.g. 0.001)
+    nudge    +1 or -1 (how strongly, usually 1)
 
 Page per layer (layers/L1/dials.json):  {"sass": 0.012, "energy": -0.004}   drift from character.json
+
+Learning settles (D50, proposed): each nudge moves the dial a small fraction of the way toward the
+limit in its direction, so it changes noticeably in the first weeks, then slows down, and ends up
+where the BALANCE of how it's treated puts it. A home that's kind 90% of the time and rude 10% ends
+up mostly warm. Fixed steps used to race every dial to the cap (time skip, Oct 21) and repeat
+Pleo's mistake in reverse (Fernaeus et al. 2010).
+
+    step = how far the very first nudge moves a fresh dial (e.g. 0.001)
 
 Blend: every layer's drift x its weight, added up, then capped at +-wear_limit (D41). Praise can
 never push it further than that, however many years it lasts.
@@ -84,8 +92,10 @@ class DialsWear(Wear):
             if r["after"] and not any(n in r["after"] and t - when <= r["within"] for n, when in self._recent):
                 continue
             d = r["dial"]
-            # Each layer's own drift is capped too, so one owner can't bank more than the limit.
-            page[d] = max(-self.limit, min(self.limit, page.get(d, 0.0) + r["nudge"] * self.step))
+            # Settle toward the limit in the nudge's direction. Never passes it (D41).
+            target = self.limit if r["nudge"] > 0 else -self.limit
+            cur = page.get(d, 0.0)
+            page[d] = cur + (target - cur) * (self.step / self.limit) * abs(r["nudge"])
             changed = True
         self._recent.append((event.name, t))
         if changed:

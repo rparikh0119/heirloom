@@ -43,15 +43,14 @@ def _(tmp):
     assert b.wear == [] and b.character.sass == 0.5
 
 
-@check("flipped off 10 times: sass creeps up (0.50 -> 0.51)")
+@check("flipped off 10 times: sass creeps up (about 0.51)")
 def _(tmp):
     cart = Cartridge.create(tmp, on=DAY)
     b = brain_with(cart)
     for _ in range(10):
         b.handle("offended")
         wait(b, 10)                     # let the sulk finish
-    assert abs(b.character.sass - 0.51) < 1e-6, b.character.sass
-    assert cart.read_page("L1", "dials")["sass"] == 0.01
+    assert 0.509 < b.character.sass < 0.511, b.character.sass
 
 
 @check("grumpier means longer sulks")
@@ -68,7 +67,7 @@ def _(tmp):
     b = brain_with(cart)
     b.handle("offended")                 # +1
     b.handle("heart")                    # while sulking: -1
-    assert cart.read_page("L1", "dials")["sass"] == 0.0
+    assert abs(cart.read_page("L1", "dials")["sass"]) < 1e-5
 
 
 @check("a heart outside a sulk doesn't touch sass")
@@ -101,14 +100,26 @@ def _(tmp):
     assert "curiosity" not in cart.read_page("L1", "dials")
 
 
-@check("the cap (D41): 1000 offences still stop at +0.25")
+@check("the cap (D41): 3000 offences get close to +0.25 and never pass it")
 def _(tmp):
     cart = Cartridge.create(tmp, on=DAY)
     b = brain_with(cart)
-    for _ in range(1000):
+    for _ in range(3000):
         b.handle(Event("offended"))
-    assert cart.read_page("L1", "dials")["sass"] == 0.25
-    assert b.character.sass == 0.75
+    drift = cart.read_page("L1", "dials")["sass"]
+    assert 0.24 < drift <= 0.25, drift
+    assert b.character.sass <= 0.75
+
+
+@check("settling: a dial ends up at the balance of how it is treated, not at the cap")
+def _(tmp):
+    cart = Cartridge.create(tmp, on=DAY)
+    b = brain_with(cart)
+    for i in range(4000):                  # 90% "not now" lowers boldness, 10% waves raise it
+        b.handle(Event("wave" if i % 10 == 0 else "not_now"))
+        b.pass_time(30)
+    drift = cart.read_page("L1", "dials")["boldness"]
+    assert -0.25 < drift < -0.17, drift    # settles near 0.25 x (0.1 - 0.9) = -0.2
 
 
 @check("layers blend: a kept grumpy past still shows, blended counts half, faded disappears")

@@ -1,13 +1,14 @@
-"""Time skip: let synthetic households live with Heirloom for years, in seconds (D46).
+"""Time skip: synthetic households live with Heirloom for years, in seconds (D46).
 
-    python scripts/time_skip.py                          # every household, 12 years
+    python scripts/time_skip.py                          # every household, 12 years, one run each
     python scripts/time_skip.py --profile loud_family    # just one
-    python scripts/time_skip.py --years 5 --seed 7
+    python scripts/time_skip.py --sweep 30               # 30 runs across every unknown range. Use this before claiming anything
 
-Writes worn cartridges to brain/cartridges/sim/, e.g. loud_family_day1, _year1, _year12.
-Run one in Unity with:  python scripts/run.py --body unity --cartridge cartridges/sim/loud_family_year12
+Writes worn cartridges to brain/cartridges/sim/, e.g. loud_family_day1, _month1, _year1, _year12.
+Run one in Unity:  python scripts/run.py --body unity --cartridge cartridges/sim/loud_family_year12
 
-Households live in brain/sim/households/. Add a JSON file to make a new one.
+Every number in brain/sim/households/*.json is declared as data (with its derivation), unknown
+(a range that gets swept) or scenario (what the household is). See docs/time-skip-provenance.md.
 """
 import argparse
 import sys
@@ -15,9 +16,16 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from heirloom.sim import HOUSEHOLDS_DIR, time_skip  # noqa: E402
+from heirloom.sim import HOUSEHOLDS_DIR, PARAMS, load_household, sweep, time_skip  # noqa: E402
 
 OUT = Path(__file__).resolve().parents[1] / "cartridges" / "sim"
+SHOW = ("sass", "boldness", "energy", "curiosity", "sulk_s", "notice_m")
+
+
+def provenance_line(profile: str) -> str:
+    prov = load_household(profile)["provenance"]
+    kinds = [prov[p]["kind"] for p in PARAMS]
+    return f"  numbers: {kinds.count('data')} data, {kinds.count('unknown')} unknown (swept), mix = scenario"
 
 
 def main() -> None:
@@ -25,19 +33,28 @@ def main() -> None:
     parser.add_argument("--profile", default=None, help="one household (default: all of them)")
     parser.add_argument("--years", type=int, default=12)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--sweep", type=int, default=0, help="runs across every unknown range (e.g. 30)")
     args = parser.parse_args()
 
     profiles = [args.profile] if args.profile else sorted(p.stem for p in HOUSEHOLDS_DIR.glob("*.json"))
-    base = {"sass": 0.5, "boldness": 0.5, "energy": 0.5, "curiosity": 0.5}
-    print(f"Out of the box: " + "  ".join(f"{k} {v:.3f}" for k, v in base.items()) + "\n")
+    print("Out of the box: every dial 0.500, sulks 6.0 s, notices you at 2.50 m\n")
     for p in profiles:
         t0 = time.perf_counter()
-        print(f"{p}  ({args.years} years, seed {args.seed})")
-        r = time_skip(p, OUT, years=args.years, seed=args.seed)
-        last = r[f"year{args.years}"]
-        print(f"  -> sulks {last['sulk_s']:.1f} s (new: 6.0 s), notices you at {last['notice_m']:.2f} m (new: 2.50 m)"
-              f"   [{time.perf_counter() - t0:.1f} s]\n")
-    print(f"Cartridges written to {OUT}")
+        print(f"{p}  ({args.years} years)")
+        print(provenance_line(p))
+        if args.sweep:
+            stats = sweep(p, runs=args.sweep, years=args.years, seed=args.seed)
+            for snap in ("month1", "year1", f"year{args.years}"):
+                cells = [f"{k} {lo:.2f}-{hi:.2f}" for k, (lo, mid, hi) in
+                         ((k, stats[snap][k]) for k in SHOW)]
+                print(f"  {snap:7s} " + "   ".join(cells))
+            print(f"  ranges = lowest to highest across {args.sweep} runs   [{time.perf_counter() - t0:.1f} s]\n")
+        else:
+            time_skip(p, OUT, years=args.years, seed=args.seed)
+            print(f"  single run at the middle of every unknown range. Not a claim: use --sweep   "
+                  f"[{time.perf_counter() - t0:.1f} s]\n")
+    if not args.sweep:
+        print(f"Cartridges written to {OUT}")
 
 
 if __name__ == "__main__":
