@@ -62,12 +62,17 @@ def main() -> None:
         if cartridge:
             print("[dials] " + "  ".join(f"{k} {v:.3f}" for k, v in brain.character.dials.items()))
             print("[wear] learning from hands and voice" + (" and keys" if args.learn_from_keys else " (keys don't count)"))
+            ws = brain.wear_state()
+            worn = "  ".join(f"{m} {v['settled']:.2f}/{v['character']:.2f}" for m, v in ws["moves"].items()) or "none yet"
+            print(f"[patina] settled/character: {worn}")
+            print(f"[patina] rust {ws['rust']:.2f}, notices you at {ws['notice_m']:.2f} m")
         problems = [(n, m) for n, ok, m in brain.health() if not ok]
         print(f"[health] {len(brain.health())} modules checked, " + (f"{len(problems)} problem(s):" if problems else "all ok"))
         for name, msg in problems:
             print(f"  ! {name}: {msg}")
         gestures = GestureDetector(debug=args.gesture_debug)
         last_mode, last = None, time.perf_counter()
+        wear, next_wear = brain.wear_state(), 0.0
         try:
             while True:
                 now = time.perf_counter()
@@ -85,7 +90,9 @@ def main() -> None:
 
                 pose, info = brain.step(dt, tuple(user["head"]) if user else None)
                 body.set_target(pose)
-                link.broadcast({"type": "state", **info})
+                if now >= next_wear:                  # wear changes slowly, so once a second is plenty
+                    wear, next_wear = brain.wear_state(), now + 1.0
+                link.broadcast({"type": "state", **info, "wear": wear})
 
                 if info["mode"] != last_mode:
                     print(f"[mode] {info['mode']}")

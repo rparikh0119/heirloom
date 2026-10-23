@@ -270,6 +270,17 @@ def _(tmp):
     assert b.presence.cfg.notice_distance < normal - 0.3, (b.presence.cfg.notice_distance, normal)
 
 
+
+@check("the overlay data: dials, moves, rust and notice distance, and it's plain JSON")
+def _(tmp):
+    b = brain_with(deep_cart(tmp / "a", 300, last=DAY - timedelta(days=90)))
+    ws = json.loads(json.dumps(b.wear_state()))
+    assert ws["learning"] and set(ws["dials"]) >= {"sass", "energy"}
+    assert ws["moves"]["hello"]["settled"] > 0.99 and ws["moves"]["hello"]["uses"] == 300
+    assert ws["rust"] > 0.5 and ws["notice_m"] < 2.1, ws
+    fresh = HeirloomBrain(play_sound=lambda name: None).wear_state()
+    assert not fresh["learning"] and fresh["moves"] == {} and fresh["rust"] == 0.0
+
 # ---------------------------------------------------------------------------------------------
 
 def main() -> None:

@@ -158,6 +158,30 @@ class HeirloomBrain:
         shown = self.mode if self.mode != AWAKE else info["mode"]
         return Pose(**ch), {**info, "mode": shown, "expression": self.expr.name or ""}
 
+    # ---------- what the overlay shows ----------
+    def wear_state(self) -> dict:
+        """Everything the MR overlay needs to show how worn in it is (R64: make relationship
+        stages visible). Without a cartridge it's a fresh droid with nothing to show.
+
+            dials      the five dials it has today, 0..1 (0.5 = out of the box)
+            limit      how far wear can ever move a dial from 0.5 (D41)
+            moves      per expression: settled 0..1 (weeks), character 0..1 (years), uses
+            rust       0 = in practice, up to about 0.6 after months apart (Rule 5)
+            notice_m   how far away it notices you right now, in metres
+        """
+        pat = next((w for w in self.wear if w.name == "patina"), None)
+        moves = {}
+        if pat is not None:
+            uses = pat.uses(self.today)
+            moves = {m: {"settled": round(pat.settle.get(m, 0.0), 3), "character": round(pat.depth.get(m, 0.0), 3),
+                         "uses": round(uses.get(m, 0.0))} for m in sorted(uses)}
+        return {"learning": self.cartridge is not None,
+                "dials": {k: round(v, 3) for k, v in self.character.dials.items()},
+                "limit": self.character.wear_limit,
+                "moves": moves,
+                "rust": round(pat.rust, 3) if pat else 0.0,
+                "notice_m": round(self.presence.cfg.notice_distance, 2)}
+
     # ---------- self-check ----------
     def health(self) -> list[tuple[str, bool, str]]:
         """Every module that can check itself: (name, ok, message). For the future self-maintenance feature."""

@@ -50,7 +50,9 @@ Anything that could fall through the cracks. Tick when done.
 **Gaps found Oct 21 (wear system)**
 - [x] Test key presses pollute the cartridge → keys ignored unless --learn-from-keys
 - [x] Nothing calls health() → run.py prints a health report at startup
-- [ ] Wear can't be seen: send effective dials in the state message, overlay toggle with five bars (needs headset)
+- [x] Brain side: state message carries "wear" (dials, limit, per-move settled/character/uses, rust, notice_m), once a second (Oct 23)
+- [ ] Unity side: overlay toggle that reads state.wear: five dial bars, hello/happy patina, rust (needs headset)
+- [ ] shh.py is still Riya's TODO (test_shh 5/6 until written)
 - [ ] Presence events: noticed, stayed_close, left, glance_ignored (unblocks boldness up, curiosity down, D44, D48)
 - [ ] Shared warm/cold signal after each reaction (before dialect)
 - [ ] Brain accepts a pretend date (for the time skip)
