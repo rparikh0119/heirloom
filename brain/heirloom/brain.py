@@ -30,10 +30,11 @@ REFLEXES = {"hearing"}     # the moment you start talking (whisper_voice), befor
 
 class HeirloomBrain:
     def __init__(self, play_sound, reactions_dir=None, cartridge=None, wear_ignores=(), show_photo=None,
-                 play_clip=None) -> None:
+                 play_clip=None, take_photo=None) -> None:
         """play_sound(name) is called whenever the brain wants to chirp.
         show_photo(path or None) projects a journal photo, or stops (bodies without a projector skip it).
         play_clip(wav bytes) plays a voice memory through the body's speaker.
+        take_photo() asks the body's camera for a picture. It comes back as a 'photo_taken' event.
         cartridge: an opened Cartridge, or None to run without learning.
         wear_ignores: event sources that never leave wear, e.g. {"unity"} so test key presses don't count."""
         self.character = load_character()
@@ -57,6 +58,7 @@ class HeirloomBrain:
         self.label = ""                                      # a name for this droid on the overlay, e.g. "FRESH"
         self.show_photo = show_photo or (lambda path: None)
         self.play_clip = play_clip or (lambda wav: None)
+        self.take_photo = take_photo or (lambda: None)
         self.journal = Journal.for_cartridge(cartridge)
         self.showing = None                                  # the photo being projected right now, or None
         self._next_tick = 60.0
@@ -83,6 +85,8 @@ class HeirloomBrain:
         e = as_event(event)
         if e.name in REFLEXES:             # instant, below the level of reactions and wear
             return self._reflex(e.name)
+        if e.name == "photo_taken" and not self._keep_photo(e):
+            return None
         if e.name == "recorded" and not self._keep_recording(e):
             return None
         if e.name == "play_memory" and not self._play_memory(e):
@@ -121,6 +125,27 @@ class HeirloomBrain:
             self._sound(r.sound)
         self._sync_projection()
         return r.file
+
+    def _keep_photo(self, e: Event) -> bool:
+        """Save a photo the droid just took into the cartridge journal."""
+        path = self.journal.save_photo(e.data.get("jpeg", b""))
+        if path is None:
+            print("[journal] can't keep a photo without a cartridge (run with --cartridge)")
+            return False
+        print(f"[journal] saved photo {path.name}")
+        return True
+
+    def _shooting_cues(self) -> None:
+        """The countdown beeps and the shutter, timed by the 'shooting' mode."""
+        mode = self.modes.get("shooting")
+        if mode is None:
+            return
+        for cue in mode.pop_cues():
+            if cue == "snap":
+                self._sound("shutter")
+                self.take_photo()
+            else:
+                self._sound(cue)
 
     def _keep_recording(self, e: Event) -> bool:
         """Save a voice memory into the cartridge (D33). Returns False if there was nowhere to keep it."""
@@ -199,6 +224,7 @@ class HeirloomBrain:
         if current and not current.step(dt):
             self.mode, current = AWAKE, None
             self._sync_projection()
+        self._shooting_cues()
 
         # Presence only follows you when the mode allows it (sulking, sleeping and backing off don't).
         attentive = current is None or current.attentive

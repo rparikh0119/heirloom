@@ -11,7 +11,7 @@ namespace Heirloom
     /// <summary>
     /// Connects to the Python brain over WebSocket.
     /// Receives: poses (moves the rig), state (for the overlays, including wear), sounds (chirps),
-    /// project (a journal photo for ProjectorBeam to show on the desk).
+    /// project (a journal photo for ProjectorBeam to show on the desk), capture (take a photo now).
     /// Sends: where the user's head is, and events (gestures, voice, keys).
     /// Uses .NET's built-in ClientWebSocket (works in the Editor and on Quest). Reconnects every 2 s.
     /// </summary>
@@ -38,6 +38,9 @@ namespace Heirloom
 
         /// <summary>The brain wants a photo projected (name, texture), or the projector off (null, null).</summary>
         public event Action<string, Texture2D> Projected;
+
+        /// <summary>The brain wants a photo taken now (PhotoCapture answers with a "photo" message).</summary>
+        public event Action CaptureRequested;
 
         [Serializable]
         public class Dials { public float curiosity = 0.5f, sass = 0.5f, boldness = 0.5f, energy = 0.5f, warmth_speed = 0.5f; }
@@ -187,6 +190,7 @@ namespace Heirloom
                         break;
                     case "sound": PlaySound(msg.wav_b64); break;
                     case "project": Project(msg.name, msg.image_b64); break;
+                    case "capture": CaptureRequested?.Invoke(); break;
                 }
             }
             if (latestPose != null && rig != null) rig.Apply(latestPose);

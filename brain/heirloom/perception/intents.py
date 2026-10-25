@@ -31,6 +31,7 @@ INTENTS: dict[str, list[str]] = {
     "shh":     ["be quiet", "quiet", "hush"],
     "show_memory": ["remember", "show me", "memory"],
     "record":  ["record this", "record", "remember this"],
+    "take_photo": ["take a picture", "take a photo", "picture", "cheese"],
     "play_memory": ["play it back", "play it", "play back"],
 }
 
@@ -57,6 +58,8 @@ EXTRA: dict[str, list[str]] = {
     "shh":     ["shh", "shush", "shhh", "quiet please", "keep it down", "be quiet please"],
     "show_memory": ["show me a memory", "what do you remember", "do you remember", "show me something",
                     "show me a picture", "show me a photo", "memories", "a memory", "remember when"],
+    "take_photo": ["take a pic", "snap a photo", "snap a picture", "say cheese", "take our picture",
+                   "take my picture", "take a picture of this", "photo time", "picture time", "take a photo of this"],
     "record":  ["record a message", "record something", "record me", "take a note", "save this",
                 "keep this", "remember this for me", "start recording"],
     "play_memory": ["play the recording", "play a recording", "play my message", "play the message",

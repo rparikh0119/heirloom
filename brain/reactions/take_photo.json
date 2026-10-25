@@ -1,0 +1,6 @@
+{
+  "note": "'Take a picture': three countdown beeps, the iris snaps, a shutter chirp. Never automatic (D02). The photo goes in the cartridge journal.",
+  "when": "take_photo",
+  "mode": "shooting",
+  "ignored_while": ["sleep", "sulk", "recording"]
+}

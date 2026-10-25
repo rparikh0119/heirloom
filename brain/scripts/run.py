@@ -29,7 +29,7 @@ import time
 from heirloom.body import make_body
 from heirloom.brain import HeirloomBrain
 from heirloom.cartridge import Cartridge
-from heirloom.events import as_event
+from heirloom.events import Event, as_event
 from heirloom.link import LinkServer
 from heirloom.perception.gestures import GestureDetector
 
@@ -85,6 +85,7 @@ def main() -> None:
         link.wait_for_client()
         ignores = set() if args.learn_from_keys else {"unity"}
         brain = HeirloomBrain(play_sound=body.play_sound, show_photo=body.show_photo, play_clip=body.play_clip,
+                              take_photo=body.take_photo,
                               cartridge=cartridge, wear_ignores=ignores)
         brain.label = args.name or (_label_from(args.cartridge) if args.cartridge else "NO CARTRIDGE")
         if cartridge:
@@ -108,6 +109,11 @@ def main() -> None:
 
                 # Every sense feeds the same stream. The source is kept so the brain knows how it heard.
                 events = [as_event(e, "unity") for e in link.pop_events()]
+                photo = link.take("photo")
+                if photo and photo.get("image_b64"):           # the camera answered a "take a picture"
+                    import base64
+                    events.append(Event("photo_taken", source="camera",
+                                        data={"jpeg": base64.b64decode(photo["image_b64"])}))
                 events += [as_event(e, "voice") for e in (voice.pop_events() if voice else [])]
                 user = link.latest("user", max_age=0.5)
                 head = user["head"] if user else None

@@ -4,7 +4,9 @@ Protocol v0, JSON text frames:
     brain -> client   {"type": "pose", "ch": {"head_pitch": 0.0, ...all channels...}}
                       {"type": "state", ...}            (what the brain is doing, for the MR overlay)
                       {"type": "sound", "name": "happy", "wav_b64": "..."}  (16-bit mono WAV)
+    brain -> client   {"type": "capture"}  (take a photo now)  ·  {"type": "project", "name", "image_b64"}
     client -> brain   {"type": "user", "head": [x, y, z]}  (user's head, metres, robot space)
+                      {"type": "photo", "image_b64": "..."}  (a JPEG from the camera, after "capture")
                       {"type": "event", "name": "wave"}    (gestures, voice commands, buttons)
 """
 from __future__ import annotations
@@ -38,7 +40,7 @@ class LinkServer:
         self._server = None
 
     def start(self) -> None:
-        self._server = serve(self._handler, self.host, self.port)
+        self._server = serve(self._handler, self.host, self.port, max_size=8 * 2**20)   # photos from the camera can be ~1 MB
         threading.Thread(target=self._server.serve_forever, daemon=True).start()
         print(f"[link] listening on ws://{self.host}:{self.port}")
 
@@ -71,6 +73,12 @@ class LinkServer:
         if max_age is not None and time.monotonic() - stamp > max_age:
             return None
         return msg
+
+    def take(self, msg_type: str) -> dict | None:
+        """The newest message of a type, removed so it's handled once (e.g. a photo). None if there isn't one."""
+        with self._lock:
+            item = self._incoming.pop(msg_type, None)
+        return item[0] if item else None
 
     def pop_events(self) -> list[str]:
         """All event names received since the last call, oldest first."""

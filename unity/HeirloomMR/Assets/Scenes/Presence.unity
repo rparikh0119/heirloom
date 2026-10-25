@@ -15731,26 +15731,14 @@ GameObject:
   m_Component:
   - component: {fileID: 734451742}
   - component: {fileID: 734451741}
-  - component: {fileID: 734451740}
+  - component: {fileID: 734451743}
   m_Layer: 0
-  m_Name: CameraTest
+  m_Name: DroidCamera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &734451740
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 734451739}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2367d8f6b29c2df43b4171ce0e32478e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Heirloom.CameraTest
 --- !u!114 &734451741
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15783,6 +15771,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &734451743
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 734451739}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1901dc613661c74429957b53f76b401c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Heirloom.PhotoCapture
+  link: {fileID: 134074658}
+  jpegQuality: 85
 --- !u!4 &735581806 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2175031653587372500, guid: ac8ac9d5da0b8b748b7633c74580eb72, type: 3}

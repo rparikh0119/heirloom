@@ -324,3 +324,9 @@ One entry per real decision. **Status:** Decided · Proposed (waiting on Riya) �
 - Playback is framed: a soft chirp before and after, so the droid presents the memory rather than pretending to be the person.
 - scripts/voice_styles.py writes all three from the newest recording for listening. Tested only on espeak in Claude's workspace, so it must be judged on a real voice.
 - Oct 25, Riya by ear on her own voice: the lighter styles sounded identical to the original (the Quest mic is 16 kHz). "radio" best, wanted a bit more. "transmission" too much ("dead corpse zombie"), blamed on the ring-mod buzz. Default is now "heirloom": between the two, 7-bit, 9.6 kHz, more body resonance and metal, no buzz.
+
+**D70 · Photo taking works in MR** · Oct 25 · Built, needs a headset check
+- Test: Meta's PassthroughCameraAccess (MRUK, SDK 207) gives the real Quest 3 camera over Link in the Editor at 1280x960, right way up. It returned colour bars until "Passthrough Camera API permissions" was turned on in the Meta Horizon Link app (Settings > Developer), then the Editor restarted.
+- "Take a picture" / "say cheese": looks at you, three countdown beeps, the iris snaps shut and opens with a shutter chirp, then Unity (PhotoCapture.cs) grabs a camera frame and sends the JPEG to the brain, which keeps it in <cartridge>/journal/. "Show me a memory" can then project it. Never automatic (D02).
+- In MR it photographs what you're looking at, since the camera is on the headset. The custom droid uses its own camera.
+- Link accepts messages up to 8 MB now (photos). Verified with websockets 15.0.1.

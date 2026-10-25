@@ -68,6 +68,21 @@ class Journal:
         self._recent = (self._recent + [choice.name])[-3:]
         return choice
 
+    # ---------- photos ----------
+
+    def save_photo(self, jpeg: bytes, when: datetime | None = None) -> Path | None:
+        """Keep a photo the droid took (D02: only ever when asked). Needs a cartridge."""
+        if self.folder is None or not jpeg:
+            return None
+        when = when or datetime.now()
+        self.folder.mkdir(parents=True, exist_ok=True)
+        stem = when.strftime("%Y-%m-%d_%H%M%S")
+        path, k = self.folder / f"{stem}.jpg", 1
+        while path.exists():
+            path, k = self.folder / f"{stem}_{k}.jpg", k + 1
+        path.write_bytes(jpeg)
+        return path
+
     # ---------- voice memories (D33) ----------
 
     def save_voice(self, samples: np.ndarray, sr: int, said: str, when: datetime | None = None) -> Path | None:

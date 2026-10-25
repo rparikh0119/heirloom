@@ -38,6 +38,10 @@ class MultiBody(Body):
         for b in self.bodies:
             b.play_clip(wav)
 
+    def take_photo(self) -> None:
+        for b in self.bodies:
+            b.take_photo()
+
     def show_photo(self, path) -> None:
         for b in self.bodies:
             b.show_photo(path)

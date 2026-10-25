@@ -1,0 +1,8 @@
+{
+  "note": "The photo is safely in the cartridge journal: the little 'saved' chirp.",
+  "when": "photo_taken",
+  "sound": "saved",
+  "works_while": [
+    "shooting"
+  ]
+}

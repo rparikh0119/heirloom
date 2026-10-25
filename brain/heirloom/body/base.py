@@ -58,6 +58,10 @@ class Body(ABC):
     def play_clip(self, wav: bytes) -> None:  # noqa: B027
         """Play a recording (16-bit mono WAV bytes), e.g. a voice memory. Bodies without a speaker ignore it."""
 
+    def take_photo(self) -> None:  # noqa: B027
+        """Capture what the camera sees. The photo comes back later as a 'photo_taken' event.
+        Bodies without a camera ignore it."""
+
     def show_photo(self, path) -> None:  # noqa: B027
         """Project a photo (a file path), or stop projecting (None). Bodies without a projector ignore it."""
 

@@ -63,6 +63,10 @@ class UnityBody(Body):
     def play_clip(self, wav: bytes) -> None:
         self._link.broadcast({"type": "sound", "name": "memory", "wav_b64": base64.b64encode(wav).decode("ascii")})
 
+    def take_photo(self) -> None:
+        """Unity grabs a frame from the Quest camera (PhotoCapture.cs) and sends it back."""
+        self._link.broadcast({"type": "capture"})
+
     def show_photo(self, path) -> None:
         """Unity draws the beam and the photo on the real desk (ProjectorBeam.cs)."""
         if path is None:
