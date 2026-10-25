@@ -45,9 +45,15 @@ class Presence:
         self.pose = {c: 0.0 for c in CHANNELS} | {"iris": 0.6, "light": 0.5}
         self.mode = "idle"
         self._perk = 0.0            # seconds left of the "oh, hi" reaction
+        self._perk_lift = 30.0      # how far the antennas go up during it
         self._glance_yaw = 0.0
         self._next_glance = random.uniform(4, 8) * self.cfg.glance_gap
         self._glance_end = 0.0
+
+    def perk(self, seconds: float, lift: float = 30.0) -> None:
+        """A quick antenna lift: when it notices you, or hears you start talking."""
+        if seconds >= self._perk:
+            self._perk, self._perk_lift = seconds, lift
 
     def step(self, dt: float, user_head: tuple[float, float, float] | None) -> tuple[Pose, dict]:
         c = self.cfg
@@ -61,7 +67,7 @@ class Presence:
         present = user_dist is not None and user_dist < c.notice_distance
 
         if present and self.mode != "attend":
-            self._perk = 0.6        # just noticed you
+            self.perk(0.6, 30.0)    # just noticed you
         self.mode = "attend" if present else "idle"
 
         target = {k: 0.0 for k in CHANNELS}
@@ -96,9 +102,9 @@ class Presence:
         # The "oh, hi" perk when it first notices you.
         if self._perk > 0:
             self._perk -= dt
-            target["antenna_left"] += 30
-            target["antenna_right"] += 30
-            target["iris"] = 1.0
+            target["antenna_left"] += self._perk_lift
+            target["antenna_right"] += self._perk_lift
+            target["iris"] = max(target["iris"], 0.6 + self._perk_lift / 75)
 
         for k in CHANNELS:
             tau = c.base_ease if k == "base_yaw" else (0.12 if k in ("iris", "antenna_left", "antenna_right") else head_tau)

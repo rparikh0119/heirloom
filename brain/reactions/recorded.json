@@ -1,0 +1,7 @@
+{
+  "note": "The recording is safely in the cartridge: a little three-note 'saved' chirp, back to normal.",
+  "when": "recorded",
+  "sound": "saved",
+  "mode": "awake",
+  "works_while": ["recording"]
+}

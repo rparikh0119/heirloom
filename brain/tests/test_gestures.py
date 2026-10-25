@@ -86,6 +86,23 @@ def test_hold_fires_once():
     assert run(msg(make_hand()), secs=8) == ["not_now"]
 
 
+def test_palm_out_is_not_a_touch():
+    # Both of these fired "not now" under the old rule (checked Oct 25).
+    # Hand on its head (petting): close to the robot, fingers forward, palm down
+    pet = make_hand(wrist=(0, 0.09, 0.12), up=(0, 0, -1), normal=(0, -1, 0))
+    assert "not_now" not in run(msg(pet), secs=2), "pet"
+    # Stop sign but too close (touching its face)
+    close = make_hand(wrist=(0, -0.05, 0.1))
+    assert "not_now" not in run(msg(close), secs=2), "too close"
+
+
+def test_palm_out_needs_a_real_hold():
+    # Palm up for 0.4 s (like the end of a wave), then hand dropped: not "not now"
+    def frame(t):
+        return msg(make_hand()) if t < 0.4 else msg(make_hand(up=(0, 0, -1), normal=(0, -1, 0)))
+    assert "not_now" not in run(frame, secs=2)
+
+
 def test_wave():
     def frame(t):
         x = 0.08 * math.sin(2 * math.pi * 2.0 * t)

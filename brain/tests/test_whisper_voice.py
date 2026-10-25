@@ -52,6 +52,10 @@ class FakeModel:
         return iter(self.segs), None
 
 
+def names(events):
+    return [e.name if hasattr(e, "name") else e for e in events]
+
+
 def listener(segs, addressed=True):
     v = WhisperListener()
     v._model = FakeModel(segs)
@@ -99,28 +103,28 @@ def _():
 def _():
     v = listener([Seg("Hey there!", 0.05, -0.3)])
     v.hear_clip(voice(0.5))
-    assert v.pop_events() == ["wave"]
+    assert names(v.pop_events()) == ["wave"]
 
 
 @check("the name spelled 'Heir loom' still wakes it from far away")
 def _():
     v = listener([Seg("Heir loom, good job.", 0.05, -0.3)], addressed=False)
     v.hear_clip(voice(0.5))
-    assert v.pop_events() == ["good"]
+    assert names(v.pop_events()) == ["good"]
 
 
 @check("far away without the name: ignored")
 def _():
     v = listener([Seg("Hi!", 0.05, -0.3)], addressed=False)
     v.hear_clip(voice(0.5))
-    assert v.pop_events() == []
+    assert names(v.pop_events()) == []
 
 
 @check("a low-confidence 'Thank you.' (Whisper hearing noise) is dropped, not praise")
 def _():
     v = listener([Seg(" Thank you.", 0.8, -1.4)])
     v.hear_clip(voice(0.5))
-    assert v.pop_events() == []
+    assert names(v.pop_events()) == []
     assert not confident([Seg("x", 0.2, -1.5)]) and confident([Seg("x", 0.1, -0.4)])
 
 
@@ -134,6 +138,59 @@ def _():
 def _():
     assert match("Good night!", loose=True)[1] == "sleep"
     assert match("No, not now.", loose=True)[1] == "not_now"
+
+
+def run_audio(v, audio):
+    """Push audio through the listener's real loop (the thread that reads the mic)."""
+    import threading
+    t = threading.Thread(target=v._run, daemon=True)
+    t.start()
+    for i in range(0, len(audio) - FRAME + 1, FRAME):
+        v._audio.put(audio[i:i + FRAME])
+    time.sleep(0.3)
+    v.stop()
+    return names(v.pop_events())
+
+
+@check("it says 'hearing' the moment you start talking, before Whisper has finished")
+def _():
+    v = listener([Seg("Hi.", 0.05, -0.3)])
+    events = run_audio(v, np.concatenate([room(1), voice(0.6), room(1)]))
+    assert events == ["hearing", "wave"], events
+
+
+@check("far away with --need-name, it doesn't perk at every voice in the room")
+def _():
+    v = listener([Seg("Hi.", 0.05, -0.3)], addressed=False)
+    events = run_audio(v, np.concatenate([room(1), voice(0.6), room(1)]))
+    assert "hearing" not in events, events
+
+
+@check("the brain: 'hearing' lifts the antennas at once, plays no move, learns nothing")
+def _():
+    import tempfile
+    from datetime import date
+    from heirloom.brain import HeirloomBrain
+    from heirloom.cartridge import Cartridge
+    with tempfile.TemporaryDirectory() as d:
+        cart = Cartridge.create(Path(d), on=date.today())
+        b = HeirloomBrain(play_sound=lambda name: None, cartridge=cart)
+        b.step(1 / 30, None)
+        before = b.step(1 / 30, None)[0].antenna_left
+        b.handle("hearing")
+        assert b.expr.name is None                                  # no expression, so no patina pause
+        after = max(b.step(1 / 30, None)[0].antenna_left for _ in range(8))
+        assert after > before + 8, (before, after)
+        assert cart.read_page("L1", "patina") == {} and cart.read_page("L1", "dials") == {}
+
+
+@check("asleep, it doesn't perk up at voices")
+def _():
+    from heirloom.brain import HeirloomBrain
+    b = HeirloomBrain(play_sound=lambda name: None)
+    b.handle("sleep")
+    b.handle("hearing")
+    assert b.presence._perk == 0.0
 
 
 def main() -> None:

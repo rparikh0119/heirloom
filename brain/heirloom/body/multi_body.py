@@ -33,3 +33,11 @@ class MultiBody(Body):
     def play_sound(self, name: str) -> None:
         for b in self.bodies:
             b.play_sound(name)
+
+    def play_clip(self, wav: bytes) -> None:
+        for b in self.bodies:
+            b.play_clip(wav)
+
+    def show_photo(self, path) -> None:
+        for b in self.bodies:
+            b.show_photo(path)

@@ -22,7 +22,8 @@ from collections import deque
 
 import numpy as np
 
-from .intents import match
+from ..events import Event
+from .intents import match, normalize
 
 SAMPLE_RATE = 16000
 FRAME = 480                 # 30 ms of audio per frame
@@ -37,6 +38,12 @@ FLOOR = 0.004               # quietest level ever treated as the room (so a sile
 
 # Whisper is told what it's likely to hear. This nudges it toward the name and the commands.
 PROMPT = "Heirloom, hi. Good job. Not now. Go to sleep. Wake up. Come here. Sorry. I love you. Shh."
+
+# Recording a voice memory ("record this"): people pause mid-sentence, so it waits longer.
+RECORD_WAIT = 15.0          # seconds it waits for you to start
+RECORD_END_SILENCE = 1.5    # seconds of quiet that end a recording
+RECORD_MAX = 30.0           # longest recording
+RECORD_MIN = 0.5            # shorter than this isn't a memory
 
 
 def confident(segments: list) -> bool:
@@ -57,6 +64,8 @@ class Segmenter:
     """Splits a stream of 30 ms frames into utterances, using loudness against the room's hum."""
 
     def __init__(self) -> None:
+        self.end_silence = END_SILENCE
+        self.max_seconds = MAX_SECONDS
         self.noise = FLOOR * 2
         self._pre: deque[np.ndarray] = deque(maxlen=int(PRE_ROLL * SAMPLE_RATE / FRAME))
         self._clip: list[np.ndarray] = []
@@ -82,7 +91,7 @@ class Segmenter:
         self._clip.append(frame)
         self._quiet = 0.0 if loud else self._quiet + dt
         length = len(self._clip) * FRAME / SAMPLE_RATE
-        if self._quiet >= END_SILENCE or length >= MAX_SECONDS:
+        if self._quiet >= self.end_silence or length >= self.max_seconds:
             clip = np.concatenate(self._clip)
             self.talking, self._clip, self._loud_run = False, [], 0
             self._pre.clear()
@@ -106,6 +115,7 @@ class WhisperListener:
         self._stop = threading.Event()
         self._model = None
         self.segmenter = Segmenter()
+        self._armed_until = 0.0         # recording a voice memory until this time (or the next sentence)
 
     # ---------- public ----------
     def start(self) -> "WhisperListener":
@@ -153,7 +163,13 @@ class WhisperListener:
                 frame = self._audio.get(timeout=0.5)
             except queue.Empty:
                 continue
+            if self._armed_until and time.monotonic() > self._armed_until and not self.segmenter.talking:
+                print("[voice] nothing to record, stopped waiting")
+                self._disarm()
+            was_talking = self.segmenter.talking
             clip = self.segmenter.feed(frame)
+            if self.segmenter.talking and not was_talking and (self.addressed or not self.require_wake_word):
+                self._emit("hearing")          # you started talking: it perks up before it knows what you said
             if clip is not None:
                 self.hear_clip(clip)
 
@@ -164,7 +180,38 @@ class WhisperListener:
         segments = list(segments)
         return " ".join(s.text.strip() for s in segments).strip(), confident(segments)
 
+    @property
+    def recording(self) -> bool:
+        return self._armed_until > 0
+
+    def _arm(self) -> None:
+        self._armed_until = time.monotonic() + RECORD_WAIT
+        self.segmenter.end_silence, self.segmenter.max_seconds = RECORD_END_SILENCE, RECORD_MAX
+
+    def _disarm(self) -> None:
+        self._armed_until = 0.0
+        self.segmenter.end_silence, self.segmenter.max_seconds = END_SILENCE, MAX_SECONDS
+
+    def _keep(self, clip: np.ndarray) -> None:
+        """The sentence after 'record this' is the memory, not a command."""
+        text, _ = self._transcribe(clip)
+        self._disarm()
+        _, event = match(text, loose=True)
+        if event in ("not_now", "scold") and len(normalize(text).split()) <= 3:
+            print(f"[voice] heard \"{text}\" -> cancelled the recording")
+            self._emit("not_now", text)
+            return
+        if len(clip) / SAMPLE_RATE < RECORD_MIN:
+            print("[voice] too short to keep")
+            self._emit("not_now", text)
+            return
+        print(f"[voice] recorded {len(clip) / SAMPLE_RATE:.1f} s: \"{text}\"")
+        self._emit("recorded", text, audio=clip, sr=SAMPLE_RATE)
+
     def hear_clip(self, clip: np.ndarray) -> None:
+        if self.recording:
+            self._keep(clip)
+            return
         t = time.perf_counter()
         text, sure = self._transcribe(clip)
         took = time.perf_counter() - t
@@ -181,16 +228,14 @@ class WhisperListener:
         open_window = self.listening or self.addressed or not self.require_wake_word
 
         if woke and event:
-            self._emit(event)
-            self._listen_until = 0.0
+            self._act(event, text)
             tag = event
         elif woke:
-            self._emit("listen")
+            self._emit("listen", text)
             self._listen_until = time.monotonic() + self.listen_seconds
             tag = "listen"
         elif event and open_window:
-            self._emit(event)
-            self._listen_until = 0.0
+            self._act(event, text)
             tag = event
         elif event:
             tag = f"ignored (would be {event}, but you're too far away. Say its name or come closer)"
@@ -198,6 +243,13 @@ class WhisperListener:
             tag = "ignored (not a command it knows)"
         print(f"[voice] heard \"{text}\" -> {tag}  [{took:.2f} s]")
 
-    def _emit(self, event: str) -> None:
+    def _act(self, event: str, text: str) -> None:
+        self._emit(event, text)
+        self._listen_until = 0.0
+        if event == "record":
+            self._arm()
+
+    def _emit(self, name: str, said: str = "", **data) -> None:
+        """Events carry what was said, so 'play the one about the recipe' can find the right memory."""
         with self._lock:
-            self._events.append(event)
+            self._events.append(Event(name, source="voice", data={"said": said, **data}))

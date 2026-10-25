@@ -55,5 +55,11 @@ class Body(ABC):
     def play_sound(self, name: str) -> None:  # noqa: B027
         """Chirp. Bodies without a speaker ignore it."""
 
+    def play_clip(self, wav: bytes) -> None:  # noqa: B027
+        """Play a recording (16-bit mono WAV bytes), e.g. a voice memory. Bodies without a speaker ignore it."""
+
+    def show_photo(self, path) -> None:  # noqa: B027
+        """Project a photo (a file path), or stop projecting (None). Bodies without a projector ignore it."""
+
     def rest(self, duration: float = 1.0) -> None:
         self.move(REST, duration)

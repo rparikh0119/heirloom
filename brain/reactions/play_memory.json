@@ -1,0 +1,6 @@
+{
+  "note": "'Play it back': plays a voice memory through the tape filter, listening along. Only on request (D45).",
+  "when": "play_memory",
+  "mode": "replaying",
+  "ignored_while": ["sleep", "sulk", "recording"]
+}

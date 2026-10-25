@@ -84,7 +84,8 @@ def main() -> None:
         print("Waiting for Unity to connect (press Play)...")
         link.wait_for_client()
         ignores = set() if args.learn_from_keys else {"unity"}
-        brain = HeirloomBrain(play_sound=body.play_sound, cartridge=cartridge, wear_ignores=ignores)
+        brain = HeirloomBrain(play_sound=body.play_sound, show_photo=body.show_photo, play_clip=body.play_clip,
+                              cartridge=cartridge, wear_ignores=ignores)
         brain.label = args.name or (_label_from(args.cartridge) if args.cartridge else "NO CARTRIDGE")
         if cartridge:
             print("[dials] " + "  ".join(f"{k} {v:.3f}" for k, v in brain.character.dials.items()))

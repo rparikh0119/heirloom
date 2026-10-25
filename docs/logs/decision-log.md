@@ -296,3 +296,31 @@ One entry per real decision. **Status:** Decided · Proposed (waiting on Riya) �
 **D64 · No wake word by default** · Oct 23 · Decided (Riya)
 - Riya: having to say "Heirloom" before every word is annoying. Whisper heard every phrase correctly in the Oct 23 test (about 0.4 s each), so the name isn't needed to avoid mishearing.
 - Default: just talk. --need-name brings back D61 (name needed from further away) for loud rooms like zoo stations. Supersedes D58.
+
+**D65 · Palm-out ("not now") tightened** · Oct 25 · Built, needs a headset check
+- It fired in every Oct 23 log when Riya didn't mean it, knocking the droid into giving her space.
+- Now: fingers pointing up (a stop sign), palm facing the robot more squarely (0.75, was 0.6), hand more than 20 cm from its head (so petting doesn't count), held 0.6 s (was 0.3). Petting and a hand close to its face both fired under the old rule and don't now (synthetic hands, checked).
+
+**D66 · "I hear you" reflex** · Oct 25 · Built
+- The moment you start talking, the antennas lift a little, about 0.75 s before Whisper has understood you. Not while asleep or sulking.
+- A reflex skips reactions and patina: instant even on a fresh droid, never counted as a practised move.
+
+**D67 · Journal projection prototype (MR)** · Oct 25 · Built, needs a headset check
+- Riya: prototype moving, photo taking, audio recording and projection. Order: projection, photo, voice memories, moving. Pulls the week 9 Journal plan forward (Oct 16), partly reverses D47 (live capture waited for winter).
+- "Show me a memory" / "what do you remember": soft remember chirp, head tilts down and holds still, a light cone from the head and a journal photo on the real desk, about 9 s. Only on request (D45). "Not now" during it stops quietly and retires that photo (journal/retired.json).
+- Photos live in <cartridge>/journal/ and pass down with it (D04). Samples in brain/journal_samples/ until it has its own.
+- The projector is a body ability (Body.show_photo), like the speaker: Unity draws it (ProjectorBeam.cs), the custom droid gets a real one, the lab Reachy has none and skips it.
+- Look: a real image on a real surface with a lamp tint, soft edges and a switch-on flicker, never a floating hologram (honest-machine pillar). Inspiration board: BD-1 (Star Wars Jedi), principles only: separate lens for the projector, head as instrument. Not its look.
+
+**D68 · Voice memories built (D33)** · Oct 25 · Built, needs a real test
+- "Record this" / "remember this": listening chirp, antennas up and still, eye wide (a clear recording sign, D43), no chirps. The next sentence is kept, with natural pauses (ends after 1.5 s quiet, up to 30 s). "Not now" cancels. Nothing said for 15 s: stops waiting.
+- Saved untouched in <cartridge>/journal/voice/ as 16-bit WAV plus a note of what was said (Whisper, local) and when. Passes down with the droid.
+- "Play it back" / "let me hear it" / "play the one about the birthday": finds by words, else the newest. Plays through a tape filter (band-limited, wow and flutter, light hiss) so it's always clearly a recording, never the droid talking. It listens along quietly.
+- Only on request (D45). Not yet: pairing a recording with a photo, retiring a recording, stopping playback midway.
+
+**D69 · Voice memories: the person's voice through a droid speaker** · Oct 25 · Built, Riya to pick a style by ear
+- Riya: the tape filter is "creep city". She wants the person's real voice with a warm, nostalgic robotic touch, never a voice of its own.
+- Replaced wow, flutter and hiss with a small-speaker sound: thinner lows, softer top, a gentle body resonance, a faint metallic echo, a light digital crunch (fewer bits, lower rate, smoothed). Three strengths: speaker (lightest), droid (default), radio (most robotic). Reference: R2-D2 playing Leia's message.
+- Playback is framed: a soft chirp before and after, so the droid presents the memory rather than pretending to be the person.
+- scripts/voice_styles.py writes all three from the newest recording for listening. Tested only on espeak in Claude's workspace, so it must be judged on a real voice.
+- Oct 25, Riya by ear on her own voice: the lighter styles sounded identical to the original (the Quest mic is 16 kHz). "radio" best, wanted a bit more. "transmission" too much ("dead corpse zombie"), blamed on the ring-mod buzz. Default is now "heirloom": between the two, 7-bit, 9.6 kHz, more body resonance and metal, no buzz.

@@ -1,0 +1,6 @@
+{
+  "note": "'Not now' while a memory is showing: stops it, and that photo is retired for good (D45). Quietly, no sad chirp.",
+  "when": "not_now",
+  "only_while": ["showing"],
+  "mode": "awake"
+}

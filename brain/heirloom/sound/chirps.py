@@ -55,6 +55,12 @@ CHIRPS = {
                              tone(1400 * p, 1700 * p, .05 * s, amp=.25), tone(1700 * p, 1500 * p, .05 * s, amp=.25)],
     "listen":  lambda p, s: [tone(1000 * p, 1600 * p, .06 * s, amp=.35), rest(.02 * s),
                              tone(1600 * p, 2200 * p, .05 * s, amp=.3)],
+    "remember": lambda p, s: [tone(700 * p, 1100 * p, .16 * s, wobble=.02, wobble_hz=5, amp=.35), rest(.05 * s),
+                              tone(1100 * p, 900 * p, .22 * s, wobble=.02, wobble_hz=5, amp=.3), rest(.06 * s),
+                              tone(900 * p, 1350 * p, .3 * s, wobble=.03, wobble_hz=4, amp=.3)],
+    "saved":   lambda p, s: [tone(1200 * p, 1500 * p, .05 * s, amp=.3), rest(.04 * s),
+                             tone(1500 * p, 1500 * p, .05 * s, amp=.3), rest(.04 * s),
+                             tone(1800 * p, 2300 * p, .09 * s, amp=.3)],
     "grumble": lambda p, s: [tone(420 * p, 260 * p, .22 * s, "square", wobble=.12, wobble_hz=28, amp=.4),
                              rest(.04 * s),
                              tone(300 * p, 170 * p, .38 * s, "square", wobble=.18, wobble_hz=18, amp=.4)],
@@ -69,13 +75,13 @@ def render(name: str, variation: float = 0.08) -> np.ndarray:
     return np.clip(np.concatenate(parts), -1, 1)
 
 
-def to_wav_bytes(samples: np.ndarray) -> bytes:
+def to_wav_bytes(samples: np.ndarray, sr: int = SR) -> bytes:
     """16-bit mono WAV, readable by Unity, a browser, or the droid's speaker."""
     pcm = (samples * 32767).astype("<i2").tobytes()
     buf = io.BytesIO()
     with wave.open(buf, "wb") as w:
         w.setnchannels(1)
         w.setsampwidth(2)
-        w.setframerate(SR)
+        w.setframerate(sr)
         w.writeframes(pcm)
     return buf.getvalue()

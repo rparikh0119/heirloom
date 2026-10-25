@@ -29,6 +29,9 @@ INTENTS: dict[str, list[str]] = {
     "sorry":   ["sorry", "i'm sorry"],
     "heart":   ["i love you", "love you"],
     "shh":     ["be quiet", "quiet", "hush"],
+    "show_memory": ["remember", "show me", "memory"],
+    "record":  ["record this", "record", "remember this"],
+    "play_memory": ["play it back", "play it", "play back"],
 }
 
 
@@ -52,6 +55,12 @@ EXTRA: dict[str, list[str]] = {
     "sorry":   ["my bad", "i apologize", "forgive me", "so sorry"],
     "heart":   ["love ya", "i love ya", "love you so much", "you're my favorite", "youre my favorite"],
     "shh":     ["shh", "shush", "shhh", "quiet please", "keep it down", "be quiet please"],
+    "show_memory": ["show me a memory", "what do you remember", "do you remember", "show me something",
+                    "show me a picture", "show me a photo", "memories", "a memory", "remember when"],
+    "record":  ["record a message", "record something", "record me", "take a note", "save this",
+                "keep this", "remember this for me", "start recording"],
+    "play_memory": ["play the recording", "play a recording", "play my message", "play the message",
+                    "play that back", "let me hear it", "play the one", "play my recording", "play it again"],
 }
 
 

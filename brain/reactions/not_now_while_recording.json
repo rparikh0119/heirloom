@@ -1,0 +1,6 @@
+{
+  "note": "'Not now' while it's waiting to record: cancels quietly, nothing saved.",
+  "when": "not_now",
+  "only_while": ["recording"],
+  "mode": "awake"
+}

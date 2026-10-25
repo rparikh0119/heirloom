@@ -17,17 +17,23 @@ from .behavior.presence import Presence, PresenceConfig
 from .body.base import Pose
 from .character import load_character
 from .events import Event, as_event
+from .journal import Journal
 from .modes import load_modes
 from .reactions import choose, load_reactions
-from .sound.chirps import CHIRPS
+from .sound.chirps import CHIRPS, to_wav_bytes
+from .sound.tape import framed, tape
 from .wear import load_wear
 
 AWAKE = "awake"
+REFLEXES = {"hearing"}     # the moment you start talking (whisper_voice), before it knows what you said
 
 
 class HeirloomBrain:
-    def __init__(self, play_sound, reactions_dir=None, cartridge=None, wear_ignores=()) -> None:
+    def __init__(self, play_sound, reactions_dir=None, cartridge=None, wear_ignores=(), show_photo=None,
+                 play_clip=None) -> None:
         """play_sound(name) is called whenever the brain wants to chirp.
+        show_photo(path or None) projects a journal photo, or stops (bodies without a projector skip it).
+        play_clip(wav bytes) plays a voice memory through the body's speaker.
         cartridge: an opened Cartridge, or None to run without learning.
         wear_ignores: event sources that never leave wear, e.g. {"unity"} so test key presses don't count."""
         self.character = load_character()
@@ -49,6 +55,10 @@ class HeirloomBrain:
         self.today = None                                    # None = the real date. The time skip sets a pretend one
         self.shyness = 0.0                                   # set by wear after time apart (Rule 5). 0 = normal
         self.label = ""                                      # a name for this droid on the overlay, e.g. "FRESH"
+        self.show_photo = show_photo or (lambda path: None)
+        self.play_clip = play_clip or (lambda wav: None)
+        self.journal = Journal.for_cartridge(cartridge)
+        self.showing = None                                  # the photo being projected right now, or None
         self._next_tick = 60.0
 
         # Wear: only with a cartridge. Each plug-in blends its layers into the brain.
@@ -71,6 +81,15 @@ class HeirloomBrain:
     def handle(self, event: "Event | str") -> str | None:
         """React to one event. Returns the reaction file used, or None if it was ignored."""
         e = as_event(event)
+        if e.name in REFLEXES:             # instant, below the level of reactions and wear
+            return self._reflex(e.name)
+        if e.name == "recorded" and not self._keep_recording(e):
+            return None
+        if e.name == "play_memory" and not self._play_memory(e):
+            return None
+        if e.name == "not_now" and self.mode == "showing" and self.showing is not None:
+            self.journal.retire(self.showing)          # D45: "not now" during a memory retires it for good
+            print(f"[journal] retired {self.showing.name}")
         learns = e.source not in self.wear_ignores
         changed = [w for w in self.wear if learns and w.record(e, self.mode, self.t)]
         for w in changed:
@@ -100,7 +119,54 @@ class HeirloomBrain:
                 self._refresh_character()
         if r.sound:
             self._sound(r.sound)
+        self._sync_projection()
         return r.file
+
+    def _keep_recording(self, e: Event) -> bool:
+        """Save a voice memory into the cartridge (D33). Returns False if there was nowhere to keep it."""
+        audio, sr, said = e.data.get("audio"), e.data.get("sr", 16000), e.data.get("said", "")
+        path = self.journal.save_voice(audio, sr, said) if audio is not None else None
+        if path is None:
+            print("[journal] can't keep a recording without a cartridge (run with --cartridge)")
+            self.mode = AWAKE
+            return False
+        print(f"[journal] saved {path.name}: \"{said}\" ({len(audio) / sr:.1f} s)")
+        return True
+
+    def _play_memory(self, e: Event) -> bool:
+        """Play the voice memory asked for, through the tape filter (D33)."""
+        path = self.journal.find_voice(e.data.get("said", ""))
+        if path is None:
+            print("[journal] no voice memories yet (say \"record this\")")
+            return False
+        samples, sr = self.journal.load_voice(path)
+        clip = framed(tape(samples, sr), sr)                 # a soft chirp before and after: it presents the memory
+        self.play_clip(to_wav_bytes(clip, sr))
+        self.modes["replaying"].duration = len(clip) / sr + 0.5
+        print(f"[journal] playing {path.name}")
+        return True
+
+    def _sync_projection(self) -> None:
+        """Start projecting when 'showing' begins, stop when it ends."""
+        if self.mode == "showing" and self.showing is None:
+            photo = self.journal.pick()
+            if photo is None:
+                print("[journal] nothing to show (no photos)")
+                self.mode = AWAKE
+                return
+            self.showing = photo
+            print(f"[journal] showing {photo.name}")
+            self.show_photo(photo)
+        elif self.mode != "showing" and self.showing is not None:
+            self.showing = None
+            self.show_photo(None)
+
+    def _reflex(self, name: str) -> None:
+        """Reflexes skip reaction files and patina, so they're instant even on a brand new droid,
+        and never count as a move it has practised."""
+        if name == "hearing" and self.mode not in ("sleep", "sulk"):
+            self.presence.perk(0.4, 18.0)          # antennas lift a little: "I hear you"
+        return None
 
     def _sound(self, name: str) -> None:
         current = self.modes.get(self.mode)
@@ -120,6 +186,7 @@ class HeirloomBrain:
         if current and not current.step(seconds):
             self.mode = AWAKE
         self.expr.name = None
+        self._sync_projection()
 
     # ---------- every tick ----------
     def step(self, dt: float, user_head) -> tuple[Pose, dict]:
@@ -131,6 +198,7 @@ class HeirloomBrain:
         current = self.modes.get(self.mode)
         if current and not current.step(dt):
             self.mode, current = AWAKE, None
+            self._sync_projection()
 
         # Presence only follows you when the mode allows it (sulking, sleeping and backing off don't).
         attentive = current is None or current.attentive

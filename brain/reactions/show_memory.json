@@ -1,0 +1,7 @@
+{
+  "note": "Asked for a memory: a soft remember chirp, looks down at the desk and projects a photo from the journal. Only ever on request (D45).",
+  "when": "show_memory",
+  "sound": "remember",
+  "mode": "showing",
+  "ignored_while": ["sleep", "sulk"]
+}

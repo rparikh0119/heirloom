@@ -1,0 +1,7 @@
+{
+  "note": "'Record this': a short listening chirp, then it records your next sentence, with a clear sign that it's recording (D33, D43).",
+  "when": "record",
+  "sound": "listen",
+  "mode": "recording",
+  "ignored_while": ["sleep", "sulk"]
+}

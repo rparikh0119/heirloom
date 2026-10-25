@@ -10,7 +10,8 @@ namespace Heirloom
 {
     /// <summary>
     /// Connects to the Python brain over WebSocket.
-    /// Receives: poses (moves the rig), state (for the overlays, including wear), sounds (chirps).
+    /// Receives: poses (moves the rig), state (for the overlays, including wear), sounds (chirps),
+    /// project (a journal photo for ProjectorBeam to show on the desk).
     /// Sends: where the user's head is, and events (gestures, voice, keys).
     /// Uses .NET's built-in ClientWebSocket (works in the Editor and on Quest). Reconnects every 2 s.
     /// </summary>
@@ -34,6 +35,9 @@ namespace Heirloom
         public float UserDistance { get; private set; } = -1f;
         /// <summary>How worn in it is (dials, patina, rust). Updated about once a second. learning = false without a cartridge.</summary>
         public Wear BrainWear { get; private set; } = new Wear();
+
+        /// <summary>The brain wants a photo projected (name, texture), or the projector off (null, null).</summary>
+        public event Action<string, Texture2D> Projected;
 
         [Serializable]
         public class Dials { public float curiosity = 0.5f, sass = 0.5f, boldness = 0.5f, energy = 0.5f, warmth_speed = 0.5f; }
@@ -64,6 +68,7 @@ namespace Heirloom
             public Wear wear;             // "state", how worn in it is
             public string name;           // "sound"
             public string wav_b64;        // "sound"
+            public string image_b64;      // "project": a journal photo (JPEG or PNG), empty name = stop
         }
 
         [Serializable] class UserMessage { public string type = "user"; public float[] head; }
@@ -181,6 +186,7 @@ namespace Heirloom
                         if (msg.wear != null && msg.wear.dials != null) BrainWear = msg.wear;
                         break;
                     case "sound": PlaySound(msg.wav_b64); break;
+                    case "project": Project(msg.name, msg.image_b64); break;
                 }
             }
             if (latestPose != null && rig != null) rig.Apply(latestPose);
@@ -195,6 +201,16 @@ namespace Heirloom
                 if (json != null && _outbox.Count < 5) _outbox.Enqueue(json);
             }
             FlushOutbox();
+        }
+
+        void Project(string photoName, string imageB64)
+        {
+            if (string.IsNullOrEmpty(photoName) || string.IsNullOrEmpty(imageB64)) { Projected?.Invoke(null, null); return; }
+            var tex = new Texture2D(2, 2, TextureFormat.RGB24, false);
+            if (!tex.LoadImage(Convert.FromBase64String(imageB64))) { Debug.LogWarning($"[Heirloom] Couldn't read photo {photoName}"); return; }
+            tex.name = photoName;
+            tex.wrapMode = TextureWrapMode.Clamp;
+            Projected?.Invoke(photoName, tex);
         }
 
         void PlaySound(string wavB64)
