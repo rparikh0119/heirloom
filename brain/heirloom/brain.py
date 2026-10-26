@@ -156,7 +156,7 @@ class HeirloomBrain:
         if learned_now:
             self._sound("learned")                          # "oh! got it"
         elif r.sound:
-            self._sound(r.sound)
+            self._sound(self._accent(r.sound, e.name))
         if e.name == "curious" and self.roller.toward(self._user):      # beckoned: roll over to you
             self._set_mode("rolling")
         elif e.name == "go_home" and self.roller.home():
@@ -246,6 +246,16 @@ class HeirloomBrain:
         if name == "hearing" and self.mode not in ("sleep", "sulk"):
             self.presence.perk(0.4, 18.0)          # antennas lift a little: "I hear you"
         return None
+
+    def _accent(self, sound: str, event: str) -> str:
+        """During a moment (the 10 am hello), answer with the family's chirp for it (dialect wear).
+        Any other time, the core chirp everyone can read."""
+        moment = getattr(self, "moment", None)
+        dialect = next((w for w in self.wear if w.name == "dialect"), None)
+        info = (getattr(self, "moments", {}) or {}).get(moment) if moment else None
+        if dialect is None or info is None or info.get("cue") != event:
+            return sound
+        return dialect.voice(moment, sound)
 
     def _sound(self, name: str) -> None:
         current = self.modes.get(self.mode)

@@ -127,7 +127,7 @@ def _(tmp):
     cart = Cartridge.create(tmp, on=DAY)
     cart.write_page("L1", "dials", {"sass": 0.2})
     cart.handoff("second home", on=DAY)
-    dials = brain_with(cart).wear[0]
+    dials = next(w for w in brain_with(cart).wear if w.name == "dials")
     assert abs(dials.effective(DAY)["sass"] - 0.7) < 1e-9
     cart.set_weight("L1", "blend", on=DAY)
     assert abs(dials.effective(DAY)["sass"] - 0.6) < 1e-9
