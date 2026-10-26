@@ -155,6 +155,45 @@ def test_heart():
     assert run(msg(right=h["right"], left=h["left"]), secs=3) == ["heart"]
 
 
+def frame_hands(diagonal=True, apart=0.15):
+    """A photographer's frame: both hands in an L. Diagonal = one index up, the other down."""
+    # person's left hand is on the robot's +x side
+    left = make_hand("left", wrist=(apart, 0.0, 0.4), up=(0, 1, 0), normal=(0, 0, -1),
+                     extended=("index",), thumb_dir=(-1, 0, 0))              # index up, thumb toward the middle
+    if diagonal:
+        right = make_hand("right", wrist=(-apart, 0.0, 0.4), up=(0, -1, 0), normal=(0, 0, -1),
+                          extended=("index",), thumb_dir=(-1, 0, 0))         # index down (the thumb sits on the outside then)
+    else:
+        right = make_hand("right", wrist=(-apart, 0.0, 0.4), up=(0, 1, 0), normal=(0, 0, -1),
+                          extended=("index",), thumb_dir=(1, 0, 0))
+    return left, right
+
+
+def test_frame_takes_a_photo():
+    for diagonal in (True, False):
+        left, right = frame_hands(diagonal)
+        assert run(msg(right=right, left=left), secs=2) == ["take_photo"], diagonal
+
+
+def test_frame_needs_both_hands_in_an_l():
+    left, right = frame_hands()
+    assert "take_photo" not in run(msg(left=left), secs=2)                         # one hand only
+    open_right = make_hand("right", wrist=(-0.15, 0, 0.4))
+    assert "take_photo" not in run(msg(right=open_right, left=left), secs=2)        # other hand open
+    pointing = make_hand("right", wrist=(-0.15, 0, 0.4), extended=("index",), thumb_dir=(0, 0, -1))
+    pointing[2:6] = pointing[2]                                                   # thumb tucked in
+    assert "take_photo" not in run(msg(right=pointing, left=left), secs=2)          # pointing, thumb in
+    h = heart_hands()
+    assert "take_photo" not in run(msg(right=h["right"], left=h["left"]), secs=2)   # a heart stays a heart
+
+
+def test_frame_hands_too_close_or_too_far():
+    left, right = frame_hands(diagonal=False, apart=0.04)               # palms 8 cm apart
+    assert "take_photo" not in run(msg(right=right, left=left), secs=2)
+    left, right = frame_hands(apart=0.45)
+    assert "take_photo" not in run(msg(right=right, left=left), secs=2)
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_"):

@@ -336,3 +336,8 @@ One entry per real decision. **Status:** Decided · Proposed (waiting on Riya) �
 - Beckon or "come here": it rolls toward you at 12 cm/s, eases in, stops about 45 cm away, keeps looking at you. "Go back" / "go home": rolls to where it started.
 - Never more than 35 cm from its starting spot: there are no cliff sensors in MR, so this keeps it on the desk. The custom droid gets cliff sensors in winter.
 - New pose channels drive_x / drive_z (metres from its starting spot). Unity moves the robot (ReachyRig.canRoll), so the overlays, the beam and your measured distance all come along. The lab Reachy can't roll and ignores them.
+
+**D72 · Frame gesture takes a photo** · Oct 25 · Built, needs a headset check
+- Both hands in an L (index and thumb out at roughly a right angle, other fingers curled), 12 to 70 cm apart, held 0.4 s: same as "take a picture" (countdown, shutter). Fulfils D02's "button, gesture or voice". Works silently, for loud rooms.
+- Checked against synthetic hands: one hand alone, an open hand, a pointing hand with the thumb in, a heart, hands too close or too far all don't fire.
+- In MR the photo comes from the headset camera, so your framing hands may be in the shot.
