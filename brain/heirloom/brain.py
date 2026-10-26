@@ -14,6 +14,7 @@ from __future__ import annotations
 
 from .behavior.expressions import EXPRESSIONS, ExpressionPlayer
 from .behavior.presence import Presence, PresenceConfig
+from .behavior.rolling import Roller
 from .body.base import Pose
 from .character import load_character
 from .events import Event, as_event
@@ -61,6 +62,8 @@ class HeirloomBrain:
         self.take_photo = take_photo or (lambda: None)
         self.journal = Journal.for_cartridge(cartridge)
         self.showing = None                                  # the photo being projected right now, or None
+        self.roller = Roller()                               # where it has rolled to on the desk
+        self._user = None                                    # where the person was last seen (robot space)
         self._next_tick = 60.0
 
         # Wear: only with a cartridge. Each plug-in blends its layers into the brain.
@@ -123,6 +126,10 @@ class HeirloomBrain:
                 self._refresh_character()
         if r.sound:
             self._sound(r.sound)
+        if e.name == "curious" and self.roller.toward(self._user):      # beckoned: roll over to you
+            self._set_mode("rolling")
+        elif e.name == "go_home" and self.roller.home():
+            self._set_mode("rolling")
         self._sync_projection()
         return r.file
 
@@ -216,6 +223,9 @@ class HeirloomBrain:
     # ---------- every tick ----------
     def step(self, dt: float, user_head) -> tuple[Pose, dict]:
         self.t += dt
+        self._user = user_head
+        if self.roller.step(dt) and self.mode == "rolling":    # arrived
+            self.mode = AWAKE
         if self.t >= self._next_tick:                        # about once a minute, wear can notice time passing
             self._next_tick = self.t + 60.0
             if any([w.tick(self) for w in self.wear]):
@@ -247,6 +257,7 @@ class HeirloomBrain:
 
         for k, v in self.expr.step(dt).items():
             ch[k] += v
+        ch["drive_x"], ch["drive_z"] = self.roller.x, self.roller.z
         ch["iris"] = min(1.0, max(0.0, ch["iris"]))
         ch["light"] = min(1.0, max(0.0, ch["light"]))
 

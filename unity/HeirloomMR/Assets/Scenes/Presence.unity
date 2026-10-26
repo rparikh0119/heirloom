@@ -3051,7 +3051,7 @@ MonoBehaviour:
   url: ws://localhost:8765
   rig: {fileID: 1398915039}
   voice: {fileID: 0}
-  userHead: {fileID: 1630097868}
+  userHead: {fileID: 0}
   userSendRate: 15
 --- !u!4 &134074659
 Transform:
@@ -10126,6 +10126,7 @@ MonoBehaviour:
   yawAxis: {x: 0, y: 1, z: 0}
   rollAxis: {x: 0, y: 0, z: 1}
   antennaAxis: {x: 0, y: 1, z: 0}
+  canRoll: 1
   hideLinkage: 1
   preview: 0
   previewPose:
@@ -10137,6 +10138,8 @@ MonoBehaviour:
     antenna_right: 0
     iris: 0.6
     light: 0.5
+    drive_x: 0
+    drive_z: 0
 --- !u!114 &464514904
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30419,6 +30422,7 @@ MonoBehaviour:
   yawAxis: {x: 0, y: 1, z: 0}
   rollAxis: {x: 0, y: 0, z: 1}
   antennaAxis: {x: 0, y: 1, z: 0}
+  canRoll: 1
   hideLinkage: 1
   preview: 0
   previewPose:
@@ -30430,6 +30434,8 @@ MonoBehaviour:
     antenna_right: 0
     iris: 0.6
     light: 0.5
+    drive_x: 0
+    drive_z: 0
 --- !u!114 &1398915040
 MonoBehaviour:
   m_ObjectHideFlags: 0

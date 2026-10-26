@@ -30,6 +30,9 @@ namespace Heirloom
         [Tooltip("In each antenna's own local space")]
         public Vector3 antennaAxis = Vector3.up;
 
+        [Tooltip("Let the brain roll the robot across the desk (drive_x / drive_z). The lab Reachy can't really roll, so this is MR only.")]
+        public bool canRoll = true;
+
         [Tooltip("Hide the Stewart rods, since the head is posed directly and they won't follow it.")]
         public bool hideLinkage = true;
 
@@ -43,6 +46,8 @@ namespace Heirloom
         public Vector3 HeadRestWorld => transform.TransformPoint(_headRestInRoot);
 
         Vector3 _headRestInRoot;
+        Vector3 _homePos;          // where it started on the desk. Rolling is measured from here
+        Quaternion _homeRot;
 
         Quaternion _headRest, _baseRest, _antLRest, _antRRest;
         Vector3 _pitchB, _yawB, _rollB, _baseUpP;   // axes converted into the frames we rotate in
@@ -74,6 +79,8 @@ namespace Heirloom
                 }
             }
 
+            _homePos = transform.position;
+            _homeRot = transform.rotation;
             _headRest = head.localRotation;
             _baseRest = baseLink.localRotation;
             _headRestInRoot = transform.InverseTransformPoint(head.position);
@@ -104,6 +111,9 @@ namespace Heirloom
             if (!_ready || c == null) return;
             if (preview && !fromPreview) return;
             Current = c;
+
+            if (canRoll)   // slides on the desk. Everything that follows the robot (overlays, beam, your distance) comes along
+                transform.position = _homePos + _homeRot * new Vector3(c.drive_x, 0f, c.drive_z);
 
             baseLink.localRotation = Quaternion.AngleAxis(baseYawSign * c.base_yaw, _baseUpP) * _baseRest;
 

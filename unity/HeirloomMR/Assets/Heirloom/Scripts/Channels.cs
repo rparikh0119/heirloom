@@ -12,5 +12,7 @@ namespace Heirloom
         [UnityEngine.Range(-90, 90)] public float antenna_right;  // 0 upright
         [UnityEngine.Range(0, 1)] public float iris = 0.6f;    // 0 closed .. 1 wide
         [UnityEngine.Range(0, 1)] public float light = 0.5f;   // 0 off .. 1 full
+        [UnityEngine.Range(-0.5f, 0.5f)] public float drive_x;   // metres rolled to its right, from where it started
+        [UnityEngine.Range(-0.5f, 0.5f)] public float drive_z;   // metres rolled forward, from where it started
     }
 }

@@ -330,3 +330,9 @@ One entry per real decision. **Status:** Decided · Proposed (waiting on Riya) �
 - "Take a picture" / "say cheese": looks at you, three countdown beeps, the iris snaps shut and opens with a shutter chirp, then Unity (PhotoCapture.cs) grabs a camera frame and sends the JPEG to the brain, which keeps it in <cartridge>/journal/. "Show me a memory" can then project it. Never automatic (D02).
 - In MR it photographs what you're looking at, since the camera is on the headset. The custom droid uses its own camera.
 - Link accepts messages up to 8 MB now (photos). Verified with websockets 15.0.1.
+
+**D71 · Rolling (MR)** · Oct 25 · Built, needs a headset check
+- Riya: keep it simple, it just rolls (no shuffle, no wear-based variation).
+- Beckon or "come here": it rolls toward you at 12 cm/s, eases in, stops about 45 cm away, keeps looking at you. "Go back" / "go home": rolls to where it started.
+- Never more than 35 cm from its starting spot: there are no cliff sensors in MR, so this keeps it on the desk. The custom droid gets cliff sensors in winter.
+- New pose channels drive_x / drive_z (metres from its starting spot). Unity moves the robot (ReachyRig.canRoll), so the overlays, the beam and your measured distance all come along. The lab Reachy can't roll and ignores them.

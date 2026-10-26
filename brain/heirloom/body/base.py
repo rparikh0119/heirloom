@@ -16,6 +16,8 @@ class Pose:
     antenna_right: float | None = None  # degrees, 0 upright
     iris: float | None = None           # 0 closed .. 1 wide
     light: float | None = None          # 0 off .. 1 full
+    drive_x: float | None = None        # metres rolled to its right, from where it started (bodies that roll)
+    drive_z: float | None = None        # metres rolled forward, from where it started
 
     def channels(self) -> dict[str, float]:
         return {f.name: getattr(self, f.name) for f in fields(self) if getattr(self, f.name) is not None}

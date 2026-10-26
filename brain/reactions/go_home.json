@@ -1,0 +1,6 @@
+{
+  "note": "'Go back' / 'go home': rolls back to where it started.",
+  "when": "go_home",
+  "sound": "listen",
+  "ignored_while": ["sleep", "recording", "showing"]
+}
