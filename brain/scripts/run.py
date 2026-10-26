@@ -79,13 +79,23 @@ def main() -> None:
         from heirloom.perception.voice import VoiceListener   # only needs vosk when used
         voice = VoiceListener(mic=args.mic, require_wake_word=args.need_name).start()
 
+    meaning = None
+    if args.voice and args.voice_engine == "whisper":
+        try:
+            from heirloom.perception.meaning import Meaning
+            t0 = time.perf_counter()
+            meaning = Meaning()
+            print(f"[meaning] ready in {time.perf_counter() - t0:.1f} s: understands sentences it has no exact words for")
+        except ImportError:
+            print("[meaning] off (python -m pip install fastembed==0.9.1 to understand any phrasing)")
+
     link = LinkServer.get(port=args.port)
     with make_body(args.body) as body:
         print("Waiting for Unity to connect (press Play)...")
         link.wait_for_client()
         ignores = set() if args.learn_from_keys else {"unity"}
         brain = HeirloomBrain(play_sound=body.play_sound, show_photo=body.show_photo, play_clip=body.play_clip,
-                              take_photo=body.take_photo,
+                              take_photo=body.take_photo, meaning=meaning,
                               cartridge=cartridge, wear_ignores=ignores)
         brain.label = args.name or (_label_from(args.cartridge) if args.cartridge else "NO CARTRIDGE")
         if cartridge:

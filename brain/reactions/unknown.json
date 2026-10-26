@@ -1,0 +1,7 @@
+{
+  "note": "Heard you but didn't understand: tilts its head with a questioning chirp. Show it what you meant within a few seconds and it learns the words (D73).",
+  "when": "unknown",
+  "motion": "curious",
+  "sound": "huh",
+  "ignored_while": ["sleep", "sulk", "recording", "showing", "replaying", "shooting"]
+}

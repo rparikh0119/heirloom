@@ -19,6 +19,7 @@ from .body.base import Pose
 from .character import load_character
 from .events import Event, as_event
 from .journal import Journal
+from .perception.intents import normalize
 from .modes import load_modes
 from .reactions import choose, load_reactions
 from .sound.chirps import CHIRPS, to_wav_bytes
@@ -26,16 +27,19 @@ from .sound.tape import framed, tape
 from .wear import load_wear
 
 AWAKE = "awake"
+HUH_COOLDOWN = 8.0         # seconds between "huh?"s
+HUH_MAX_WORDS = 8          # it only asks "huh?" about short things. Longer ones it understands or lets go
 REFLEXES = {"hearing"}     # the moment you start talking (whisper_voice), before it knows what you said
 
 
 class HeirloomBrain:
     def __init__(self, play_sound, reactions_dir=None, cartridge=None, wear_ignores=(), show_photo=None,
-                 play_clip=None, take_photo=None) -> None:
+                 play_clip=None, take_photo=None, meaning=None) -> None:
         """play_sound(name) is called whenever the brain wants to chirp.
         show_photo(path or None) projects a journal photo, or stops (bodies without a projector skip it).
         play_clip(wav bytes) plays a voice memory through the body's speaker.
         take_photo() asks the body's camera for a picture. It comes back as a 'photo_taken' event.
+        meaning: a perception.meaning.Meaning to understand sentences it has no exact words for (or None).
         cartridge: an opened Cartridge, or None to run without learning.
         wear_ignores: event sources that never leave wear, e.g. {"unity"} so test key presses don't count."""
         self.character = load_character()
@@ -63,6 +67,9 @@ class HeirloomBrain:
         self.journal = Journal.for_cartridge(cartridge)
         self.showing = None                                  # the photo being projected right now, or None
         self.roller = Roller()                               # where it has rolled to on the desk
+        self.meaning = meaning
+        self.vocabulary: dict[str, str] = {}                 # words it has learned (the words wear fills this)
+        self._last_huh = -99.0
         self._user = None                                    # where the person was last seen (robot space)
         self._next_tick = 60.0
 
@@ -74,6 +81,9 @@ class HeirloomBrain:
             w.attach(cartridge, self)
             w.apply(self)
         self._refresh_character()
+        if self.meaning is not None:                         # learned words help it understand close variations too
+            for phrase, event in self.vocabulary.items():
+                self.meaning.teach(phrase, event)
 
     def _refresh_character(self) -> None:
         """Push the current dials into the parts that use them. Modes read them live."""
@@ -88,6 +98,13 @@ class HeirloomBrain:
         e = as_event(event)
         if e.name in REFLEXES:             # instant, below the level of reactions and wear
             return self._reflex(e.name)
+        if e.name == "unknown":            # heard words with no exact match: learned words, then meaning
+            found = self._understand(e.data.get("said", ""))
+            if found:
+                event, how = found
+                print(f"[understood] \"{e.data.get('said', '')}\" -> {event} ({how})")
+                return self.handle(Event(event, source=e.source, strength=e.strength,
+                                         data={**e.data, "understood": how}))
         if e.name == "photo_taken" and not self._keep_photo(e):
             return None
         if e.name == "recorded" and not self._keep_recording(e):
@@ -103,6 +120,18 @@ class HeirloomBrain:
             w.apply(self)
         if changed:
             self._refresh_character()
+        learned_now = next((w.just_learned for w in self.wear if getattr(w, "just_learned", None)), None)
+        if learned_now:
+            phrase, meant = learned_now
+            print(f"[learned] \"{phrase}\" means {meant}")
+            if self.meaning is not None:
+                self.meaning.teach(phrase, meant)
+        if e.name == "unknown":
+            if len(normalize(e.data.get("said", "")).split()) > HUH_MAX_WORDS:
+                return None                                 # a long sentence it can't place: probably not meant for it
+            if self.t - self._last_huh < HUH_COOLDOWN:      # background chatter shouldn't make it ask over and over
+                return None
+            self._last_huh = self.t
 
         current = self.modes.get(self.mode)
         if current and current.ends_on_any_event and e.name != current.name:
@@ -124,7 +153,9 @@ class HeirloomBrain:
                 w.apply(self)
             if worn:
                 self._refresh_character()
-        if r.sound:
+        if learned_now:
+            self._sound("learned")                          # "oh! got it"
+        elif r.sound:
             self._sound(r.sound)
         if e.name == "curious" and self.roller.toward(self._user):      # beckoned: roll over to you
             self._set_mode("rolling")
@@ -132,6 +163,22 @@ class HeirloomBrain:
             self._set_mode("rolling")
         self._sync_projection()
         return r.file
+
+    def _understand(self, said: str) -> tuple[str, str] | None:
+        """Words it learned from you first, then meaning. None if it really doesn't know."""
+        text = normalize(said)
+        if text:
+            for phrase in sorted(self.vocabulary, key=len, reverse=True):
+                if f" {phrase} " in f" {text} ":
+                    for w in self.wear:
+                        if w.name == "words":
+                            w.used(phrase)
+                    return self.vocabulary[phrase], "learned"
+        if self.meaning is not None and text:
+            event, how_sure = self.meaning.understand(said)
+            if event:
+                return event, f"meaning {how_sure:.2f}"
+        return None
 
     def _keep_photo(self, e: Event) -> bool:
         """Save a photo the droid just took into the cartridge journal."""

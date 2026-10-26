@@ -44,6 +44,7 @@ RECORD_WAIT = 15.0          # seconds it waits for you to start
 RECORD_END_SILENCE = 1.5    # seconds of quiet that end a recording
 RECORD_MAX = 30.0           # longest recording
 RECORD_MIN = 0.5            # shorter than this isn't a memory
+UNDERSTAND_MAX_WORDS = 25   # longer than this: a conversation in the room, not something said to the droid
 
 
 def confident(segments: list) -> bool:
@@ -239,8 +240,11 @@ class WhisperListener:
             tag = event
         elif event:
             tag = f"ignored (would be {event}, but you're too far away. Say its name or come closer)"
+        elif (open_window or woke) and 0 < len(normalize(text).split()) <= UNDERSTAND_MAX_WORDS:
+            self._emit("unknown", text)                    # the brain tries learned words and meaning, or asks "huh?"
+            tag = "no exact words, asking the brain"
         else:
-            tag = "ignored (not a command it knows)"
+            tag = "ignored (very long, probably not talking to it)"
         print(f"[voice] heard \"{text}\" -> {tag}  [{took:.2f} s]")
 
     def _act(self, event: str, text: str) -> None:

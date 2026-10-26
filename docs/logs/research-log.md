@@ -388,3 +388,55 @@ Status: Not read. Ningyo kuyo (doll memorial services). Lead for the handoff and
 
 **R69 · Weiss, Pillinger, Tsiourti, "Merely a conventional 'diffusion' problem? On the adoption process of Anki Vector," IEEE RO-MAN 2021**
 Status: Not read (cited in R31). Attachment dropped after 2 of 30 weeks. Lead for the novelty curve and Vector pillar.
+
+## Learning each person: affect-aware personalization (Oct 25)
+
+**R70 · Laukka & Elfenbein, "Cross-Cultural Emotion Recognition and In-Group Advantage in Vocal Expression: A Meta-Analysis," Emotion Review (2021)**
+Status: Abstract. 37 studies, speakers from 26 cultures, listeners from 44. Vocal emotions recognized above chance across cultures, but better within a culture, and accuracy drops as cultural distance grows.
+- Informs: D74 · tone carries signal but a one-size model fits whoever trained it, so learn each person.
+- https://journals.sagepub.com/doi/full/10.1177/1754073919897295
+
+**R71 · Weber, Ritschel, Aslan, Lingenfelser, André, "How to Shape the Humor of a Robot: Social Behavior Adaptation Based on Reinforcement Learning," ICMI 2018**
+Status: Read (PDF). Reeti robot learned which humor (jokes, grimaces, sounds) each listener finds funniest. Reward = smile (video) + laughter (audio SVM). Linear RL, epsilon 0.1. 24 people. First round: learning robot more amusing (p = .02). "The first impression of a robot is more important than having a robot adapt later on." Non-learning robot sometimes funnier, possibly more varied.
+- Informs: D74 · strong defaults on day one · keep variety.
+- https://opus.bibliothek.uni-augsburg.de/opus4/frontdoor/deliver/index/docId/47626/file/47626.pdf
+
+**R72 · Park, Grover, Spaulding, Gomez, Breazeal, "A Model-Free Affective Reinforcement Learning Approach to Personalization of an Autonomous Social Robot Companion for Early Literacy Education," AAAI 2019**
+Status: Read (PDF). Tega, 67 children, 12 weeks. Q-learning on facial affect (Affdex) + verbal behavior. Personalized group learned more target vocabulary (p = .028, d = .69). Learned policies diverged across children. Policy had not converged after 8 sessions.
+- Informs: D74 · personalization works but is slow, needs a head start.
+- https://cdn.aaai.org/ojs/3846/3846-13-6904-1-10-20190701.pdf
+
+**R73 · Clabaugh et al., "Long-Term Personalization of an In-Home Socially Assistive Robot for Children With Autism Spectrum Disorders," Frontiers in Robotics and AI 6 (2019)**
+Status: Read (Frontiers page). 17 homes, 30+ days (mean 41), fully autonomous. Q-learning on performance (challenge and feedback level). Converged for most, challenge needed 100+ games. Engagement flat at about 65%. No control group.
+- Informs: D74 · in-home long-term learning is feasible · slow convergence.
+- https://www.frontiersin.org/journals/robotics-and-ai/articles/10.3389/frobt.2019.00110/full
+
+**R74 · Churamani, Kalkan, Gunes, "Continual Learning for Affective Robotics: Why, What and How?" RO-MAN 2020**
+Status: Read (manuscript). Generic models trained once fail on changing users. Robots must adapt to individual differences "due to culture, gender or personality." Recommends person-specific baselines from neutral interactions, then detecting deviations, plus controlled forgetting.
+- Informs: D74 · personal baseline · fading layers as controlled forgetting.
+- https://www.cl.cam.ac.uk/~hg410/CL4AR_ROMAN2020.pdf
+
+**R75 · Churamani, Axelsson, Çaldır, Gunes, "Continual Learning for Affective Robotics: A Proof of Concept for Wellbeing," ACII Workshops 2022**
+Status: Not read in full (citing summaries only). Pepper wellbeing coach. Participants preferred the continually personalized version. Verify before citing details.
+
+**R76 · Fu, Shi, Huang, Liu, Kian, Song, Matarić, "Personalized Socially Assistive Robots With End-to-End Speech-Language Models for Well-Being Support," USC (arXiv 2507.14412, 2025)**
+Status: Read. Blossom + GPT-4o realtime, 11 students, one session. Participants did not feel it adapted its tone to theirs. "I felt like it heard me, but I didn't feel understood." Content generic.
+- Informs: D74 · a large language model alone isn't personal · supports non-verbal + learning.
+- https://arxiv.org/html/2507.14412v1
+
+**R77 · Yang, Yap, Wijeakumar, Magassouba, Deshpande, "A Multimodal Adaptive Framework for Social Interaction with the MiRo-E Robot," Sensors 26(4) 1209 (2026)**
+Status: Read (partly). Emotion2Vec voice emotion + face + GPT-4o-mini, but adaptation is rule-based on response time. 10 participants.
+- Informs: D74 · even emotion-equipped systems adapt on simple engagement signals.
+- https://www.mdpi.com/1424-8220/26/4/1209
+
+**R78 · Song, Okafuji, Ariu, Koike, "What you reward is what you learn: Comparing rewards for online speech policy optimization in public HRI," HRI '26 (arXiv 2601.01969)**
+Status: Read (most). Sota robot, 12-day mall field study, Thompson sampling bandit over 6 speech styles, 3 different rewards. The reward choice changed which behavior it learned. "There is no single best speech policy."
+- Informs: D74 · defining warm and cold is the core design decision.
+- https://arxiv.org/html/2601.01969v1
+
+**R79 · EU AI Act Art. 5(1)(f), via Future of Privacy Forum summary (2026)**
+Status: Read (summary, not legal text). Bans inferring emotions from biometric data (incl. voice) at work and in education. Other uses are high risk. Detecting "a raised voice or whispering" isn't covered unless used to infer emotions.
+- Informs: D74 · no emotion labels. Not legal advice.
+- https://fpf.org/blog/red-lines-under-eu-ai-act-unpacking-the-prohibition-of-emotion-recognition-in-the-workplace-and-education-institutions/
+
+Searched for, not found (Oct 25): a robot that learns an owner's own tone and words without emotion labels and carries that learning to a new body and owner. Say "as far as we found."

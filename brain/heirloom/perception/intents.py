@@ -45,7 +45,7 @@ EXTRA: dict[str, list[str]] = {
                 "thanks", "you're the best", "youre the best", "that's it", "atta boy", "attaboy",
                 "amazing", "you're amazing", "youre amazing", "good robot", "smart", "so smart", "clever",
                 "you're so cute", "youre so cute", "so cute", "cutie", "proud of you", "love that"],
-    "offended": ["fuck off", "fuck you", "screw you", "i hate you", "hate you", "you suck", "shut up",
+    "offended": ["fuck off", "fuck you", "screw you", "get lost", "buzz off", "piss off", "i hate you", "hate you", "you suck", "shut up",
                  "you're annoying", "youre annoying", "so annoying", "stupid", "idiot", "dumb robot",
                  "useless", "you're useless", "youre useless", "go to hell"],
     "scold":   ["bad boy", "bad girl", "don't do that", "dont do that", "hey stop", "cut it out", "knock it off",
@@ -53,9 +53,11 @@ EXTRA: dict[str, list[str]] = {
     "not_now": ["not right now", "i'm busy", "im busy", "leave me alone", "back off", "one sec", "hold on"],
     "sleep":   ["night night", "go to bed", "bedtime", "time to sleep", "rest now"],
     "wake":    ["rise and shine", "wakey wakey", "time to get up", "get up"],
-    "curious": ["come over here", "come look", "look over here", "check this out", "look at this"],
+    "curious": ["come over here", "come look", "look over here", "check this out", "look at this",
+                "look what i've got", "look what i have", "come see"],
     "sorry":   ["my bad", "i apologize", "forgive me", "so sorry"],
-    "heart":   ["love ya", "i love ya", "love you so much", "you're my favorite", "youre my favorite"],
+    "heart":   ["love ya", "i love ya", "love you so much", "you're my favorite", "youre my favorite",
+                "you mean the world to me", "you mean everything to me", "i adore you"],
     "shh":     ["shh", "shush", "shhh", "quiet please", "keep it down", "be quiet please"],
     "show_memory": ["show me a memory", "what do you remember", "do you remember", "show me something",
                     "show me a picture", "show me a photo", "memories", "a memory", "remember when"],
@@ -67,6 +69,11 @@ EXTRA: dict[str, list[str]] = {
     "play_memory": ["play the recording", "play a recording", "play my message", "play the message",
                     "play that back", "let me hear it", "play the one", "play my recording", "play it again"],
 }
+
+
+SOLO_MAX = 3   # one-word keywords only count in sentences this short ("no!", "good job", "nice one buddy")
+NEGATIONS = {"not", "don't", "dont", "never", "isn't", "isnt", "aren't", "doesn't", "didn't", "won't", "can't", "cannot"}
+NEGATIVE_EVENTS = {"scold", "not_now", "shh", "offended"}     # their phrases already contain "no" / "not"
 
 
 def normalize(text: str) -> str:
@@ -111,11 +118,18 @@ def match(text: str, loose: bool = False) -> tuple[bool, str | None]:
     for w in wakes:
         padded = padded.replace(f" {w} ", " ")
 
-    best, best_len = None, 0
+    best, best_len, best_phrase = None, 0, ""
     tables = [INTENTS, EXTRA] if loose else [INTENTS]
+    words = len(padded.split())
     for table in tables:
         for event, phrases in table.items():
             for p in phrases:
+                if " " not in p and words > SOLO_MAX:   # a lone keyword inside a long sentence ("long time NO see")
+                    continue                           # isn't trusted. Meaning reads the whole sentence instead
                 if f" {p} " in padded and len(p) > best_len:
-                    best, best_len = event, len(p)
+                    best, best_len, best_phrase = event, len(p), p
+    if best and best not in NEGATIVE_EVENTS:
+        before = padded[:padded.index(f" {best_phrase} ")].split()[-3:]
+        if NEGATIONS & set(before):           # "I don't love you" is not a heart. Better a "huh?" than a wrong one
+            return woke, None
     return woke, best
