@@ -9,7 +9,12 @@ history, and you can always say whose layer it came from.
 How a moment is found:
     Every event that isn't a reflex is noted with its time of day (minutes after midnight).
     When the same event happens within WINDOW minutes of the same time on MIN_DAYS different days,
-    spread over at least MIN_SPAN_DAYS, it becomes a moment. Two weeks of a habit, not one busy week.
+    spread over at least MIN_SPAN_DAYS, it's a candidate. Two weeks of a habit, not one busy week.
+    It only becomes a moment if it also stands out: since it started, random timing would almost
+    never put that many in one slot (COINCIDENCE), and it happens on MIN_DAY_SHARE of those days.
+    Waving at random all day is not a 9 am habit. Waving at random AND every morning at 9 is.
+    The curious-then-good pair at 3:30 shows up as two moments. Grouping them into one ritual
+    is the practice spine's job, later.
 
 What it keeps (privacy):
     Only the event name and the minute it happened. No audio, no words, no who. Raw notes older
@@ -41,6 +46,15 @@ from .base import Wear
 WINDOW = 45           # minutes either side of a moment's usual time that still count as it
 MIN_DAYS = 5          # different days it has to happen on
 MIN_SPAN_DAYS = 14    # and those days must spread over at least two weeks
+COINCIDENCE = 1e-5    # and the odds that random timing would pile up that many in one slot must be
+                      # under 1 in 10,000. Found by the time skip (Oct 25): looser rules let random
+                      # events pile up over weeks until slots looked like habits (40 fake moments in
+                      # a year at first, then about 1 fake per two years with a simple 3x rule).
+                      # It's strict because it gets checked after every event, for years
+AWAKE = 960           # a waking day is about 16 hours. Design value: if it has only ever seen you
+                      # at 9 am, it still assumes you could have shown up any time you're awake
+LOOK_BACK = 14        # compare against two weeks before the habit seems to start
+MIN_DAY_SHARE = 0.3   # and it happens on at least this share of days since it started
 KEEP_DAYS = 60        # raw notes older than this are dropped
 DORMANT_DAYS = 30     # a moment not seen this long is asleep (kept, just not expected)
 MAX_PER_DAY = 6       # notes per event per day, so a burst of waves doesn't flood the page
@@ -61,6 +75,12 @@ def _mean_time(minutes: list[int]) -> float:
     ang = [m / DAY * 2 * math.pi for m in minutes]
     x, y = sum(math.cos(a) for a in ang), sum(math.sin(a) for a in ang)
     return (math.atan2(y, x) / (2 * math.pi) * DAY) % DAY
+
+
+def _odds(hits: int, total: int, share: float) -> float:
+    """If `total` events landed at random times, how likely is it that `hits` or more fall in a slot
+    that's `share` of the day? (A binomial tail.) Tiny = this slot really is a habit."""
+    return sum(math.comb(total, k) * share ** k * (1 - share) ** (total - k) for k in range(hits, total + 1))
 
 
 def _clock(m: float) -> str:
@@ -97,6 +117,11 @@ class MomentsWear(Wear):
         lid = self.cart.active.id
         page = self._page(lid)
 
+        notes = page["seen"].setdefault(cue, {}).setdefault(day.isoformat(), [])
+        if len(notes) < MAX_PER_DAY:
+            notes.append(minute)          # kept even when it matches a moment, so comparisons stay fair
+        self._prune(page, day)
+
         mid = self._match(page["moments"], cue, minute)
         if mid:
             self._saw(page["moments"][mid], day)
@@ -115,11 +140,7 @@ class MomentsWear(Wear):
             print(f"[moments] {new_id} woke up: {old['name']} (from {inherited}, {self._keeper(old['layer'])})")
             return self._found(lid, page, new_id, t)
 
-        notes = page["seen"].setdefault(cue, {}).setdefault(day.isoformat(), [])
-        if len(notes) < MAX_PER_DAY:
-            notes.append(minute)
-        self._prune(page, day)
-        new_id = self._try_mint(lid, page, cue)
+        new_id = self._try_mint(lid, page, cue, day)
         if new_id:
             m = page["moments"][new_id]
             print(f"[moments] new moment {new_id}: {m['name']} ({m['days']} days since {m['first']})")
@@ -226,17 +247,27 @@ class MomentsWear(Wear):
             m["days"] += 1
             m["last"] = day.isoformat()
 
-    def _try_mint(self, lid: str, page: dict, cue: str) -> str | None:
+    def _try_mint(self, lid: str, page: dict, cue: str, today: date) -> str | None:
         if len(page["moments"]) >= MAX_MOMENTS:
             return None
         notes = [(date.fromisoformat(d), m) for d, ms in page["seen"].get(cue, {}).items() for m in ms]
+        taken = [m["at"] for m in page["moments"].values() if m["cue"] == cue]
+        free = [(d, m) for d, m in notes if all(_gap(m, a) > WINDOW for a in taken)]
         best = None
-        for _, centre in notes:
-            near = [(d, m) for d, m in notes if _gap(m, centre) <= WINDOW]
+        for _, centre in free:
+            near = [(d, m) for d, m in free if _gap(m, centre) <= WINDOW]
             days = sorted({d for d, _ in near})
-            if len(days) >= MIN_DAYS and (days[-1] - days[0]).days >= MIN_SPAN_DAYS:
-                if best is None or len(days) > len(best[1]):
-                    best = (near, days)
+            if len(days) < MIN_DAYS or (days[-1] - days[0]).days < MIN_SPAN_DAYS:
+                continue
+            since = days[0] - timedelta(days=LOOK_BACK)    # a little before it started, so a lucky start can't be cherry-picked
+            lived = (today - days[0]).days + 1
+            others = sum(1 for d, m in free if d >= since and _gap(m, centre) > WINDOW)   # habits it already knows aren't random, so they don't count
+            covered = max(AWAKE, self._covered(notes, since))        # minutes of the day it could happen in
+            slot = min(1.0, 2 * WINDOW / covered)                     # share of that day one slot is
+            if len(days) / lived < MIN_DAY_SHARE or _odds(len(near), len(near) + others, slot) > COINCIDENCE:
+                continue
+            if best is None or len(days) > len(best[1]):
+                best = (near, days)
         if best is None:
             return None
         near, days = best
@@ -248,14 +279,17 @@ class MomentsWear(Wear):
                                    "name": f"{cue.replace('_', ' ')} around {_clock(at)}",
                                    "first": days[0].isoformat(), "last": days[-1].isoformat(),
                                    "days": len(days), "tag": None, "from": None}
-        used = {(d.isoformat(), m) for d, m in near}       # these notes now live in the moment
-        for d in list(page["seen"][cue]):
-            page["seen"][cue][d] = [m for m in page["seen"][cue][d] if (d, m) not in used]
-            if not page["seen"][cue][d]:
-                del page["seen"][cue][d]
-        if not page["seen"][cue]:
-            del page["seen"][cue]
         return new_id
+
+    @staticmethod
+    def _covered(notes: list, since: date) -> float:
+        """Roughly how much of the day this event happens in. The widest gap around the clock is
+        the part of the day it never happens (when you're asleep)."""
+        ms = sorted({m for d, m in notes if d >= since})
+        if len(ms) < 2:
+            return 0.0
+        gaps = [b - a for a, b in zip(ms, ms[1:])] + [ms[0] + DAY - ms[-1]]
+        return DAY - max(gaps)
 
     def _prune(self, page: dict, today: date) -> None:
         cutoff = (today - timedelta(days=KEEP_DAYS)).isoformat()

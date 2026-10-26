@@ -89,6 +89,42 @@ def _(tmp):
             assert lo <= mid <= hi
 
 
+@check("with a routine, the time skip finds the household's habits and nothing else")
+def _(tmp):
+    r = time_skip("desk_student", tmp, years=1, seed=5, quiet=True,
+                  snapshots={"month1": 30, "year1": 365})
+    found = sorted(n.split(" around ")[0] for n in r["year1"]["found"].values())
+    assert found == ["curious", "good", "sleep", "wave"], r["year1"]["found"]
+
+
+@check("without a routine there's no clock, so no moments (old households unchanged)")
+def _(tmp):
+    r = time_skip("quiet_solo", tmp, years=1, seed=5, quiet=True, snapshots={"year1": 365})
+    assert r["year1"]["found"] == {}
+
+
+@check("a routine not declared as a scenario is refused")
+def _(tmp):
+    raw = json.loads((HOUSEHOLDS_DIR / "desk_student.json").read_text(encoding="utf-8"))
+    raw["provenance"].pop("routine")
+    (tmp / "bad.json").write_text(json.dumps(raw), encoding="utf-8")
+    try:
+        load_household("bad", tmp)
+    except ValueError as e:
+        assert "routine must be declared" in str(e)
+        return
+    raise AssertionError("accepted an undeclared routine")
+
+
+@check("a snapshot put on the desk today keeps its moments awake (dates shifted like patina)")
+def _(tmp):
+    from datetime import date
+    time_skip("desk_student", tmp, years=2, seed=5, quiet=True, snapshots={"year1": 365, "year2": 730})
+    page = Cartridge.open(tmp / "desk_student_year1").read_page("L1", "moments")
+    last = max(m["last"] for m in page["moments"].values())
+    assert (date.today() - date.fromisoformat(last)).days <= 3, last
+
+
 # ---------------------------------------------------------------------------------------------
 
 def main() -> None:

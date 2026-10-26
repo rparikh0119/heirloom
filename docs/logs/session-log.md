@@ -42,3 +42,23 @@
 
 **Next**
 - Test voice with a real mic. Hand poses in Unity. Fix desk height.
+
+---
+
+## Oct 25, 2026 (night session)
+
+**Built**
+- Deep research on the learning system (report: Heirloom modular learning system) and on three "spines" that make inheritance real: chirp dialect, keeper habits, practice (report: Heirloom learning spine). Proposed decisions D74 to D100 are in the reports, not logged yet.
+- Moment registry (`wear/moments.py`): something that keeps happening at the same time of day gets a stable id (L1.m01). The dialect, habits and the response learner will hang off these ids. Passed down, an old moment wakes up in the new owner's layer with its lineage. Only the event name and the minute are stored.
+- Time skip can now have a clock: a household "routine" (a scenario). New household `desk_student` (10:00 hello, 15:30 break, 23:30 good night).
+
+**Broke, and why**
+- First rule (5 days over 2 weeks in a 90 min slot) found 40 fake habits in a simulated year. Random waves pile up over 60 days until every slot looks like a habit.
+- A "3x busier" rule still left about one fake habit per two years. Rare events (a few random "shh") look concentrated.
+- Fix: a coincidence test (binomial odds under 1 in 100,000 that random timing would pile that many into one slot), comparing against two weeks before the habit starts, and ignoring habits it already knows. Result: 0 fake habits in 30 two-year runs, real habits found within a month in 29 of 30.
+
+**Learned**
+- When something gets checked after every event for years, rare flukes become certainties. Strict thresholds matter more than clever ones.
+
+**Next**
+- Show the current moment in the wear overlay. Then the first spine on top of moments (dialect: one chirp per moment).

@@ -73,10 +73,25 @@ def _(tmp):
     assert cart.read_page("L1", "moments")["moments"] == {}
 
 
+@check("waving at random all day for months never fakes a habit, but a real 9 am wave still stands out")
+def _(tmp):
+    cart, b = setup(tmp)
+    rng = random.Random(11)
+    for d in range(60):
+        for _ in range(2):
+            at(b, d, rng.randrange(9, 23), rng.randrange(60))
+    assert cart.read_page("L1", "moments")["moments"] == {}, cart.read_page("L1", "moments")["moments"]
+    for d in range(60, 80):
+        if d % 7 < 5:
+            at(b, d, 9, rng.randrange(10))
+    names = [m["name"] for m in cart.read_page("L1", "moments")["moments"].values()]
+    assert len(names) == 1 and names[0].startswith("wave around 9:"), names
+
+
 @check("the same thing at two times of day is two moments (hello at 9, good night at 11 pm)")
 def _(tmp):
     cart, b = setup(tmp)
-    for d in (0, 3, 6, 9, 12, 15):
+    for d in (0, 2, 4, 6, 8, 10, 12, 14, 16):     # two habits of one event take a few more days to tell apart
         at(b, d, 9, 5)
         at(b, d, 23, 0)
     ms = cart.read_page("L1", "moments")["moments"]
