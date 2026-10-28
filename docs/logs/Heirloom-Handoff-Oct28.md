@@ -10,10 +10,10 @@ Riya's working style: concise, direct, personality-driven. No em dashes, no semi
 
 - Riya filmed (or is filming) Oct 28 for a progress video due Tuesday Nov 3. She then can't work for ~3 days.
 - Shot list: `E:\HEIRLOOM\docs\shoot-oct28.md` (sections A base features, B routines + family chirp with demo clock, C passed down, D fresh vs worn, E PC B-roll, F learning loop, optional).
-- Decision log now runs to **D106**. D101 wheels dropped, D102 no move to the real Reachy Mini (Riya's call, the project plan still needs updating, ask her to confirm), D103 demo clock + moment overlay, D104 learning loop, D105 dialect drift, D106 keeper habits. D74 to D100 stay reserved for the research proposals. D74, D75, D77, D78, D79 (learning loop), D86, D88 (drift), D90, D92, D93-habits (habits) are now built as v0 and logged under D104 to D106.
+- Decision log now runs to **D107**. D101 wheels dropped, D102 no move to the real Reachy Mini (Riya's call, the project plan still needs updating, ask her to confirm), D103 demo clock + moment overlay, D104 learning loop, D105 dialect drift, D106 keeper habits, D107 the time skip learns too (household taste + keeper style). D74 to D100 stay reserved for the research proposals. D74, D75, D77, D78, D79 (learning loop), D86, D88 (drift), D90, D92, D93-habits (habits) are now built as v0 and logged under D104 to D106.
 - Tests: everything passes except `test_shh` 5/6 (Riya's own exercise). New suites: test_demo_moment 8, test_learning 13, test_dialect_drift 7, test_habits 12.
 - Unity scripts changed several times tonight (HeirloomLink.cs, WearOverlay.cs) and were **never compiled** (Claude can't compile Unity). First thing: check the console.
-- Last commit Riya confirmed: "Dialect drift (D105)...". Habits (D106) and the ROUTINES rename were written to disk after that and may not be committed yet.
+- Last commit Riya confirmed: "Dialect drift (D105)...". Habits (D106), the ROUTINES rename and D107 were written to disk after that and may not be committed yet.
 
 ## 2. Built Oct 27 night
 
@@ -26,6 +26,8 @@ Riya's working style: concise, direct, personality-driven. No em dashes, no semi
 **Dialect drift (D105), `--learn` only.** Each family chirp play is varied (pitch ±3%, lengths ±8%, wobble ±20%). Warm reaction nudges the stored chirp 10% toward what played. Identity locked (note count + directions). Caps ±12% pitch, ±20% length. Homonym filter (never closer to another chirp, ancestors excluded). Only the active keeper's copy drifts. Pace: always-warm-to-higher home +2.2% after 30 mornings, +8.9% after 120.
 
 **Keeper habits (D106), `--learn` only.** Wrist + head motion in memory, consolidated into 7 numbers when it hears good night ("dreaming"). Moves 1/30 per day, new keeper ramps over 35 days, cap 30%, old keeper fades to a 0.25 floor over 180 days, per-layer strength 0..1. Synthetic test: tempo, amplitude, stillness, tilt are reliable. Directness weak. Smoothness and settle unmeasurable at 30 Hz with jitter smoothing, so TRUST = 0 for them until checked on real hands. Unity now sends head roll (sign unchecked). Overlay "moves like: ...".
+
+**Time skip learns too (D107).** Households can declare a "taste" (favourite move per cue, praise / says_no rates, higher or lower chirps) and a "keeper" (habits numbers + spread), both scenarios. The sim reacts to what the droid chose, so demo droids arrive learned: loud_family_year12 answers waves with the happy wiggle and moves quicker, bigger, busier (run it with `--learn` to see the LEARNING line). desk_student drifts its routine chirps ~6% lower and moves calmer, smaller, tilted. Untimed households learn into "anytime" buckets. Finding: incidental scripted praise makes a chirp drift at random. Shot list section D updated.
 
 **Meaning check.** Riya's on-camera lines scored 20/20. Added exact phrases for "give me a minute" and "time for bed". `meaning_check.py --file scripts/my_lines.txt` tests her own lines. Teaching phrase "beep boop buddy" sits at 0.45 toward offended: pick one under 0.40 (candidates in the last chat: zoop zoop, bleep bloop, hey noodle, yo pickle).
 

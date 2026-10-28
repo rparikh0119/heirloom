@@ -385,7 +385,7 @@ def time_skip(profile: str, out: Path, years: int = 12, seed: int = 42, snapshot
             print(f"  {name:7s} day {day:5d}  {moments:6d} moments   " +
                   "  ".join(f"{k} {x:.3f}" for k, x in brain.character.dials.items()))
             if results[name]["found"]:
-                print(f"  {'':7s} habits it noticed: " + ", ".join(results[name]["found"].values()))
+                print(f"  {'':7s} routines it noticed: " + ", ".join(results[name]["found"].values()))
     return results
 
 

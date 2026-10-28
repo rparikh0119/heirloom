@@ -139,7 +139,7 @@ def main() -> None:
             brain.now = datetime.now() + offset
             print(f"[clock] demo clock: it thinks it's {brain.now:%H:%M} (really {datetime.now():%H:%M})")
         if getattr(brain, "moments", None):
-            print("[moments] habits it knows: " + ", ".join(
+            print("[moments] routines it knows: " + ", ".join(
                 f"{m.get('tag') or m['name']}{' (asleep)' if m.get('dormant') else ''}"
                 for _, m in sorted(brain.moments.items(), key=lambda kv: kv[1]["at"])))
         problems = [(n, m) for n, ok, m in brain.health() if not ok]

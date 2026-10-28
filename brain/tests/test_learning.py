@@ -107,17 +107,17 @@ def _(tmp):
     assert picks[-10:].count("listen") >= 7, picks
 
 
-@check("situations are separate: what it learned for the morning doesn't change the evening")
+@check("times of day share a lean, but an evening that wants something else gets it")
 def _(tmp):
     b = droid(tmp)
-    owner(b, "happy", 25, random.Random(3))
+    owner(b, "happy", 25, random.Random(3))           # mornings: loves the wiggle
     b.now = b.now.replace(hour=19)
-    picks = []
-    for _ in range(40):
-        b.handle(Event("wave", source="hands"))
-        picks.append(b.decisions.lines[-1]["chosen"])
-        b.pass_time(10)
-    assert picks.count("hello") > picks.count("happy"), picks
+    b.handle(Event("wave", source="hands"))
+    first = [l for l in b.decisions.lines if "chosen" in l][-1]
+    assert first["context"]["tod"] == "evening"
+    b.pass_time(300)
+    picks = owner(b, "listen", 40, random.Random(4))  # evenings: wants quiet
+    assert picks[-10:].count("listen") >= 7, picks
 
 
 @check("only a reaction in the next 6 s counts. Later, or after another command, it's no reward")

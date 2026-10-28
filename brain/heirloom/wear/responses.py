@@ -16,8 +16,8 @@ a move up (D75). The reaction's chirp stays the same, so what it means stays rea
     fading          every time a bucket learns, its old evidence is multiplied by GAMMA, so no move
                     can run away with it and old habits can be unlearned (discounted TS)
     cap             no move holds more than CAP worth of evidence in one bucket (growth cap, D78)
-    anytime         learned with no clock (a time skip household without a routine) goes in "wave|anytime",
-                    and is used at any hour that has nothing of its own yet
+    anytime         learned with no clock (a time skip household without a routine) goes in "wave|anytime"
+                    and always counts, at every hour. Other hours' lessons for the same cue lean in (POOL)
     quiet mask      for QUIET_S after a cold reaction, only quiet moves are allowed (intrusion, D78)
     passed down     an old keeper's tallies count at INHERIT x their layer weight, at most
                     INHERIT_CAP per move: a lean the new keeper overrides in about 10 reactions (D81)
@@ -45,6 +45,8 @@ GAMMA = 0.98          # fading per lesson in a bucket. Half-life about 34 lesson
 CAP = 30.0            # most evidence one move can hold in one bucket
 INHERIT = 0.3         # how much an old keeper's tallies count (times their layer weight)
 INHERIT_CAP = 10.0    # at most this much inherited evidence per move
+POOL = 0.3           # lessons for the same cue at other times of day count this much...
+POOL_CAP = 10.0       # ...at most this much per move
 QUIET_S = 120.0       # after a cold reaction, quiet moves only for this long
 QUIET_MAX = 0.2       # "quiet" = intrusion at or under this
 DRAWS = 400           # draws used to estimate each move's chance of being picked (for the log)
@@ -76,32 +78,50 @@ class ResponsesWear(Wear):
 
     # ---------- the learner ----------
     def tallies(self, bucket: str, arms: list[str], default: str) -> dict[str, dict]:
-        """Per move: alpha/beta to sample from, plus own and inherited evidence (for explain)."""
+        """Per move: alpha/beta to sample from, plus own and inherited evidence (for explain).
+        Evidence for one situation = its own bucket + what it learned with no clock ("wave|anytime") +
+        a weaker lean (POOL) from the same cue at other times of day, at most POOL_CAP. So a lesson at
+        10 am never hides twelve years of "they love the wiggle", and a new keeper's learning isn't
+        split four ways by the clock."""
         active = self.cart.active.id
         weights = self.cart.weights(getattr(self.brain, "today", None))
         pages = {layer.id: self._page(layer.id) for layer in self.cart.layers}
         cue = bucket.split("|")[0]
-        if not any(bucket in pg["buckets"] for pg in pages.values()):
-            bucket = f"{cue}|anytime"         # nothing learned for this time of day: use what it learned without a clock
+
+        def evidence(page: dict, arm: str) -> tuple[float, float]:
+            b = page["buckets"]
+            s = f = 0.0
+            for key in {bucket, f"{cue}|anytime"}:
+                ev = b.get(key, {}).get(arm)
+                if ev:
+                    s, f = s + ev[0], f + ev[1]
+            ps = pf = 0.0
+            for key, arms_ in b.items():
+                if key.split("|")[0] == cue and key not in (bucket, f"{cue}|anytime") and arm in arms_:
+                    ps, pf = ps + POOL * arms_[arm][0], pf + POOL * arms_[arm][1]
+            if ps + pf > POOL_CAP:
+                ps, pf = ps * POOL_CAP / (ps + pf), pf * POOL_CAP / (ps + pf)
+            return s + ps, f + pf
+
         out = {}
         for arm in arms:
             a0, b0 = (1.0 + HEAD, 1.0) if arm == default else OTHER_PRIOR
-            own = pages[active]["buckets"].get(bucket, {}).get(arm, [0.0, 0.0])
+            own = evidence(pages[active], arm)
             inh_s = inh_f = 0.0
             inh_from = []
             for layer in self.cart.layers:
                 if layer.id == active:
                     continue
-                ev = pages[layer.id]["buckets"].get(bucket, {}).get(arm)
-                if ev:
+                es, ef = evidence(pages[layer.id], arm)
+                if es + ef > 0:
                     w = INHERIT * weights.get(layer.id, 0.0)
-                    inh_s, inh_f = inh_s + w * ev[0], inh_f + w * ev[1]
+                    inh_s, inh_f = inh_s + w * es, inh_f + w * ef
                     inh_from.append(layer.id)
             total = inh_s + inh_f
             if total > INHERIT_CAP:
                 inh_s, inh_f = inh_s * INHERIT_CAP / total, inh_f * INHERIT_CAP / total
             out[arm] = {"alpha": a0 + own[0] + inh_s, "beta": b0 + own[1] + inh_f,
-                        "own": (own[0], own[1]), "inherited": (inh_s, inh_f), "from": inh_from}
+                        "own": own, "inherited": (inh_s, inh_f), "from": inh_from}
         return out
 
     def propose(self, bucket: str, default: str, arms: list[str], masked: set[str], seed: str,

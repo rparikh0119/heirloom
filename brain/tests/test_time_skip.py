@@ -93,8 +93,17 @@ def _(tmp):
 def _(tmp):
     r = time_skip("desk_student", tmp, years=1, seed=5, quiet=True,
                   snapshots={"month1": 30, "year1": 365})
-    found = sorted(n.split(" around ")[0] for n in r["year1"]["found"].values())
-    assert found == ["curious", "good", "sleep", "wave"], r["year1"]["found"]
+    found = r["year1"]["found"].values()
+    cues = {n.split(" around ")[0] for n in found}
+    assert cues == {"curious", "good", "sleep", "wave"}, found          # the routine's four, nothing invented
+    def minute(n):
+        h, m = n.split(" around ")[1].split(":")
+        return int(h) * 60 + int(m)
+    routine = {"curious": 930, "good": 930, "sleep": 1410, "wave": 600}
+    for n in found:                                                     # each one near a routine time, or a "good"
+        cue = n.split(" around ")[0]                                    # near the 10:00 wave (its taste: it praises
+        near = abs(minute(n) - routine[cue]) <= 45 or (cue == "good" and abs(minute(n) - 600) <= 45)
+        assert near, n                                                  # the move it likes, D107)
 
 
 @check("without a routine there's no clock, so no moments (old households unchanged)")

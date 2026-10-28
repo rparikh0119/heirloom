@@ -94,3 +94,9 @@
 - Shoot (docs/shoot-oct28.md). Check the new overlay in the headset.
 - Riya: is ~60% "designed move" on a fresh droid OK, or should it stray less?
 - Riya: listen to drifted chirps (still unheard). Pick a teaching phrase that scores under 0.40 in meaning_check.
+
+**Audit before moving on (Oct 27, late)**
+- Fixed: a live lesson at a new time of day hid all earlier learning (see the decision log note under D107). The worn demo droid would have looked fresh on camera after one wave.
+- Verified: the full run loop against a fake Unity client (head + roll, moving hands, events) with --clock and --learn: no errors, every new overlay field arrives. Journal 9/9 and photos 7/7 with the real sample photos. Both changed Unity scripts compile with zero errors against stand-in Unity types (mono). The real Unity editor is still the final check.
+- Re-swept the loud family (30 runs): every time-skip claim still holds, numbers updated in docs/time-skip-provenance.md.
+- Terminal now says "routines" for moments, matching the panel.
