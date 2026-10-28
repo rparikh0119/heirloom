@@ -68,6 +68,7 @@ class HeirloomBrain:
         self.moment = None                                   # the moment happening right now (moments wear sets it)
         self.moments = {}                                    # every moment it knows, all layers (moments wear fills it)
         self.shyness = 0.0                                   # set by wear after time apart (Rule 5). 0 = normal
+        self.habit_idle = 1.0                                # habits wear: >1 a calmer keeper, it glances around less
         self.label = ""                                      # a name for this droid on the overlay, e.g. "FRESH"
         self.show_photo = show_photo or (lambda path: None)
         self.play_clip = play_clip or (lambda wav: None)
@@ -88,6 +89,19 @@ class HeirloomBrain:
         for w in self.wear:
             w.attach(cartridge, self)
             w.apply(self)
+        for w in self.wear:
+            if w.name == "habits":
+                w.on = learn                                 # it only watches how you move with the learning loop on
+        shapers = [w for w in self.wear if hasattr(w, "restyle")]
+        if shapers:                                          # habits shape every move, on top of patina
+            base = self.expr.style
+
+            def styled(move: str, base=base) -> dict:
+                st = {**self.expr.PLAIN, **(base(move) if base else {})}
+                for w in shapers:
+                    st = w.restyle(move, st)
+                return st
+            self.expr.style = styled
         self._refresh_character()
 
         # Learning loop v0: which authored move lands (heirloom/learning, wear/responses.py)
@@ -106,7 +120,7 @@ class HeirloomBrain:
         """Push the current dials into the parts that use them. Modes read them live."""
         c = self.character
         self.presence.cfg.notice_distance = c.notice_distance_when_shy(self.shyness)
-        self.presence.cfg.glance_gap = c.glance_gap
+        self.presence.cfg.glance_gap = c.glance_gap * self.habit_idle
         self.expr.scale = c.motion_scale
 
     # ---------- events ----------
@@ -188,6 +202,13 @@ class HeirloomBrain:
             self._set_mode("rolling")
         self._sync_projection()
         return r.file
+
+    def sense_body(self, hands: dict | None, head=None, roll: float | None = None) -> None:
+        """A new hands message from Unity (or the robot's camera later). Only the habits wear looks,
+        in memory, and only with the learning loop on. Never live mimicry (proposed D90)."""
+        for w in self.wear:
+            if w.name == "habits":
+                w.observe(self.t, hands, head, roll)
 
     # ---------- learning loop v0 ----------
     def _bucket(self, cue: str) -> str:
@@ -461,6 +482,7 @@ class HeirloomBrain:
                 "learn_reward": self.last_learning.get("reward", ""),
                 "learn_explore": bool(self.last_learning.get("explored")),
                 "learn_chirp": self.last_learning.get("chirp", ""),
+                "habits_line": next((w.describe() for w in self.wear if w.name == "habits"), ""),
                 "dials": {k: round(v, 3) for k, v in self.character.dials.items()},
                 "limit": self.character.wear_limit,
                 "moves": moves,

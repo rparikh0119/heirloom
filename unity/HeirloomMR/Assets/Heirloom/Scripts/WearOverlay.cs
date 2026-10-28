@@ -15,7 +15,7 @@ namespace Heirloom
     ///   RUST    after time apart. Warms back up with a few moments.
     ///   NOW     the moment happening now (the 10 am hello), the chirp it answered with, whose habit it is.
     ///   LEARNING (run.py --learn) the move it just chose for a situation, how often it worked, landed or missed.
-    ///   HABITS  every moment it has noticed. Turn off Show Moments for the older, shorter panel.
+    ///   ROUTINES every moment it has noticed (moments wear). Turn off Show Moments for the older, shorter panel.
     /// Press W (Game view focused) to show or hide it.
     /// Two droids side by side: give the left one a negative Offset X so its panel sits on the outside.
     /// </summary>
@@ -115,6 +115,7 @@ namespace Heirloom
             if (w.rust > 0.01f) _sb.Append($"<color={Rust}>RUSTY {w.rust:0.00}</color>  <color={Dim}>warming up</color>\n");
             else _sb.Append($"<color={Dim}>in practice</color>\n");
             _sb.Append($"<color={Dim}>notices you at {w.notice_m:0.0} m</color>");
+            if (!string.IsNullOrEmpty(w.habits_line)) _sb.Append($"\n<color={Cream}>moves like: {Trim(w.habits_line, 40)}</color>");
             if (showMoments) AppendHabits(w);
             return _sb.ToString();
         }
@@ -146,7 +147,7 @@ namespace Heirloom
         void AppendHabits(HeirloomLink.Wear w)
         {
             int n = w.habits == null ? 0 : Mathf.Min(habitsShown, w.habits.Length);
-            _sb.Append($"\n\n<color={Dim}>HABITS</color>\n");
+            _sb.Append($"\n\n<color={Dim}>ROUTINES</color>\n");
             if (n == 0) { _sb.Append($"<color={Dim}>none noticed yet</color>"); return; }
             for (int i = 0; i < n; i++)
             {

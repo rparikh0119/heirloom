@@ -50,7 +50,7 @@ Overlay on (W).
 ```
 python scripts\run.py --body unity --voice --mic 2 --cartridge cartridges\demo\desk_student_year1 --clock 14:00
 ```
-Wave with your hand (a real wave, number keys never count). Core hello chirp. Panel shows "14:00 demo clock" and the HABITS list, nothing lit.
+Wave with your hand (a real wave, number keys never count). Core hello chirp. Panel shows "14:00 demo clock" and the ROUTINES list, nothing lit.
 
 **B2. Same wave at its usual time**
 ```
@@ -67,7 +67,7 @@ Say it on camera or in the edit: the time is faked so it can be filmed now, and 
 ```
 python scripts\run.py --body unity --voice --mic 2 --cartridge cartridges\demo\desk_student_passed_on --clock 9:58
 ```
-The same droid, handed to a new keeper today. Before you wave, the HABITS list shows the old keeper's habits marked "· L1". Wave. Panel: **NOW wave around 10:03**, "family chirp, passed down", "passed down from keeper L1 · a student at a desk". It greets the new keeper with the first keeper's hello.
+The same droid, handed to a new keeper today. Before you wave, the ROUTINES list shows the old keeper's routines marked "· L1". Wave. Panel: **NOW wave around 10:03**, "family chirp, passed down", "passed down from keeper L1 · a student at a desk". It greets the new keeper with the first keeper's hello.
 
 This is the core question of the project, answered on camera: what it learned comes with it.
 

@@ -16,6 +16,8 @@
     python scripts/run.py --body unity --voice --mic 2 --cartridge cartridges/riya --learn
         # learning loop v0: it learns which of its authored moves lands for a wave, a thumbs up, a heart.
         # Thumbs up / heart within 6 s = landed. "no" / "not now" / "shh" = missed. Silence = nothing
+        # Also: family chirps drift toward what you warm to, and it picks up how you move (habits),
+        # consolidated when you say good night
 
 Two droids side by side (fresh vs worn), each brain in its own terminal, each Unity link on its own port:
     python scripts/run.py --body unity --voice --port 8765 --cartridge cartridges/fresh_test
@@ -145,7 +147,7 @@ def main() -> None:
         for name, msg in problems:
             print(f"  ! {name}: {msg}")
         gestures = GestureDetector(debug=args.gesture_debug)
-        last_mode, last, last_moment = None, time.perf_counter(), None
+        last_mode, last, last_moment, last_hands = None, time.perf_counter(), None, None
         wear, next_wear = brain.wear_state(), 0.0
         try:
             while True:
@@ -165,7 +167,11 @@ def main() -> None:
                 events += [as_event(e, "voice") for e in (voice.pop_events() if voice else [])]
                 user = link.latest("user", max_age=0.5)
                 head = user["head"] if user else None
-                events += [as_event(e, "hands") for e in gestures.step(dt, link.latest("hands", max_age=0.3), head)]
+                hands = link.latest("hands", max_age=0.3)
+                events += [as_event(e, "hands") for e in gestures.step(dt, hands, head)]
+                if hands is not None and hands is not last_hands:     # habits: each new message once, in memory only
+                    brain.sense_body(hands, head, user.get("roll") if user else None)
+                    last_hands = hands
                 for event in events:
                     print(f"[event] {event}")
                     brain.handle(event)

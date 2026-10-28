@@ -81,9 +81,11 @@
 - Learning loop v0 (D104), off unless `--learn`: Thompson sampling over authored moves for wave / good / heart, reward interpreter, quiet mask, decision log, passing down as a capped lean, overlay line. tests/test_learning.py 13/13, checked on 20 different dates. scripts/learn_sim.py prints fake-owner learning curves.
 
 - Dialect drift (D105), only with `--learn`: varied plays, warm reactions nudge the family chirp, identity locked, capped, old keeper's chirp frozen. tests/test_dialect_drift.py 7/7.
+- Keeper habits (D106), only with `--learn`: seven movement numbers per keeper, consolidated when it sleeps, shaping every move, capped, passed down with a 0.25 floor. tests/test_habits.py 12/12. Unity sends head roll.
 - Exact phrases for "give me a minute" and "time for bed" (Riya's on-camera check was 20/20, those two were close calls).
 
 **Learned**
+- 30 Hz hand tracking can carry tempo, size, stillness and tilt, but probably not jerkiness or settle time once jitter is smoothed out. Measure Quest jitter at rest before trusting those.
 - Drift speed needs a brake: a 25% step reached the 12% cap in a month of warm mornings. 10% gives months.
 - The reward rule decides who gets heard. With silence as no reward, owners who only praise (most people, Akalin & Loutfi 2021) barely moved the droid off its designed move until the prior was softened.
 

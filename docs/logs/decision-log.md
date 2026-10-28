@@ -388,3 +388,14 @@ One entry per real decision. **Status:** Decided · Proposed (waiting on Riya) �
 - Passing down: drift writes only to the current keeper's copy. The old keeper's chirp stays frozen as the base (the spine report's base + delta).
 - Pace (fake households, 6 each): a home that always warms to higher versions drifts +2.2% pitch after 30 mornings, +8.9% after 120. A home that warms at random wanders about 1%. The first step size (25%) hit the cap in about a month, so it was cut to 10%. No sourced drift rate exists. The next knob is a per-day limit if playtests say it's still fast.
 - Overlay: "family chirp drifted: +0.4% pitch, ..." under LEARNING. tests/test_dialect_drift.py 7/7, stable over repeated runs.
+
+**D106 · Keeper habits built (accepts proposed D90, D92 and the habits part of D93 as v0)** · Oct 27 · Built, only with `--learn`, needs real hands
+- It picks up how its keeper moves, never live (Jonell 2021 "tricked"). While you're together it measures your wrists (hand tracking) and head, in memory only. When you say good night it "dreams": the day becomes seven numbers and the raw motion is dropped. Days with fewer than 15 gestures are skipped. A new day without a good night consolidates too.
+- Seven numbers per keeper, nothing else on disk (D90): tempo, amplitude, smoothness, directness, settle, stillness, tilt (head roll, now sent by Unity).
+- Your numbers move 1/30 of the way per counted day (half-life ~3 weeks). A new keeper's influence ramps over 35 counted days. Everything capped at 30% so the droid stays itself (D92). Per-layer "strength" 0 to 1, 0 = off.
+- How it shows: every move after patina. Quicker or slower (tempo), bigger or smaller (amplitude), eased or stiff (smoothness), a beat of hesitation (directness), resting head tilt (tilt), glances around more or less (stillness).
+- Passing down (D93): the old keeper's numbers freeze. Their influence fades over 180 days to a floor of 0.25, never zero.
+- Measured honestly (synthetic energetic vs calm keepers, 30 Hz): tempo, amplitude, stillness and tilt separate clearly even with 2 mm of tracking jitter. Directness only weakly. Smoothness and settle don't survive the jitter smoothing, so they're recorded but have no effect yet (TRUST in habits.py). Raise their trust after a real-hands check. Quest hand-tracking jitter is unmeasured.
+- Fixes found by testing: tracking jumps (hand lost and found) read as 8 m/s gestures, now ignored above 4 m/s. Without position smoothing, 2 mm of jitter made a calm keeper look busy and jerky.
+- Overlay: "moves like: quicker, bigger · L1 40%". The moments list on the panel is renamed ROUTINES so "habits" means one thing on screen.
+- Not built: anticipation, the report's per-body joint map, D91's new resting-tilt and settle body params (mapped onto existing style keys instead).

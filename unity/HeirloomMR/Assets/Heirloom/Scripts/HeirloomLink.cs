@@ -70,6 +70,7 @@ namespace Heirloom
             public string learn_reward;   // "landed (thumbs up)", "missed (\"no\")", or empty
             public bool learn_explore;    // it just tried something it isn't sure about
             public string learn_chirp;    // "family chirp drifted: +0.4% pitch, ..." or empty
+            public string habits_line;    // "quicker, bigger · L1 40%": how it has picked up its keepers' way of moving
         }
 
         [Serializable]
@@ -86,7 +87,7 @@ namespace Heirloom
             public string image_b64;      // "project": a journal photo (JPEG or PNG), empty name = stop
         }
 
-        [Serializable] class UserMessage { public string type = "user"; public float[] head; }
+        [Serializable] class UserMessage { public string type = "user"; public float[] head; public float roll; }   // roll: head tilt in degrees vs gravity (habits)
         [Serializable] class EventMessage { public string type = "event"; public string name; }
 
         readonly ConcurrentQueue<string> _inbox = new ConcurrentQueue<string>();
@@ -243,7 +244,8 @@ namespace Heirloom
             if (headT == null) return null;
             // User's head relative to the robot's resting head, in the robot's own axes (x right, y up, z forward).
             var rel = Quaternion.Inverse(rig.transform.rotation) * (headT.position - rig.HeadRestWorld);
-            return JsonUtility.ToJson(new UserMessage { head = new[] { rel.x, rel.y, rel.z } });
+            float roll = Mathf.DeltaAngle(0f, headT.eulerAngles.z);   // sign not yet checked in the headset: which way is "tilts right"
+            return JsonUtility.ToJson(new UserMessage { head = new[] { rel.x, rel.y, rel.z }, roll = roll });
         }
 
         // A WebSocket can only send one message at a time, so messages wait in a queue.
