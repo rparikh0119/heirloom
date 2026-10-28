@@ -78,5 +78,16 @@
 - Moments run on the wall clock, so the 10 am habit could only be filmed at 10 am. Fixed with the demo clock.
 - Dialect breeding had low variety: 40 droids bred only 2 different family hellos and 1 family curious (the core set is crowded with 2-note shapes, so "add a tail note" nearly always won). Added three moves that keep the parent recognisable: pickup (a note before), stutter (a note split in two), hold (a note stops gliding). Now 5/40 for hello and curious, 11/40 for happy and notice. Measured, not yet heard: Riya to listen when she can (dialect_listen.py). Chirps already minted in a cartridge don't change.
 
+- Learning loop v0 (D104), off unless `--learn`: Thompson sampling over authored moves for wave / good / heart, reward interpreter, quiet mask, decision log, passing down as a capped lean, overlay line. tests/test_learning.py 13/13, checked on 20 different dates. scripts/learn_sim.py prints fake-owner learning curves.
+
+- Dialect drift (D105), only with `--learn`: varied plays, warm reactions nudge the family chirp, identity locked, capped, old keeper's chirp frozen. tests/test_dialect_drift.py 7/7.
+- Exact phrases for "give me a minute" and "time for bed" (Riya's on-camera check was 20/20, those two were close calls).
+
+**Learned**
+- Drift speed needs a brake: a 25% step reached the 12% cap in a month of warm mornings. 10% gives months.
+- The reward rule decides who gets heard. With silence as no reward, owners who only praise (most people, Akalin & Loutfi 2021) barely moved the droid off its designed move until the prior was softened.
+
 **Next**
 - Shoot (docs/shoot-oct28.md). Check the new overlay in the headset.
+- Riya: is ~60% "designed move" on a fresh droid OK, or should it stray less?
+- Riya: listen to drifted chirps (still unheard). Pick a teaching phrase that scores under 0.40 in meaning_check.

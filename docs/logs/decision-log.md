@@ -367,3 +367,24 @@ One entry per real decision. **Status:** Decided · Proposed (waiting on Riya) �
 - The wear panel now shows the clock, a NOW line for the moment happening (e.g. "wave around 10:03"), "family chirp" or "family chirp, passed down", how often and whose it is, and a HABITS list (an old keeper's habits marked "· L1", a woken habit replaces its old copy).
 - Only real waves and voice count. Number keys never leave wear, so they never trigger a moment.
 - scripts/demo_cartridges.py builds the four demo droids in one go (fresh, desk_student_year1, desk_student_passed_on, loud_family_year12) so their years end on the day you film. tests/test_demo_moment.py 8/8.
+
+**D104 · Learning loop v0 built (accepts proposed D74, D75, D77, D78, D79 as v0)** · Oct 27 · Built, off by default (`--learn`), needs a headset check
+- What it learns: which authored move answers a wave, a thumbs up or a heart (reaction files list "choices"). It never invents a move, and the chirp stays the reaction's own, so meaning stays readable (D75). Sleep, goodbyes, sulks and commands never learn.
+- Situation = what you did × time of day (morning, afternoon, evening, night). No tone yet (proposed D76 stays open, it carries the EU emotion-recognition question).
+- Learner: Beta "worked X of Y" tallies per situation × move, Thompson sampling (D74). Kept in `layers/L1/responses.json`. Fades by 0.98 per lesson, capped at 30 per move.
+- Factory prior: designed move 2.5 of 3.5, every other choice 1 of 2.5. Picked by a sweep: a stronger head start (4 of 5) left owners who only ever praise with their favourite 10% of the time. Now a fresh droid plays its designed move about 60% of the time, and a praise-only owner gets their favourite about 80% by wave 40. Riya's call whether a fresh droid should stray that often.
+- Reward (D77): thumbs up / heart within 6 s = landed. "no" / "not now" / "shh" / middle finger = missed. Silence or another command = no reward. Nothing rewards staying close, staying longer or coming back.
+- Guards (D78): whitelist of moves per reaction, quiet-only moves for 2 min after a miss (intrusion values in responses.py), fading + cap so no move runs away.
+- Decision record (D79): every decision and reward in `<cartridge>/logs/decisions.jsonl` (context, candidates, odds, choice, seed, explored, layer weights).
+- Passing down (D81, responses part only): an old keeper's tallies count at 0.3 × layer weight, at most 10 per move. In the fake-owner sim, keeper B's preference is at 60% by waves 11 to 20 (a fresh droid: 90%) and the old habit is gone by wave 31 to 40.
+- Overlay: LEARNING line ("wave · morning -> happy · worked 5 of 6 (2 from L1)"), "trying something new", landed / missed.
+- Fake-owner results (`scripts/learn_sim.py`, 30 owners): owners who praise and say "no" get their favourite 90% of the time by waves 11 to 20. Scripted owners, not people.
+- Still open from the report: D76 tone, D80 named intents, D82 per-body pages, D83 migrate(), D84, whether logs stay with the owner at a handoff, dialect drift (now possible on top of this).
+
+**D105 · Dialect drift built (accepts proposed D86 and D88 as v0)** · Oct 27 · Built, only with `--learn`, needs ears and a headset check
+- With the learning loop on, every family chirp plays as a slightly varied version (pitch ±3%, note lengths ±8%, wobble ±20%). A thumbs up or heart within 6 s nudges the stored chirp 10% of the way toward the version that played. Silence or a "no" leaves it alone. Mute rollback waits for the real toggle.
+- Identity locked: note count and each note's direction never change, so the 10 am hello stays a hello. Only the accent drifts.
+- Caps from where the chirp started: pitch ±12%, note lengths ±20%, never longer than 1 s. Homonym filter: a nudge can never bring it closer to another chirp (its own ancestors don't count).
+- Passing down: drift writes only to the current keeper's copy. The old keeper's chirp stays frozen as the base (the spine report's base + delta).
+- Pace (fake households, 6 each): a home that always warms to higher versions drifts +2.2% pitch after 30 mornings, +8.9% after 120. A home that warms at random wanders about 1%. The first step size (25%) hit the cap in about a month, so it was cut to 10%. No sourced drift rate exists. The next knob is a per-day limit if playtests say it's still fast.
+- Overlay: "family chirp drifted: +0.4% pitch, ..." under LEARNING. tests/test_dialect_drift.py 7/7, stable over repeated runs.

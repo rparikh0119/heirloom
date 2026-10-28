@@ -69,6 +69,7 @@ namespace Heirloom
             public string learn_line;     // "wave · morning -> happy · worked 5 of 6"
             public string learn_reward;   // "landed (thumbs up)", "missed (\"no\")", or empty
             public bool learn_explore;    // it just tried something it isn't sure about
+            public string learn_chirp;    // "family chirp drifted: +0.4% pitch, ..." or empty
         }
 
         [Serializable]

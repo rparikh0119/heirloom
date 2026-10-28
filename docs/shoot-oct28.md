@@ -89,6 +89,21 @@ Only one brain gets the mic. Use hands for the worn one, or give each its own ta
 - `python scripts\time_skip.py --profile desk_student --years 1`. The "habits it noticed" lines.
 - `python scripts\dialect_listen.py`, then play `00_all_in_a_row.wav` over the B shots.
 - `python tests\test_wear_moments.py`. A screen of PASS lines.
+- `python scripts\learn_sim.py`. Learning curves for 30 fake owners, including a droid passed to a new keeper.
+
+---
+
+## F · Learning loop (optional, first time it's on camera)
+
+```
+python scripts\run.py --body unity --voice --mic 2 --cartridge cartridges\demo\fresh --learn
+```
+Overlay on. Wave, wait for its answer, then thumbs up only when it answers with the **happy wiggle** and say "no" for anything else. Leave about 5 seconds between waves. In the fake-owner sim the wiggle wins most waves after 10 to 20 of these, so plan on a long take and cut it down. The panel shows "trying something new" and "landed (thumbs up)" / "missed ("no")" as it goes. After a "no" it only answers quietly for 2 minutes. That's a guard, not a bug.
+
+Family chirp drift: run `desk_student_year1 --clock 9:58 --learn`, wave, then thumbs up right after the family hello. The panel shows "family chirp drifted: +0.x% pitch". One step is tiny on purpose, so this is a panel shot, not an audio one.
+
+It's untested in the headset. If it misbehaves, skip it and use the sim as B-roll instead:
+`python scripts\learn_sim.py` (about a minute, prints the learning curves).
 
 ---
 

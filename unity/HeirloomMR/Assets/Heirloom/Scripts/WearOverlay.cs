@@ -133,11 +133,12 @@ namespace Heirloom
         void AppendLearning(HeirloomLink.Wear w)
         {
             _sb.Append($"<color={Dim}>LEARNING</color>\n");
-            if (string.IsNullOrEmpty(w.learn_line)) { _sb.Append($"<color={Dim}>nothing tried yet</color>\n\n"); return; }
-            _sb.Append($"<color={Cream}>{Trim(w.learn_line, 40)}</color>\n");
+            if (string.IsNullOrEmpty(w.learn_line) && string.IsNullOrEmpty(w.learn_reward)) { _sb.Append($"<color={Dim}>nothing tried yet</color>\n\n"); return; }
+            if (!string.IsNullOrEmpty(w.learn_line)) _sb.Append($"<color={Cream}>{Trim(w.learn_line, 40)}</color>\n");
             if (w.learn_explore) _sb.Append($"<color={Rust}>trying something new</color>\n");
             if (!string.IsNullOrEmpty(w.learn_reward))
                 _sb.Append($"<color={(w.learn_reward.StartsWith("landed") ? Oxblood : Dim)}>{w.learn_reward}</color>\n");
+            if (!string.IsNullOrEmpty(w.learn_chirp)) _sb.Append($"<color={Cream}>{Trim(w.learn_chirp, 44)}</color>\n");
             _sb.Append("\n");
         }
 

@@ -178,7 +178,10 @@ class HeirloomBrain:
         if learned_now:
             self._sound("learned")                          # "oh! got it"
         elif r.sound:
-            self._sound(self._accent(r.sound, e.name))
+            name = self._accent(r.sound, e.name)
+            if self.learner is not None and learns and name.startswith("m:"):
+                name = self._vary(name)                      # dialect drift: a slightly fresh version each time
+            self._sound(name)
         if e.name == "curious" and self.roller.toward(self._user):      # beckoned: roll over to you
             self._set_mode("rolling")
         elif e.name == "go_home" and self.roller.home():
@@ -218,6 +221,29 @@ class HeirloomBrain:
         print(f"[learn] {did} {self.last_learning['line']}" + ("  (trying something new)" if p["explored"] else ""))
         return chosen
 
+    def _vary(self, name: str) -> str:
+        """Play a slightly varied family chirp and remember the variation, so a warm reaction
+        can drift the chirp toward it (proposed D88: drift uses the same reward interpreter)."""
+        dialect = next((w for w in self.wear if w.name == "dialect"), None)
+        mid = name[2:]
+        if dialect is None or mid not in dialect.chirps:
+            return name
+        o = self.rewards.open
+        if o is not None and o.t == self.t and o.decision_id in self._decided:
+            did = o.decision_id                              # the move it just chose for this same reaction
+        else:
+            self._n_decisions += 1
+            did = f"c_{self._n_decisions:04d}"
+            self._decided[did] = {"bucket": None, "arm": None, "t": self.t}
+            self.rewards.start(did, self.t)
+        seed = f"{self.cartridge.droid.get('id', '')}:{did}:{(self.now or datetime.now()).isoformat()}"
+        played, jitter = dialect.variant(mid, seed)
+        self._decided[did]["chirp"] = (mid, jitter)
+        self.decisions.write({"decision_id": did, "chirp": mid, "seed": seed, "jitter": {
+            "pitch": round(jitter["pitch"], 4), "len": [round(x, 4) for x in jitter["len"]],
+            "wobble": round(jitter["wobble"], 4)}})
+        return played
+
     def _judge(self, event_name: str) -> None:
         """Was this event a reaction to the last move it chose? Learn from it (proposed D77)."""
         verdict = self.rewards.observe(event_name, self.t)
@@ -227,13 +253,24 @@ class HeirloomBrain:
         d = self._decided.get(did)
         if d is None:
             return
-        self.learner.learn(d["bucket"], d["arm"], reward)
         if reward == 0:
             self._last_cold = self.t
         self.decisions.write({"decision_id": did, "reward": reward, "cue": cue, "delay_s": round(self.t - d["t"], 2)})
+        drifted = ""
+        if reward == 1 and d.get("chirp"):
+            dialect = next((w for w in self.wear if w.name == "dialect"), None)
+            change = dialect.nudge(*d["chirp"]) if dialect is not None else None
+            if change:
+                drifted = f"family chirp drifted: {change}"
+                print(f"[dialect] {d['chirp'][0]} {drifted}")
+        if d.get("arm") is None:                             # a chirp on its own, no move was chosen
+            self.last_learning = {**self.last_learning, "reward": f"{'landed' if reward else 'missed'} ({cue})",
+                                  "chirp": drifted}
+            return
+        self.learner.learn(d["bucket"], d["arm"], reward)
         self.last_learning = {"line": self.learner.explain(d["bucket"], d["arm"], d["default"], d["arms"]),
                               "explored": False, "reward": f"{'landed' if reward else 'missed'} ({cue})",
-                              "quiet": reward == 0}
+                              "quiet": reward == 0, "chirp": drifted}
         print(f"[learn] {did} {'landed' if reward else 'missed'} ({cue}): {self.last_learning['line']}")
 
     def _understand(self, said: str) -> tuple[str, str] | None:
@@ -423,6 +460,7 @@ class HeirloomBrain:
                 "learn_line": self.last_learning.get("line", ""),
                 "learn_reward": self.last_learning.get("reward", ""),
                 "learn_explore": bool(self.last_learning.get("explored")),
+                "learn_chirp": self.last_learning.get("chirp", ""),
                 "dials": {k: round(v, 3) for k, v in self.character.dials.items()},
                 "limit": self.character.wear_limit,
                 "moves": moves,
