@@ -9,6 +9,8 @@
       "only_while": ["sulk"],         only fires in these modes (optional)
       "works_while": ["sulk"],        still fires during a mode that normally blocks reactions (optional)
       "ignored_while": ["back_off"]   never fires in these modes (optional)
+      "choices": ["hello", "happy"]   other authored moves it may learn to answer with (optional,
+                                      only with --learn). "motion" stays the default it starts from
     }
 
 Which reaction wins for an event:
@@ -22,7 +24,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 REACTIONS_DIR = Path(__file__).resolve().parents[1] / "reactions"
-KEYS = {"note", "when", "motion", "sound", "mode", "only_while", "works_while", "ignored_while"}
+KEYS = {"note", "when", "motion", "sound", "mode", "only_while", "works_while", "ignored_while", "choices"}
 
 
 @dataclass
@@ -36,6 +38,7 @@ class Reaction:
     works_while: list[str] = field(default_factory=list)
     ignored_while: list[str] = field(default_factory=list)
     note: str = ""
+    choices: list[str] = field(default_factory=list)
 
 
 class ReactionError(ValueError):
@@ -63,9 +66,16 @@ def load_reactions(folder: Path = REACTIONS_DIR, motions=None, sounds=None, mode
         r = Reaction(file=path.name, when=_as_list(raw["when"]), motion=raw.get("motion"),
                      sound=raw.get("sound"), mode=raw.get("mode"),
                      only_while=_as_list(raw.get("only_while")), works_while=_as_list(raw.get("works_while")),
-                     ignored_while=_as_list(raw.get("ignored_while")), note=raw.get("note", ""))
+                     ignored_while=_as_list(raw.get("ignored_while")), note=raw.get("note", ""),
+                     choices=_as_list(raw.get("choices")))
         if motions is not None and r.motion and r.motion not in motions:
             raise ReactionError(f"{path.name}: no motion called {r.motion!r}. Known: {sorted(motions)}")
+        if r.choices and not r.motion:
+            raise ReactionError(f"{path.name}: \"choices\" needs a \"motion\" too (the move it starts from)")
+        if motions is not None:
+            for c in r.choices:
+                if c not in motions:
+                    raise ReactionError(f"{path.name}: choice {c!r} isn't a motion. Known: {sorted(motions)}")
         if sounds is not None and r.sound and r.sound not in sounds:
             raise ReactionError(f"{path.name}: no sound called {r.sound!r}. Known: {sorted(sounds)}")
         if modes is not None:

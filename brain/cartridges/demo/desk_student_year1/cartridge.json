@@ -1,0 +1,31 @@
+{
+  "format_version": 1,
+  "droid": {
+    "id": "hl-ed40",
+    "born": "2025-10-27"
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "label": "a student at a desk",
+      "since": "2025-10-27",
+      "until": null,
+      "source": {
+        "type": "simulated",
+        "profile": "desk_student",
+        "seed": 42,
+        "params": {
+          "moments_per_day": 2.455,
+          "weekend": 0.781,
+          "novelty.peak": 2.25,
+          "novelty.days": 21.0,
+          "long_term.floor": 0.5,
+          "long_term.from_day": 360.0,
+          "long_term.to_day": 1277.5
+        }
+      },
+      "weight": "active",
+      "memories": "open"
+    }
+  ]
+}

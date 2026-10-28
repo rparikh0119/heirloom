@@ -62,3 +62,21 @@
 
 **Next**
 - Show the current moment in the wear overlay. Then the first spine on top of moments (dialect: one chirp per moment).
+
+---
+
+## Oct 27, 2026 (night session)
+
+**Built**
+- Demo clock (`--clock`) and the current moment + habits on the wear overlay (D103). Brain + HeirloomLink.cs + WearOverlay.cs.
+- `scripts/demo_cartridges.py`: every demo droid rebuilt in one command, including one handed to a new keeper.
+- `meaning_check.py --file`: test your own sentences. Starter list in `scripts/my_lines.txt`.
+- Shot list for the Oct 28 progress footage: `docs/shoot-oct28.md`.
+- Logged D101 (wheels dropped), D102 (no move to the real Reachy Mini).
+
+**Found**
+- Moments run on the wall clock, so the 10 am habit could only be filmed at 10 am. Fixed with the demo clock.
+- Dialect breeding had low variety: 40 droids bred only 2 different family hellos and 1 family curious (the core set is crowded with 2-note shapes, so "add a tail note" nearly always won). Added three moves that keep the parent recognisable: pickup (a note before), stutter (a note split in two), hold (a note stops gliding). Now 5/40 for hello and curious, 11/40 for happy and notice. Measured, not yet heard: Riya to listen when she can (dialect_listen.py). Chirps already minted in a cartridge don't change.
+
+**Next**
+- Shoot (docs/shoot-oct28.md). Check the new overlay in the headset.

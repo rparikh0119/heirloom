@@ -1,0 +1,20 @@
+{
+  "format_version": 1,
+  "droid": {
+    "id": "hl-add7",
+    "born": "2026-10-27"
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "label": "fresh",
+      "since": "2026-10-27",
+      "until": null,
+      "source": {
+        "type": "lived"
+      },
+      "weight": "active",
+      "memories": "open"
+    }
+  ]
+}

@@ -350,3 +350,20 @@ One entry per real decision. **Status:** Decided · Proposed (waiting on Riya) �
 - Learning: an unknown phrase of 6 words or fewer, followed within 6 s by any command or gesture, is learned as meaning that (a "got it" chirp). Kept as text in the cartridge (words wear), never audio. Passes down: the next owner's droid still answers to the last family's pet names. A faded layer forgets them.
 - To check against D43 (content only on request): it stores short phrases you teach it on purpose. Riya's call whether that counts as asked.
 - Oct 25 first check on Riya's PC: 24/31 as expected, about 1 ms per sentence, no false understanding of unrelated sentences (top score 0.40). Fixes: one-word keywords only count in sentences of 3 words or fewer ("long time no see" was a scold, "I need some space right now" was a scold via "now"); meaning can't pick a warm command when there's a "not" (MiniLM scored "I don't love you" as love, 0.73); ACCEPT lowered to 0.50; added examples for "you mean the world to me", "get lost", "look what I've got" (these three now pass by construction). Long sentences (up to 25 words) are now understood by meaning, but only short ones (8 words or fewer) get a "huh?".
+
+*D74 to D100 are kept for the proposals in docs/research/learning-system-research.md and learning-spine-research.md (moments.py and dialect.py already cite D99 and D85 to D87). Accepted ones get logged under those numbers.*
+
+**D101 · Wheels dropped** · Oct 27 · Decided
+- No free roaming. Reasons: it breaks "one brain, any body" (no other body can roll), desk edges and falls, a battery and dock to design, drivetrains fail first and can't be repaired by hand, and scope.
+- D23 (rolls) and the wheel half of D39 are replaced. Rolling code (D71) stays as a sim experiment and is left out of demos.
+- Maybe later: a tethered scoot of a few cm or a rocker. To do: redo the hardware list without wheels, cliff sensors or drive battery.
+
+**D102 · The brain doesn't move to the lab's real Reachy Mini** · Oct 27 · Riya's call, to confirm in the plan
+- The custom droid becomes the first real hardware. The Reachy Mini stays as the virtual body in MR.
+- Knock-on: the spring transfer test needs a different second body (two custom droids, or custom droid + virtual Reachy). The project instructions and older plan docs still say winter runs on the real Reachy. Update them.
+
+**D103 · Demo clock and the moment on the overlay** · Oct 27 · Built, needs a headset check
+- run.py --clock 9:58 makes the droid think it's that time of day (the date stays real, the clock ticks at real speed), so a habit like the 10 am wave can be filmed at any hour. The overlay says "demo clock" whenever it's on, so footage stays honest.
+- The wear panel now shows the clock, a NOW line for the moment happening (e.g. "wave around 10:03"), "family chirp" or "family chirp, passed down", how often and whose it is, and a HABITS list (an old keeper's habits marked "· L1", a woken habit replaces its old copy).
+- Only real waves and voice count. Number keys never leave wear, so they never trigger a moment.
+- scripts/demo_cartridges.py builds the four demo droids in one go (fresh, desk_student_year1, desk_student_passed_on, loud_family_year12) so their years end on the day you film. tests/test_demo_moment.py 8/8.

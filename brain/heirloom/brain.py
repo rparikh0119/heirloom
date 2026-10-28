@@ -12,6 +12,8 @@ Without one, it behaves exactly like the out-of-the-box droid.
 """
 from __future__ import annotations
 
+from datetime import datetime
+
 from .behavior.expressions import EXPRESSIONS, ExpressionPlayer
 from .behavior.presence import Presence, PresenceConfig
 from .behavior.rolling import Roller
@@ -19,6 +21,7 @@ from .body.base import Pose
 from .character import load_character
 from .events import Event, as_event
 from .journal import Journal
+from .learning import DecisionLog, RewardInterpreter
 from .perception.intents import normalize
 from .modes import load_modes
 from .reactions import choose, load_reactions
@@ -34,14 +37,15 @@ REFLEXES = {"hearing"}     # the moment you start talking (whisper_voice), befor
 
 class HeirloomBrain:
     def __init__(self, play_sound, reactions_dir=None, cartridge=None, wear_ignores=(), show_photo=None,
-                 play_clip=None, take_photo=None, meaning=None) -> None:
+                 play_clip=None, take_photo=None, meaning=None, learn=False) -> None:
         """play_sound(name) is called whenever the brain wants to chirp.
         show_photo(path or None) projects a journal photo, or stops (bodies without a projector skip it).
         play_clip(wav bytes) plays a voice memory through the body's speaker.
         take_photo() asks the body's camera for a picture. It comes back as a 'photo_taken' event.
         meaning: a perception.meaning.Meaning to understand sentences it has no exact words for (or None).
         cartridge: an opened Cartridge, or None to run without learning.
-        wear_ignores: event sources that never leave wear, e.g. {"unity"} so test key presses don't count."""
+        wear_ignores: event sources that never leave wear, e.g. {"unity"} so test key presses don't count.
+        learn: let the learning loop pick among a reaction's "choices" (needs a cartridge). Off = as designed."""
         self.character = load_character()
         c = self.character
         self.presence = Presence(PresenceConfig(notice_distance=c.notice_distance, glance_gap=c.glance_gap))
@@ -59,6 +63,10 @@ class HeirloomBrain:
         self._last_attending = False
         self.t = 0.0                                         # seconds since it woke up
         self.today = None                                    # None = the real date. The time skip sets a pretend one
+        self.now = None                                      # None = the computer clock. The time skip and the demo clock set it
+        self.demo_clock = False                              # True when run.py --clock fakes the time of day (shown on the overlay)
+        self.moment = None                                   # the moment happening right now (moments wear sets it)
+        self.moments = {}                                    # every moment it knows, all layers (moments wear fills it)
         self.shyness = 0.0                                   # set by wear after time apart (Rule 5). 0 = normal
         self.label = ""                                      # a name for this droid on the overlay, e.g. "FRESH"
         self.show_photo = show_photo or (lambda path: None)
@@ -81,6 +89,15 @@ class HeirloomBrain:
             w.attach(cartridge, self)
             w.apply(self)
         self._refresh_character()
+
+        # Learning loop v0: which authored move lands (heirloom/learning, wear/responses.py)
+        self.learner = next((w for w in self.wear if w.name == "responses"), None) if learn else None
+        self.rewards = RewardInterpreter()
+        self.decisions = DecisionLog.for_cartridge(cartridge) if self.learner else DecisionLog(None)
+        self._decided: dict[str, dict] = {}                  # recent decisions by id, to learn from
+        self._n_decisions = 0
+        self._last_cold = -1e9
+        self.last_learning: dict = {}                        # what the overlay shows about the last decision
         if self.meaning is not None:                         # learned words help it understand close variations too
             for phrase, event in self.vocabulary.items():
                 self.meaning.teach(phrase, event)
@@ -115,6 +132,8 @@ class HeirloomBrain:
             self.journal.retire(self.showing)          # D45: "not now" during a memory retires it for good
             print(f"[journal] retired {self.showing.name}")
         learns = e.source not in self.wear_ignores
+        if self.learner is not None and learns:
+            self._judge(e.name)
         changed = [w for w in self.wear if learns and w.record(e, self.mode, self.t)]
         for w in changed:
             w.apply(self)
@@ -146,9 +165,12 @@ class HeirloomBrain:
 
         if r.mode:
             self._set_mode(r.mode)
-        if r.motion:
-            self.expr.play(r.motion)
-            worn = [w for w in self.wear if learns and w.played("motion", r.motion, self.t)]
+        motion = r.motion
+        if r.motion and r.choices and self.learner is not None and learns:
+            motion = self._decide(e.name, r)
+        if motion:
+            self.expr.play(motion)
+            worn = [w for w in self.wear if learns and w.played("motion", motion, self.t)]
             for w in worn:
                 w.apply(self)
             if worn:
@@ -163,6 +185,56 @@ class HeirloomBrain:
             self._set_mode("rolling")
         self._sync_projection()
         return r.file
+
+    # ---------- learning loop v0 ----------
+    def _bucket(self, cue: str) -> str:
+        from .wear.responses import time_of_day
+        return f"{cue}|{time_of_day((self.now or datetime.now()).hour)}"
+
+    def _decide(self, cue: str, r) -> str:
+        """Pick which of the reaction's authored moves to answer with, and log it (proposed D74, D79)."""
+        from .wear.responses import INTRUSION, QUIET_MAX, QUIET_S
+        arms = [r.motion] + [c for c in r.choices if c != r.motion]
+        quiet = self.t - self._last_cold < QUIET_S
+        masked = {a for a in arms if quiet and INTRUSION.get(a, 0.5) > QUIET_MAX}
+        bucket = self._bucket(cue)
+        self._n_decisions += 1
+        did = f"d_{self._n_decisions:04d}"
+        seed = f"{self.cartridge.droid.get('id', '')}:{(self.now or datetime.now()).isoformat()}:{self._n_decisions}"
+        p = self.learner.propose(bucket, r.motion, arms, masked, seed)
+        chosen = p["chosen"]
+        cue_name, tod = bucket.split("|")
+        self.decisions.write({"decision_id": did, "t": round(self.t, 2), "when": (self.now or datetime.now()).isoformat(timespec="seconds"),
+                              "seed": seed, "context": {"cue": cue_name, "tod": tod, "mode": self.mode},
+                              "candidates": arms, "masked": sorted(masked), "probs": p["probs"], "chosen": chosen,
+                              "explored": p["explored"], "learner": "bucket_ts/1",
+                              "layers": {k: round(v, 2) for k, v in self.cartridge.weights(self.today).items()}})
+        self._decided[did] = {"bucket": bucket, "arm": chosen, "default": r.motion, "arms": arms, "t": self.t}
+        if len(self._decided) > 50:
+            self._decided.pop(next(iter(self._decided)))
+        self.rewards.start(did, self.t)
+        self.last_learning = {"line": self.learner.explain(bucket, chosen, r.motion, arms),
+                              "explored": p["explored"], "reward": "", "quiet": bool(masked)}
+        print(f"[learn] {did} {self.last_learning['line']}" + ("  (trying something new)" if p["explored"] else ""))
+        return chosen
+
+    def _judge(self, event_name: str) -> None:
+        """Was this event a reaction to the last move it chose? Learn from it (proposed D77)."""
+        verdict = self.rewards.observe(event_name, self.t)
+        if verdict is None:
+            return
+        did, reward, cue = verdict
+        d = self._decided.get(did)
+        if d is None:
+            return
+        self.learner.learn(d["bucket"], d["arm"], reward)
+        if reward == 0:
+            self._last_cold = self.t
+        self.decisions.write({"decision_id": did, "reward": reward, "cue": cue, "delay_s": round(self.t - d["t"], 2)})
+        self.last_learning = {"line": self.learner.explain(d["bucket"], d["arm"], d["default"], d["arms"]),
+                              "explored": False, "reward": f"{'landed' if reward else 'missed'} ({cue})",
+                              "quiet": reward == 0}
+        print(f"[learn] {did} {'landed' if reward else 'missed'} ({cue}): {self.last_learning['line']}")
 
     def _understand(self, said: str) -> tuple[str, str] | None:
         """Words it learned from you first, then meaning. None if it really doesn't know."""
@@ -292,6 +364,7 @@ class HeirloomBrain:
             self.mode, current = AWAKE, None
             self._sync_projection()
         self._shooting_cues()
+        self.rewards.expire(self.t)
 
         # Presence only follows you when the mode allows it (sulking, sleeping and backing off don't).
         attentive = current is None or current.attentive
@@ -340,13 +413,72 @@ class HeirloomBrain:
             uses = pat.uses(self.today)
             moves = [{"name": m, "settled": round(pat.settle.get(m, 0.0), 3), "character": round(pat.depth.get(m, 0.0), 3),
                       "uses": round(uses.get(m, 0.0))} for m in sorted(uses, key=lambda m: -uses[m])]
+        now = self.now or datetime.now()
         return {"learning": self.cartridge is not None,
                 "label": self.label,
+                "clock": now.strftime("%H:%M"),
+                "clock_demo": self.demo_clock,
+                **self._moment_state(),
+                "learn_on": self.learner is not None,
+                "learn_line": self.last_learning.get("line", ""),
+                "learn_reward": self.last_learning.get("reward", ""),
+                "learn_explore": bool(self.last_learning.get("explored")),
                 "dials": {k: round(v, 3) for k, v in self.character.dials.items()},
                 "limit": self.character.wear_limit,
                 "moves": moves,
                 "rust": round(pat.rust, 3) if pat else 0.0,
                 "notice_m": round(self.presence.cfg.notice_distance, 2)}
+
+    def _moment_state(self) -> dict:
+        """The moment part of the overlay (proposed D99, D85).
+            moment         the moment happening now, e.g. "wave around 10:03", or ""
+            moment_detail  one line on it: how often, since when, whose (moments.explain)
+            moment_lines   the same, as short lines that fit the panel
+            moment_chirp   "family chirp", "family chirp, passed down", or "" if it used the core chirp
+            habits         every awake moment it knows, earliest in the day first. An old keeper's gets " · L1"
+            habit_now      which of habits is happening now, or -1"""
+        mom = next((w for w in self.wear if w.name == "moments"), None)
+        dialect = next((w for w in self.wear if w.name == "dialect"), None)
+        out = {"moment": "", "moment_detail": "", "moment_lines": [], "moment_chirp": "", "habits": [], "habit_now": -1}
+        if mom is None:
+            return out
+        known = self.moments or {}
+        active = self.cartridge.active.id
+        woken = {m.get("from") for m in known.values() if m.get("from")}
+        shown = [(mid, m) for mid, m in sorted(known.items(), key=lambda kv: kv[1]["at"])
+                 if not m.get("dormant") and mid not in woken]          # a woken habit replaces the old keeper's copy
+        out["habits"] = [(m.get("tag") or m["name"]) + ("" if m["layer"] == active else f" · {m['layer']}")
+                         for _, m in shown]
+        out["habit_now"] = next((i for i, (hid, _) in enumerate(shown) if hid == self.moment), -1)
+        mid = self.moment
+        if mid and mid in mom.known:
+            m = mom.known[mid]
+            out["moment"] = m.get("tag") or m["name"]
+            out["moment_detail"] = mom.explain(mid)
+            out["moment_lines"] = self._moment_lines(mom, m)
+            rec = dialect.chirps.get(mid) if dialect is not None else None
+            if rec is not None:
+                out["moment_chirp"] = "family chirp, passed down" if rec.get("from") else "family chirp"
+        return out
+
+    @staticmethod
+    def _moment_lines(mom, m: dict) -> list[str]:
+        """Short lines for the overlay: how often, since when, whose, and where it came from."""
+        from datetime import date as _date
+
+        def keeper(lid: str) -> str:
+            try:
+                return f"keeper {lid} · {mom.cart.layer(lid).label}"
+            except Exception:  # noqa: BLE001
+                return f"keeper {lid}"
+
+        first = _date.fromisoformat(m["first"])
+        days = m["days"]
+        lines = [f"seen on {days} day{'' if days == 1 else 's'} since {first:%b %Y}", keeper(m["layer"])]
+        src = mom.known.get(m.get("from") or "")
+        if src:
+            lines.append(f"passed down from {keeper(src['layer'])}")
+        return lines
 
     # ---------- self-check ----------
     def health(self) -> list[tuple[str, bool, str]]:

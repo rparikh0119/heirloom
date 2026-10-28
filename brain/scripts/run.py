@@ -10,6 +10,12 @@
     python scripts/run.py --body unity --gesture-debug  # print finger states twice a second, for tuning
     python scripts/run.py --body unity --cartridge cartridges/riya   # learn into a cartridge (made if missing)
     python scripts/run.py --body unity --cartridge cartridges/riya --learn-from-keys   # key presses count too
+    python scripts/run.py --body unity --voice --cartridge cartridges/sim/desk_student_year1 --clock 9:58
+        # demo clock: the droid thinks it's 9:58, so its 10 am moment happens while you film.
+        # The overlay says "demo clock" so the footage stays honest. Only the time of day moves, not the date
+    python scripts/run.py --body unity --voice --mic 2 --cartridge cartridges/riya --learn
+        # learning loop v0: it learns which of its authored moves lands for a wave, a thumbs up, a heart.
+        # Thumbs up / heart within 6 s = landed. "no" / "not now" / "shh" = missed. Silence = nothing
 
 Two droids side by side (fresh vs worn), each brain in its own terminal, each Unity link on its own port:
     python scripts/run.py --body unity --voice --port 8765 --cartridge cartridges/fresh_test
@@ -25,6 +31,7 @@ In the Unity Editor, number keys (Game view focused) send events:
 """
 import argparse
 import time
+from datetime import datetime, timedelta
 
 from heirloom.body import make_body
 from heirloom.brain import HeirloomBrain
@@ -45,6 +52,18 @@ def _label_from(folder: str) -> str:
     return " ".join(name.upper().split())
 
 
+def _clock_offset(text: str) -> timedelta:
+    """'9:58' -> how far to move the computer clock so it reads 9:58 today."""
+    try:
+        h, m = (int(x) for x in text.split(":"))
+        if not (0 <= h < 24 and 0 <= m < 60):
+            raise ValueError
+    except ValueError:
+        raise SystemExit(f"--clock wants a time of day like 9:58 or 15:30, not {text!r}")
+    real = datetime.now()
+    return real.replace(hour=h, minute=m, second=0, microsecond=0) - real
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--body", default="unity")
@@ -61,7 +80,12 @@ def main() -> None:
     parser.add_argument("--name", default=None, help="label on the overlay (default: from the cartridge folder)")
     parser.add_argument("--learn-from-keys", action="store_true",
                         help="let Unity key presses leave wear (off by default, so testing doesn't change the droid)")
+    parser.add_argument("--learn", action="store_true",
+                        help="learning loop v0: learn which authored move lands (needs --cartridge)")
+    parser.add_argument("--clock", default=None,
+                        help="demo clock: pretend it's this time of day (e.g. 9:58), so a moment happens on camera")
     args = parser.parse_args()
+    offset = _clock_offset(args.clock) if args.clock else None
 
     cartridge = None
     if args.cartridge:
@@ -96,7 +120,10 @@ def main() -> None:
         ignores = set() if args.learn_from_keys else {"unity"}
         brain = HeirloomBrain(play_sound=body.play_sound, show_photo=body.show_photo, play_clip=body.play_clip,
                               take_photo=body.take_photo, meaning=meaning,
-                              cartridge=cartridge, wear_ignores=ignores)
+                              cartridge=cartridge, wear_ignores=ignores, learn=args.learn and cartridge is not None)
+        if args.learn:
+            print("[learn] on: learns which move lands, logged to <cartridge>/logs/decisions.jsonl" if cartridge
+                  else "[learn] off: --learn needs a --cartridge to keep what it learns")
         brain.label = args.name or (_label_from(args.cartridge) if args.cartridge else "NO CARTRIDGE")
         if cartridge:
             print("[dials] " + "  ".join(f"{k} {v:.3f}" for k, v in brain.character.dials.items()))
@@ -105,17 +132,28 @@ def main() -> None:
             worn = "  ".join(f"{v['name']} {v['settled']:.2f}/{v['character']:.2f}" for v in ws["moves"]) or "none yet"
             print(f"[patina] settled/character: {worn}")
             print(f"[patina] rust {ws['rust']:.2f}, notices you at {ws['notice_m']:.2f} m")
+        if offset is not None:
+            brain.demo_clock = True
+            brain.now = datetime.now() + offset
+            print(f"[clock] demo clock: it thinks it's {brain.now:%H:%M} (really {datetime.now():%H:%M})")
+        if getattr(brain, "moments", None):
+            print("[moments] habits it knows: " + ", ".join(
+                f"{m.get('tag') or m['name']}{' (asleep)' if m.get('dormant') else ''}"
+                for _, m in sorted(brain.moments.items(), key=lambda kv: kv[1]["at"])))
         problems = [(n, m) for n, ok, m in brain.health() if not ok]
         print(f"[health] {len(brain.health())} modules checked, " + (f"{len(problems)} problem(s):" if problems else "all ok"))
         for name, msg in problems:
             print(f"  ! {name}: {msg}")
         gestures = GestureDetector(debug=args.gesture_debug)
-        last_mode, last = None, time.perf_counter()
+        last_mode, last, last_moment = None, time.perf_counter(), None
         wear, next_wear = brain.wear_state(), 0.0
         try:
             while True:
                 now = time.perf_counter()
                 dt, last = now - last, now
+
+                if offset is not None:
+                    brain.now = datetime.now() + offset     # the demo clock keeps ticking at real speed
 
                 # Every sense feeds the same stream. The source is kept so the brain knows how it heard.
                 events = [as_event(e, "unity") for e in link.pop_events()]
@@ -141,6 +179,12 @@ def main() -> None:
                     wear, next_wear = brain.wear_state(), now + 1.0
                 link.broadcast({"type": "state", **info, "wear": wear})
 
+                if brain.moment != last_moment:
+                    if brain.moment:
+                        line = next((w.explain(brain.moment) for w in brain.wear if w.name == "moments"), brain.moment)
+                        print(f"[moment] {brain.moment} {line}")
+                        wear, next_wear = brain.wear_state(), now + 1.0   # show it on the overlay right away
+                    last_moment = brain.moment
                 if info["mode"] != last_mode:
                     print(f"[mode] {info['mode']}")
                     last_mode = info["mode"]

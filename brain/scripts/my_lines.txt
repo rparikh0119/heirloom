@@ -1,0 +1,29 @@
+# What Riya plans to say on camera (shoot, Oct 28). Check them tonight, no mic needed:
+#   python scripts\meaning_check.py --file scripts\my_lines.txt
+# Format:  sentence | what it should mean   ("huh" = it should ask, not guess)
+# Edit these to how you actually talk. Add any you might ad-lib.
+
+hey buddy | wave
+good morning | wake
+you're such a good little robot | good
+I'm so proud of you | good
+come over here | curious
+look at this | curious
+give me a minute | not_now
+I love you | heart
+get lost | offended
+I'm sorry, I didn't mean it | sorry
+time for bed | sleep
+rise and shine | wake
+remember this | record
+let me hear it | play_memory
+take a picture | take_photo
+show me a memory | show_memory
+
+# the word it should learn on camera (must be a "huh" first, then you teach it with a wave)
+beep boop buddy | huh
+
+# things it should NOT pretend to understand
+what's the weather like | huh
+did you finish the assignment | huh
+I don't love you | huh

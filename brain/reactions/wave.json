@@ -3,5 +3,10 @@
   "when": "wave",
   "motion": "hello",
   "sound": "hello",
-  "mode": "awake"
+  "mode": "awake",
+  "choices": [
+    "happy",
+    "curious",
+    "listen"
+  ]
 }

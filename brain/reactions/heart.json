@@ -2,5 +2,9 @@
   "note": "A heart or “I love you”: shy head tilt, its light beats like a heartbeat.",
   "when": "heart",
   "motion": "love",
-  "sound": "love"
+  "sound": "love",
+  "choices": [
+    "happy",
+    "sheepish"
+  ]
 }

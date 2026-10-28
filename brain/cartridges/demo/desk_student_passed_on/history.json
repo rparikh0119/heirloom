@@ -1,0 +1,13 @@
+{
+  "handoffs": [
+    {
+      "from": "L1",
+      "to": "L2",
+      "date": "2026-10-27",
+      "choices": {
+        "L1": "keep"
+      }
+    }
+  ],
+  "seated_in": []
+}

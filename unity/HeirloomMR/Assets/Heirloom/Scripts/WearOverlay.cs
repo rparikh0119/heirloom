@@ -13,6 +13,9 @@ namespace Heirloom
     ///           the mark in the middle is out of the box, the fill is how far this home has moved it.
     ///   MOVES   the most used expressions. settled = weeks (hesitant to sure), character = years (the home's flavour).
     ///   RUST    after time apart. Warms back up with a few moments.
+    ///   NOW     the moment happening now (the 10 am hello), the chirp it answered with, whose habit it is.
+    ///   LEARNING (run.py --learn) the move it just chose for a situation, how often it worked, landed or missed.
+    ///   HABITS  every moment it has noticed. Turn off Show Moments for the older, shorter panel.
     /// Press W (Game view focused) to show or hide it.
     /// Two droids side by side: give the left one a negative Offset X so its panel sits on the outside.
     /// </summary>
@@ -28,6 +31,10 @@ namespace Heirloom
         public float textSize = 0.2f;
         [Tooltip("How many expressions to list, most used first")]
         public int movesShown = 4;
+        [Tooltip("Show the clock, the moment happening now, and the habits it knows (moments + dialect)")]
+        public bool showMoments = true;
+        [Tooltip("How many habits to list")]
+        public int habitsShown = 4;
 
         const string Cream = "#E9DFC8", Oxblood = "#B5413A", Dim = "#6E675C", Rust = "#C77B3A";
         static readonly string[] DialNames = { "curiosity", "sass", "boldness", "energy", "warmth" };
@@ -46,7 +53,7 @@ namespace Heirloom
         void Resize()
         {
             _label.fontSize = textSize;
-            _label.rectTransform.sizeDelta = new Vector2(9f * textSize, 6.5f * textSize);
+            _label.rectTransform.sizeDelta = new Vector2(9f * textSize, (showMoments ? 10f : 6.5f) * textSize);
             // Anchored by the edge nearest the robot, so the panel always starts beside the head.
             _label.rectTransform.pivot = new Vector2(offset.x >= 0 ? 0f : 1f, 0.5f);
         }
@@ -84,7 +91,12 @@ namespace Heirloom
             }
 
             string name = string.IsNullOrEmpty(w.label) ? "WEAR" : w.label;
-            _sb.Append($"<size=150%><color={Cream}><b>{name}</b></color></size>\n\n");
+            _sb.Append($"<size=150%><color={Cream}><b>{name}</b></color></size>\n");
+            if (showMoments && !string.IsNullOrEmpty(w.clock))
+                _sb.Append($"<color={Dim}>{w.clock}{(w.clock_demo ? "  demo clock" : "")}</color>\n");
+            _sb.Append("\n");
+            if (showMoments && !string.IsNullOrEmpty(w.moment)) AppendMoment(w);
+            if (w.learn_on) AppendLearning(w);
             var d = w.dials;
             float[] values = { d.curiosity, d.sass, d.boldness, d.energy, d.warmth_speed };
             for (int i = 0; i < values.Length; i++)
@@ -103,7 +115,43 @@ namespace Heirloom
             if (w.rust > 0.01f) _sb.Append($"<color={Rust}>RUSTY {w.rust:0.00}</color>  <color={Dim}>warming up</color>\n");
             else _sb.Append($"<color={Dim}>in practice</color>\n");
             _sb.Append($"<color={Dim}>notices you at {w.notice_m:0.0} m</color>");
+            if (showMoments) AppendHabits(w);
             return _sb.ToString();
+        }
+
+        /// <summary>The moment happening now, big, so it reads on camera: what it is, the chirp it used, whose it is.</summary>
+        void AppendMoment(HeirloomLink.Wear w)
+        {
+            _sb.Append($"<size=120%><color={Oxblood}><b>NOW  {Trim(w.moment, 28)}</b></color></size>\n");
+            if (!string.IsNullOrEmpty(w.moment_chirp)) _sb.Append($"<color={Cream}>{w.moment_chirp}</color>\n");
+            if (w.moment_lines != null)
+                foreach (var line in w.moment_lines) _sb.Append($"<color={Dim}>{Trim(line, 36)}</color>\n");
+            _sb.Append("\n");
+        }
+
+        /// <summary>Learning loop v0: what it just chose, how often that worked, and whether it landed.</summary>
+        void AppendLearning(HeirloomLink.Wear w)
+        {
+            _sb.Append($"<color={Dim}>LEARNING</color>\n");
+            if (string.IsNullOrEmpty(w.learn_line)) { _sb.Append($"<color={Dim}>nothing tried yet</color>\n\n"); return; }
+            _sb.Append($"<color={Cream}>{Trim(w.learn_line, 40)}</color>\n");
+            if (w.learn_explore) _sb.Append($"<color={Rust}>trying something new</color>\n");
+            if (!string.IsNullOrEmpty(w.learn_reward))
+                _sb.Append($"<color={(w.learn_reward.StartsWith("landed") ? Oxblood : Dim)}>{w.learn_reward}</color>\n");
+            _sb.Append("\n");
+        }
+
+        /// <summary>Every habit it has noticed. The one happening now is lit.</summary>
+        void AppendHabits(HeirloomLink.Wear w)
+        {
+            int n = w.habits == null ? 0 : Mathf.Min(habitsShown, w.habits.Length);
+            _sb.Append($"\n\n<color={Dim}>HABITS</color>\n");
+            if (n == 0) { _sb.Append($"<color={Dim}>none noticed yet</color>"); return; }
+            for (int i = 0; i < n; i++)
+            {
+                bool now = i == w.habit_now;
+                _sb.Append($"<color={(now ? Oxblood : Cream)}>{(now ? "> " : "  ")}{Trim(w.habits[i], 34)}</color>\n");
+            }
         }
 
         /// <summary>21 cells across 0.5 +- limit. Middle mark = out of the box, fill = how far this home moved it.</summary>

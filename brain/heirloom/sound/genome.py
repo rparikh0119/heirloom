@@ -119,20 +119,61 @@ def _mutate(parent: list[dict], rng: random.Random, changes: int = 1) -> list[di
     return _clamp(g)
 
 
+OPS = ("tail", "pickup", "stutter", "hold", "flip", "drop")
+# tail     a little note at the end, up or down      (the only kind of change before Oct 27)
+# pickup   a little note before the first one, like a breath in
+# stutter  one note split in two with a tiny gap: "hel-lo" becomes "he-he-llo"
+# hold     one note stops gliding and holds its pitch (flat), which no core chirp but tick does
+# flip     one note turns around: up becomes down
+# drop     one note goes (only for chirps with more than one)
+# Oct 27: with only tail/drop/flip, 40 droids bred 2 different family hellos and 1 family curious,
+# because the core set is crowded with 2-note shapes and "tail" almost always won. Families should
+# sound different from each other, not just from their parent.
+
+
+def _note(f0: float, f1: float, like: dict, dur: float, rng: random.Random) -> dict:
+    return {"f0": f0, "f1": f1, "dur": dur, "gap": 0.0, "shape": like.get("shape", "sine"),
+            "wobble": 0.0, "wobble_hz": 0.0, "amp": min(0.4, like.get("amp", 0.4))}
+
+
 def _change(g: list[dict], rng: random.Random) -> list[dict]:
     g = [dict(n) for n in g]
-    op = rng.choice(["add", "drop", "flip"] if len(g) > 1 else ["add", "flip"])
-    if op == "add":                       # a little pickup note at the end, up or down
+    ops = [op for op in OPS if op != "drop" or len(g) > 1]
+    op = rng.choice(ops)
+    if op == "tail":
         last = g[-1]
         up = rng.random() < 0.5
         g[-1]["gap"] = max(last.get("gap", 0.0), 0.02)
-        g.append({"f0": last["f1"], "f1": last["f1"] * (rng.uniform(1.15, 1.45) if up else rng.uniform(0.7, 0.87)),
-                  "dur": rng.uniform(0.05, 0.09), "gap": 0.0, "shape": last.get("shape", "sine"),
-                  "wobble": 0.0, "wobble_hz": 0.0, "amp": min(0.4, last.get("amp", 0.4))})
+        g.append(_note(last["f1"], last["f1"] * (rng.uniform(1.15, 1.45) if up else rng.uniform(0.7, 0.87)),
+                       last, rng.uniform(0.05, 0.09), rng))
+    elif op == "pickup":
+        first = g[0]
+        up = rng.random() < 0.5
+        lead = _note(first["f0"] * (rng.uniform(0.7, 0.85) if up else rng.uniform(1.2, 1.4)), first["f0"],
+                     first, rng.uniform(0.04, 0.07), rng)
+        lead["gap"] = rng.uniform(0.015, 0.035)
+        g.insert(0, lead)
+    elif op == "stutter":
+        i = rng.randrange(len(g))
+        n = g[i]
+        mid = math.sqrt(n["f0"] * n["f1"])           # halfway in pitch, so the glide keeps its direction
+        a, b = dict(n), dict(n)
+        a["f1"], a["dur"], a["gap"] = mid, n["dur"] * 0.5, rng.uniform(0.015, 0.03)
+        b["f0"], b["dur"] = mid, n["dur"] * 0.5
+        if direction(a) == 0 and direction(n) != 0:   # too small a glide to split: repeat the whole note instead
+            a, b = dict(n), dict(n)
+            a["dur"], a["gap"] = n["dur"] * 0.6, rng.uniform(0.015, 0.03)
+            b["dur"] = n["dur"] * 0.6
+        g[i:i + 1] = [a, b]
+    elif op == "hold":
+        i = rng.randrange(len(g))
+        n = g[i]
+        pitch = n["f1"] if rng.random() < 0.5 else n["f0"]
+        n["f0"] = n["f1"] = pitch
     elif op == "drop":
         g.pop(rng.randrange(len(g)))
         g[-1]["gap"] = 0.0
-    else:                                 # one note turns around: up becomes down
+    else:                                 # flip
         i = rng.randrange(len(g))
         n = g[i]
         if direction(n) == 0:

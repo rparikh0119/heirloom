@@ -58,6 +58,17 @@ namespace Heirloom
             public Move[] moves = new Move[0];
             public float rust;
             public float notice_m;
+            public string clock;          // the time of day the brain thinks it is, "10:01"
+            public bool clock_demo;       // true when run.py --clock fakes the time of day (shown, so footage stays honest)
+            public string moment;         // the moment happening now, e.g. "wave around 10:03", empty if none
+            public string[] moment_lines = new string[0];   // how often, since when, whose, passed down from
+            public string moment_chirp;   // "family chirp", "family chirp, passed down", or empty
+            public string[] habits = new string[0];         // every awake moment it knows, earliest first. Old keeper's end in " · L1"
+            public int habit_now = -1;    // which of habits is happening now, -1 = none
+            public bool learn_on;         // run.py --learn
+            public string learn_line;     // "wave · morning -> happy · worked 5 of 6"
+            public string learn_reward;   // "landed (thumbs up)", "missed (\"no\")", or empty
+            public bool learn_explore;    // it just tried something it isn't sure about
         }
 
         [Serializable]
