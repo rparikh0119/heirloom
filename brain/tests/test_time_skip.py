@@ -125,6 +125,46 @@ def _(tmp):
     assert (date.today() - date.fromisoformat(last)).days <= 3, last
 
 
+@check("taste: the loud family's droid learns the happy wiggle for waves, and keeper habits make it quicker and bigger")
+def _(tmp):
+    time_skip("loud_family", tmp, years=1, seed=3, quiet=True, snapshots={"year1": 365})
+    cart = Cartridge.open(tmp / "loud_family_year1")
+    arms = cart.read_page("L1", "responses")["buckets"]["wave|anytime"]
+    rate = {a: (ev[0] + 1) / (sum(ev) + 2) for a, ev in arms.items()}
+    assert max(rate, key=rate.get) == "happy", arms
+    style = cart.read_page("L1", "habits")["style"]
+    assert style["tempo"] > 1.0 and style["amplitude"] > 0.18, style
+
+
+@check("taste: the desk student's routine chirps drift lower, the way it likes them")
+def _(tmp):
+    time_skip("desk_student", tmp, years=1, seed=42, quiet=True, snapshots={"year1": 365})
+    cart = Cartridge.open(tmp / "desk_student_year1")
+    moments = cart.read_page("L1", "moments")["moments"]
+    dialect = cart.read_page("L1", "dialect")
+    hello = next(mid for mid, m in moments.items() if m["cue"] == "wave")
+    assert dialect[hello]["drift"]["pitch"] < 0.98, dialect[hello]["drift"]
+
+
+@check("a household with no taste or keeper runs exactly as before: no learning pages")
+def _(tmp):
+    time_skip("quiet_solo", tmp, years=1, seed=1, quiet=True, snapshots={"year1": 365})
+    cart = Cartridge.open(tmp / "quiet_solo_year1")
+    assert cart.read_page("L1", "responses") == {} and cart.read_page("L1", "habits") == {}
+
+
+@check("a taste must be a declared scenario and only name real choices")
+def _(tmp):
+    def change(r):
+        r["taste"] = {"favourite": {"wave": "dance"}, "praise": 0.5, "says_no": 0.1}
+        r["provenance"]["taste"] = {"kind": "scenario", "source": "test"}
+    assert "isn't a choice" in refuses(tmp, change)
+
+    def undeclared(r):
+        r["taste"] = {"favourite": {"wave": "happy"}, "praise": 0.5, "says_no": 0.1}
+    assert "scenario" in refuses(tmp, undeclared)
+
+
 # ---------------------------------------------------------------------------------------------
 
 def main() -> None:

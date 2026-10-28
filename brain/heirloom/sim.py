@@ -19,6 +19,16 @@ A household can also have a "routine" (also a scenario): when it's awake, and th
 set times ("wave at 10:00 on weekdays, 80% of days"). With a routine, every moment gets a time of
 day, so the moments wear can notice habits. Without one there's no clock and it learns no moments.
 
+A household can also have a "taste" and a "keeper" (both scenarios), for the learning loop (D104 to D106):
+    taste    which authored move it warms to for each cue ({"wave": "happy"}), how often it praises a
+             move it likes ("praise") or says no to one it doesn't ("says_no"), and whether it warms to
+             higher or lower family chirps ("chirp"). It reacts to what the droid actually CHOSE, so the
+             real learner and drift run. These reactions are extra events on top of the mix
+    keeper   how the keeper moves (habits wear's seven numbers) and a day-to-day "spread". Years of hand
+             frames can't be simulated, so each active day hands the keeper style (with noise) straight
+             to the habits learning rule. Only days with at least KEEPER_MIN moments count
+With either one, the brain runs with learning on. Without, it's exactly as before.
+
 The cartridge it writes records the profile, seed and every value used (D46).
 """
 from __future__ import annotations
@@ -37,7 +47,11 @@ from .cartridge import Cartridge, CartridgeError
 from .events import Event
 
 HOUSEHOLDS_DIR = Path(__file__).resolve().parents[1] / "sim" / "households"
-HOUSEHOLD_KEYS = {"note", "label", "moments_per_day", "weekend", "novelty", "long_term", "mix", "routine", "provenance"}
+HOUSEHOLD_KEYS = {"note", "label", "moments_per_day", "weekend", "novelty", "long_term", "mix", "routine",
+                  "taste", "keeper", "provenance"}
+TASTE_KEYS = {"note", "favourite", "praise", "says_no", "chirp"}
+KEEPER_KEYS = {"note", "style", "spread"}
+KEEPER_MIN = 3        # moments in a day for it to count as a day of seeing the keeper move (habits needs enough gestures)
 ROUTINE_ITEM_KEYS = {"note", "events", "at", "jitter", "chance", "days", "gap"}
 KINDS = {"data", "unknown", "scenario"}
 
@@ -86,7 +100,80 @@ def load_household(name: str, folder: Path = HOUSEHOLDS_DIR) -> dict:
             raise ValueError(f"{path.name} mix item {i + 1}: needs \"events\" (a list) and \"weight\" (a number)")
     if "routine" in raw:
         _check_routine(raw["routine"], prov, path.name)
+    if "taste" in raw:
+        _check_taste(raw["taste"], prov, path.name)
+    if "keeper" in raw:
+        _check_keeper(raw["keeper"], prov, path.name)
     return raw
+
+
+def _check_taste(taste: dict, prov: dict, name: str) -> None:
+    if prov.get("taste", {}).get("kind") != "scenario":
+        raise ValueError(f"{name}: the taste must be declared as a scenario in provenance")
+    bad = set(taste) - TASTE_KEYS
+    if bad:
+        raise ValueError(f"{name} taste: unknown field(s) {sorted(bad)}. Allowed: {sorted(TASTE_KEYS)}")
+    from .reactions import load_reactions
+    choices = {w: [r.motion] + r.choices for r in load_reactions() if r.choices for w in r.when}
+    for cue, move in taste.get("favourite", {}).items():
+        if cue not in choices:
+            raise ValueError(f"{name} taste: {cue!r} doesn't learn. Learnable: {sorted(choices)}")
+        if move not in choices[cue]:
+            raise ValueError(f"{name} taste: {move!r} isn't a choice for {cue}. Choices: {choices[cue]}")
+    for k in ("praise", "says_no"):
+        if not 0 <= taste.get(k, -1) <= 1:
+            raise ValueError(f"{name} taste: needs {k!r} from 0 to 1")
+    if taste.get("chirp", "none") not in ("higher", "lower", "none"):
+        raise ValueError(f"{name} taste: \"chirp\" is higher, lower or none")
+
+
+def _check_keeper(keeper: dict, prov: dict, name: str) -> None:
+    from .wear.habits import FEATURES
+    if prov.get("keeper", {}).get("kind") != "scenario":
+        raise ValueError(f"{name}: the keeper must be declared as a scenario in provenance")
+    bad = set(keeper) - KEEPER_KEYS
+    if bad:
+        raise ValueError(f"{name} keeper: unknown field(s) {sorted(bad)}. Allowed: {sorted(KEEPER_KEYS)}")
+    extra = set(keeper.get("style", {})) - set(FEATURES)
+    if extra or not keeper.get("style"):
+        raise ValueError(f"{name} keeper: \"style\" takes the habits numbers {list(FEATURES)}"
+                         + (f", found {sorted(extra)}" if extra else ""))
+    if not 0 <= keeper.get("spread", -1) <= 0.5:
+        raise ValueError(f"{name} keeper: needs \"spread\" from 0 to 0.5 (day-to-day variation, as a share)")
+
+
+def _react(brain: HeirloomBrain, household: dict, rng: random.Random) -> None:
+    """The household reacts to what the droid just chose (taste). Never to its own reaction."""
+    taste = household.get("taste")
+    o = brain.rewards.open
+    if not taste or brain.learner is None or o is None or o.t != brain.t:
+        return
+    d = brain._decided.get(o.decision_id) or {}
+    arm = d.get("arm")
+    cue = d["bucket"].split("|")[0] if d.get("bucket") else None
+    liked_move = arm is not None and taste.get("favourite", {}).get(cue) == arm
+    chirp = d.get("chirp")
+    pref = taste.get("chirp", "none")
+    liked_chirp = chirp is not None and pref != "none" and ((chirp[1]["pitch"] > 1.0) == (pref == "higher"))
+    parts = [liked_move] if arm is not None else []          # a home warms to the whole answer: each part it
+    if chirp is not None and pref != "none":                  # likes (the move, the chirp) adds to the chance
+        parts.append(liked_chirp)
+    if parts and any(parts) and rng.random() < taste["praise"] * sum(parts) / len(parts):
+        brain.pass_time(1.5)
+        brain.handle(Event("good", source="sim"))
+    elif arm is not None and not liked_move and cue in taste.get("favourite", {}) and rng.random() < taste["says_no"]:
+        brain.pass_time(1.5)
+        brain.handle(Event("scold", source="sim"))
+
+
+def _keeper_day(brain: HeirloomBrain, household: dict, rng: random.Random, moments: int) -> None:
+    keeper = household.get("keeper")
+    habits = next((w for w in brain.wear if w.name == "habits"), None)
+    if not keeper or habits is None or moments < KEEPER_MIN:
+        return
+    spread = keeper["spread"]
+    habits.learn_day({k: v * (1 + rng.gauss(0, spread)) if k != "tilt" else v + rng.gauss(0, 2.0)
+                      for k, v in keeper["style"].items()})
 
 
 def _minute(text: str, where: str) -> int:
@@ -172,7 +259,9 @@ def _live_one_day(brain: HeirloomBrain, household: dict, v: dict, rng: random.Ra
             if i:
                 brain.pass_time(m.get("gap", 2))
             brain.handle(Event(name, source="sim"))
+            _react(brain, household, rng)
         brain.pass_time(rng.uniform(600, 7200))   # mechanics only: long enough for any sulk to end
+    _keeper_day(brain, household, rng, n)
     return n
 
 
@@ -204,8 +293,10 @@ def _live_one_timed_day(brain: HeirloomBrain, household: dict, v: dict, rng: ran
                 brain.pass_time(m.get("gap", 2))
             brain.now = now + timedelta(seconds=m.get("gap", 2) * i)
             brain.handle(Event(name, source="sim"))
+            _react(brain, household, rng)
         last = now
     brain.pass_time(3600)
+    _keeper_day(brain, household, rng, len(plan))
     return len(plan)
 
 
@@ -243,6 +334,10 @@ def _ends_today(folder: Path, sim_day: date) -> None:
             moments["seen"] = {cue: {move(d): ms for d, ms in days.items()}
                                for cue, days in moments.get("seen", {}).items()}
             cart.write_page(layer.id, "moments", moments)
+        habits = cart.read_page(layer.id, "habits")
+        if habits.get("last"):
+            habits["last"] = (date.fromisoformat(habits["last"]) + shift).isoformat()
+            cart.write_page(layer.id, "habits", habits)
 
 
 def time_skip(profile: str, out: Path, years: int = 12, seed: int = 42, snapshots: dict | None = None,
@@ -261,7 +356,12 @@ def time_skip(profile: str, out: Path, years: int = 12, seed: int = 42, snapshot
     source = {"type": "simulated", "profile": profile, "seed": seed, "params": {k: round(x, 3) for k, x in v.items()}}
     cart = Cartridge.create(work, label=household.get("label", profile), source=source, on=start)
 
-    brain = HeirloomBrain(play_sound=lambda name: None, cartridge=cart)
+    learn = "taste" in household or "keeper" in household
+    brain = HeirloomBrain(play_sound=lambda name: None, cartridge=cart, learn=learn)
+    if learn:
+        from .learning import DecisionLog
+        brain.decisions = DecisionLog(None)              # years of decisions: no log file, no odds
+        brain.estimate_odds = False
     results, day, moments = {}, 0, 0
     for name, until in sorted(snapshots.items(), key=lambda kv: kv[1]):
         with cart.batch():

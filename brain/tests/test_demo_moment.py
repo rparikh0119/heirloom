@@ -77,8 +77,7 @@ def _(tmp):
     assert "days since" in ws["moment_detail"], ws["moment_detail"]
     assert ws["moment_chirp"] == "family chirp", ws["moment_chirp"]
     assert ws["moment_lines"][0].startswith("seen on ") and "keeper L1" in ws["moment_lines"][1], ws["moment_lines"]
-    assert len(ws["habits"]) == 4 and ws["habits"][0].startswith("wave around 10:"), ws["habits"]
-    assert ws["habit_now"] == 0
+    assert len(ws["habits"]) >= 4 and ws["habits"][ws["habit_now"]].startswith("wave around 10:"), ws["habits"]
     assert ws["clock"] == "10:01" and ws["clock_demo"] is True
     json.dumps(ws)      # plain JSON, so Unity's JsonUtility can read it
 
@@ -95,8 +94,9 @@ def _(tmp):
     ws = b2.wear_state()
     assert ws["moment_chirp"] == "family chirp, passed down", ws
     assert any(l.startswith("passed down from keeper L1") for l in ws["moment_lines"]), ws["moment_lines"]
-    assert ws["habits"].count("wave around 10:03") == 1 and ws["habit_now"] == 0, ws["habits"]
-    assert ws["habits"][1].endswith(" · L1"), ws["habits"]       # the 3:30 break is still the old keeper's
+    waves = [h for h in ws["habits"] if h.startswith("wave around 10:")]
+    assert len(waves) == 1 and ws["habits"][ws["habit_now"]] == waves[0], ws["habits"]
+    assert any(h.startswith("curious around 15:") and h.endswith(" · L1") for h in ws["habits"]), ws["habits"]   # the 3:30 break is still the old keeper's
 
 
 @check("the moment lets go after 90 s and the overlay clears it")

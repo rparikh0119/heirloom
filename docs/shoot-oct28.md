@@ -78,9 +78,16 @@ This is the core question of the project, answered on camera: what it learned co
 Two terminals, Unity scene with both droids.
 ```
 python scripts\run.py --body unity --voice --mic 2 --port 8765 --cartridge cartridges\demo\fresh
-python scripts\run.py --body unity --port 8766 --cartridge cartridges\demo\loud_family_year12
+python scripts\run.py --body unity --port 8766 --cartridge cartridges\demo\loud_family_year12 --learn
 ```
-Only one brain gets the mic. Use hands for the worn one, or give each its own take. Wave at each, thumbs up at each. Fresh is stiff and hesitant, worn is fluent with the home's flourish. Overlay on shows FRESH vs LOUD FAMILY YEAR 12 dials and patina bars.
+Only one brain gets the mic. Use hands for the worn one, or give each its own take. Wave at each, thumbs up at each.
+
+What should show:
+- Fresh is stiff and hesitant and answers a wave with the designed hello.
+- Worn is fluent, answers a wave with the **happy wiggle** (12 years of a family that loved it), and moves **quicker and bigger** (its keepers' habits).
+- Worn panel: "LEARNING wave · (time of day) -> happy · worked 30 of 30" and "moves like: quicker, bigger, busier · L1 100%".
+
+Don't thumbs-down the worn one on camera unless you mean it: `--learn` is live, so it keeps learning. Rebuild with `demo_cartridges.py` to reset.
 
 ---
 

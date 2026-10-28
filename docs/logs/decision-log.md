@@ -399,3 +399,11 @@ One entry per real decision. **Status:** Decided · Proposed (waiting on Riya) �
 - Fixes found by testing: tracking jumps (hand lost and found) read as 8 m/s gestures, now ignored above 4 m/s. Without position smoothing, 2 mm of jitter made a calm keeper look busy and jerky.
 - Overlay: "moves like: quicker, bigger · L1 40%". The moments list on the panel is renamed ROUTINES so "habits" means one thing on screen.
 - Not built: anticipation, the report's per-body joint map, D91's new resting-tilt and settle body params (mapped onto existing style keys instead).
+
+**D107 · The time skip learns too: household taste and keeper style** · Oct 27 · Built
+- Households can declare a "taste" (favourite move per cue, how often they praise a move they like or say no to one they don't, higher or lower chirps) and a "keeper" (habits numbers + day-to-day spread). Both are scenarios in provenance, like the routine. The loader refuses undeclared ones or moves that aren't real choices.
+- The sim reacts to what the droid actually chose, so the real learner, drift and habits run. Praise chance grows with each part the household likes (move, chirp). Reactions are extra events on top of the mix. Habits get the declared style once per day with 3+ moments (years of hand frames can't be simulated).
+- Households without a clock (no routine) learn into "anytime" buckets, used at any hour that has nothing of its own. Seeds no longer touch the real clock, so sims are repeatable again.
+- loud_family: favourites happy / love / happy, higher chirps, big fast keeper. desk_student: curious / sheepish / love, lower chirps, small calm tilted keeper. Results: the loud family's droid answers waves with the wiggle and moves quicker, bigger, busier. The desk student's routine chirps drift ~6% lower, and it moves calmer, smaller, tilted. Emergent: its morning praise became its own routine ("good around 10:09").
+- Finding for the write-up: scripted praise unrelated to the chirp (the household's normal routine) reached the praise chirp 116 times a year, so that chirp drifted at random (+4.6%, against its taste). Drift only follows taste where the praise is about the droid's answer. Real homes will have the same noise.
+- Old tests updated: the loud family now wears in the wiggle instead of hello (it learned it).

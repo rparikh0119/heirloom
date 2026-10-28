@@ -97,54 +97,6 @@
       "weight": 0.05
     }
   ],
-  "provenance": {
-    "moments_per_day": {
-      "kind": "unknown",
-      "source": "Bentley et al. 2018, IMWUT 2(3) Art. 91, Table 6, light-user cluster (25 of 88 homes): 2.30 sessions/day, 2.61 commands/day",
-      "note": "Picking the light-user cluster is part of the scenario (a busy owner). Bentley found household size did not change use. A Heirloom moment is neither a speaker session nor a command. The light cluster's sessions and commands bound the range. A companion robot could fall outside it"
-    },
-    "weekend": {
-      "kind": "data",
-      "source": "Bentley et al. 2018, IMWUT 2(3) Art. 91, p.14: single-person homes gave 23.8% of commands on weekends",
-      "derivation": "share s = 2w/(5+2w) for a weekend-day multiplier w, so w = 5s/(2(1-s)) = 5(0.238)/(2(0.762)) = 0.781",
-      "note": "Command share used as the moment share"
-    },
-    "novelty.peak": {
-      "kind": "unknown",
-      "source": "Cagiltay et al. 2022 (IDC), Misty II, 14 homes",
-      "note": "Only measured magnitude: weekly use fell about 2.2x from week 1 to week 4 (Table 1, converting 'once a week'=1, 'a few times'=3, 'daily'=7). The conversion is an interpretation and the robot was a children's reading tutor, so the range is kept wide and swept"
-    },
-    "novelty.days": {
-      "kind": "unknown",
-      "source": "Weiss et al. 2021 (RO-MAN, Anki Vector): attachment dropped after 2 weeks \u00b7 Bajones et al. 2019: novelty passed by 3 weeks \u00b7 Cagiltay et al. 2022: still declining in week 4",
-      "note": "Range spans the three studies"
-    },
-    "long_term.floor": {
-      "kind": "unknown",
-      "source": "Zhao & McEwen 2025 (Luka, 19 families): use 'low but stable' by years 3 to 4",
-      "note": "Family recall, no logs and no number. Range kept wide and swept"
-    },
-    "long_term.from_day": {
-      "kind": "unknown",
-      "source": "Zhao & McEwen 2025: 'sharp drop after the first year' (recall)",
-      "note": "Range around year 1"
-    },
-    "long_term.to_day": {
-      "kind": "unknown",
-      "source": "Zhao & McEwen 2025: low and stable 'by years 3 to 4' (recall)",
-      "note": "Range = years 3 to 4"
-    },
-    "mix": {
-      "kind": "scenario",
-      "source": "Defines this household. No study measures how often people wave at, praise or insult a companion robot",
-      "note": "Results are conditional: 'in a home where moments look like this'. Only the proportions matter. Replace with real playtest proportions after week 10"
-    },
-    "routine": {
-      "kind": "scenario",
-      "source": "Defines this household. No study measures when people greet a desk robot",
-      "note": "Times and chances are the scenario, so moments found are conditional ('in a home with this rhythm'). Replace with logged times from real use after week 10"
-    }
-  },
   "routine": {
     "awake": [
       "09:00",
@@ -183,5 +135,87 @@
         "chance": 0.7
       }
     ]
+  },
+  "taste": {
+    "note": "Wants a calm desk mate: likes the curious head tilt and a bashful answer to praise, warms to lower, softer chirps, rarely corrects it",
+    "favourite": {
+      "wave": "curious",
+      "good": "sheepish",
+      "heart": "love"
+    },
+    "praise": 0.4,
+    "says_no": 0.08,
+    "chirp": "lower"
+  },
+  "keeper": {
+    "note": "Small, unhurried gestures, mostly still, head tilted while working",
+    "style": {
+      "tempo": 0.55,
+      "amplitude": 0.1,
+      "smoothness": 0.9,
+      "directness": 0.85,
+      "settle": 0.7,
+      "stillness": 0.85,
+      "tilt": 5.0
+    },
+    "spread": 0.1
+  },
+  "provenance": {
+    "moments_per_day": {
+      "kind": "unknown",
+      "source": "Bentley et al. 2018, IMWUT 2(3) Art. 91, Table 6, light-user cluster (25 of 88 homes): 2.30 sessions/day, 2.61 commands/day",
+      "note": "Picking the light-user cluster is part of the scenario (a busy owner). Bentley found household size did not change use. A Heirloom moment is neither a speaker session nor a command. The light cluster's sessions and commands bound the range. A companion robot could fall outside it"
+    },
+    "weekend": {
+      "kind": "data",
+      "source": "Bentley et al. 2018, IMWUT 2(3) Art. 91, p.14: single-person homes gave 23.8% of commands on weekends",
+      "derivation": "share s = 2w/(5+2w) for a weekend-day multiplier w, so w = 5s/(2(1-s)) = 5(0.238)/(2(0.762)) = 0.781",
+      "note": "Command share used as the moment share"
+    },
+    "novelty.peak": {
+      "kind": "unknown",
+      "source": "Cagiltay et al. 2022 (IDC), Misty II, 14 homes",
+      "note": "Only measured magnitude: weekly use fell about 2.2x from week 1 to week 4 (Table 1, converting 'once a week'=1, 'a few times'=3, 'daily'=7). The conversion is an interpretation and the robot was a children's reading tutor, so the range is kept wide and swept"
+    },
+    "novelty.days": {
+      "kind": "unknown",
+      "source": "Weiss et al. 2021 (RO-MAN, Anki Vector): attachment dropped after 2 weeks · Bajones et al. 2019: novelty passed by 3 weeks · Cagiltay et al. 2022: still declining in week 4",
+      "note": "Range spans the three studies"
+    },
+    "long_term.floor": {
+      "kind": "unknown",
+      "source": "Zhao & McEwen 2025 (Luka, 19 families): use 'low but stable' by years 3 to 4",
+      "note": "Family recall, no logs and no number. Range kept wide and swept"
+    },
+    "long_term.from_day": {
+      "kind": "unknown",
+      "source": "Zhao & McEwen 2025: 'sharp drop after the first year' (recall)",
+      "note": "Range around year 1"
+    },
+    "long_term.to_day": {
+      "kind": "unknown",
+      "source": "Zhao & McEwen 2025: low and stable 'by years 3 to 4' (recall)",
+      "note": "Range = years 3 to 4"
+    },
+    "mix": {
+      "kind": "scenario",
+      "source": "Defines this household. No study measures how often people wave at, praise or insult a companion robot",
+      "note": "Results are conditional: 'in a home where moments look like this'. Only the proportions matter. Replace with real playtest proportions after week 10"
+    },
+    "routine": {
+      "kind": "scenario",
+      "source": "Defines this household. No study measures when people greet a desk robot",
+      "note": "Times and chances are the scenario, so moments found are conditional ('in a home with this rhythm'). Replace with logged times from real use after week 10"
+    },
+    "taste": {
+      "kind": "scenario",
+      "source": "Defines this household. No study measures which robot responses a home warms to, or how often people praise or correct a companion robot's choices",
+      "note": "Results are conditional: 'in a home with this taste'. These reactions are extra events on top of the mix. Replace with logged reactions from the week 10 playtest"
+    },
+    "keeper": {
+      "kind": "scenario",
+      "source": "Defines this household's keeper. No study gives desk-gesture norms on Quest hand tracking (as far as we found)",
+      "note": "Numbers are in the habits wear's units (m/s, m, share, s, degrees). Replace with real measured keepers after a hand-tracking check"
+    }
   }
 }

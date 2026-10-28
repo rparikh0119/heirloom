@@ -140,12 +140,13 @@ def _(tmp):
         assert "sped" in str(e)
 
 
-@check("the time skip wears moves in: a family's droid has a worn hello after a year")
+@check("the time skip wears moves in: a family's droid has a worn greeting after a year")
 def _(tmp):
     from heirloom.sim import time_skip
     time_skip("loud_family", tmp, years=1, seed=5, quiet=True)
     page = Cartridge.open(tmp / "loud_family_year1").read_page("L1", "patina")
-    assert page["hello"]["uses"] > 200, page
+    greet = max(("hello", "happy"), key=lambda m: page.get(m, {}).get("uses", 0))   # it learns which (D104)
+    assert page[greet]["uses"] > 200, page
 
 
 def seeded(brain, seed=1):
@@ -235,7 +236,8 @@ def _(tmp):
     shelf = time_skip("shelved", tmp / "s", years=2, seed=5, quiet=True)
     assert shelf["year2"]["rust"] > 0.5, shelf["year2"]
     fam = time_skip("loud_family", tmp / "f", years=12, seed=5, quiet=True)
-    assert fam["year12"]["deep"]["hello"] > fam["year1"]["deep"]["hello"] + 0.3, fam
+    greet = max(("hello", "happy"), key=lambda m: fam["year12"]["uses"].get(m, 0))   # the greeting it learned (D104)
+    assert fam["year12"]["deep"][greet] > fam["year1"]["deep"][greet] + 0.3, fam
 
 
 @check("a year-1 snapshot opened today isn't rusty (its dates end today), a shelved one is")

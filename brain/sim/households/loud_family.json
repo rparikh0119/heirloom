@@ -120,6 +120,30 @@
       "weight": 1.5
     }
   ],
+  "taste": {
+    "note": "The kids love the big happy wiggle and higher, brighter chirps, and say 'no' when it does something boring",
+    "favourite": {
+      "wave": "happy",
+      "good": "love",
+      "heart": "happy"
+    },
+    "praise": 0.5,
+    "says_no": 0.15,
+    "chirp": "higher"
+  },
+  "keeper": {
+    "note": "Big, fast, restless gestures (whoever handles it most)",
+    "style": {
+      "tempo": 1.3,
+      "amplitude": 0.24,
+      "smoothness": 0.75,
+      "directness": 0.65,
+      "settle": 0.3,
+      "stillness": 0.5,
+      "tilt": 0.0
+    },
+    "spread": 0.12
+  },
   "provenance": {
     "moments_per_day": {
       "kind": "unknown",
@@ -161,6 +185,16 @@
       "kind": "scenario",
       "source": "Defines this household. No study measures how often people wave at, praise or insult a companion robot",
       "note": "Results are conditional: 'in a home where moments look like this'. Only the proportions matter. Replace with real playtest proportions after week 10"
+    },
+    "taste": {
+      "kind": "scenario",
+      "source": "Defines this household. No study measures which robot responses a home warms to, or how often people praise or correct a companion robot's choices",
+      "note": "Results are conditional: 'in a home with this taste'. These reactions are extra events on top of the mix. Replace with logged reactions from the week 10 playtest"
+    },
+    "keeper": {
+      "kind": "scenario",
+      "source": "Defines this household's keeper. No study gives desk-gesture norms on Quest hand tracking (as far as we found)",
+      "note": "Numbers are in the habits wear's units (m/s, m, share, s, degrees). Replace with real measured keepers after a hand-tracking check"
     }
   }
 }

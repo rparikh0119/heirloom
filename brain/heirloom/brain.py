@@ -111,6 +111,7 @@ class HeirloomBrain:
         self._decided: dict[str, dict] = {}                  # recent decisions by id, to learn from
         self._n_decisions = 0
         self._last_cold = -1e9
+        self.estimate_odds = True                           # the time skip turns this off: no log, years of decisions
         self.last_learning: dict = {}                        # what the overlay shows about the last decision
         if self.meaning is not None:                         # learned words help it understand close variations too
             for phrase, event in self.vocabulary.items():
@@ -211,9 +212,17 @@ class HeirloomBrain:
                 w.observe(self.t, hands, head, roll)
 
     # ---------- learning loop v0 ----------
+    def _clock_now(self):
+        """The time it thinks it is: the demo clock or the time skip's, else the computer's.
+        None when there's a pretend date with no time of day (a time skip household without a routine)."""
+        if self.now is not None:
+            return self.now
+        return None if self.today is not None else datetime.now()
+
     def _bucket(self, cue: str) -> str:
         from .wear.responses import time_of_day
-        return f"{cue}|{time_of_day((self.now or datetime.now()).hour)}"
+        now = self._clock_now()
+        return f"{cue}|{time_of_day(now.hour) if now else 'anytime'}"
 
     def _decide(self, cue: str, r) -> str:
         """Pick which of the reaction's authored moves to answer with, and log it (proposed D74, D79)."""
@@ -224,11 +233,12 @@ class HeirloomBrain:
         bucket = self._bucket(cue)
         self._n_decisions += 1
         did = f"d_{self._n_decisions:04d}"
-        seed = f"{self.cartridge.droid.get('id', '')}:{(self.now or datetime.now()).isoformat()}:{self._n_decisions}"
-        p = self.learner.propose(bucket, r.motion, arms, masked, seed)
+        stamp = self._clock_now() or self.today
+        seed = f"{self.cartridge.droid.get('id', '')}:{stamp.isoformat()}:{self._n_decisions}"
+        p = self.learner.propose(bucket, r.motion, arms, masked, seed, estimate=self.estimate_odds)
         chosen = p["chosen"]
         cue_name, tod = bucket.split("|")
-        self.decisions.write({"decision_id": did, "t": round(self.t, 2), "when": (self.now or datetime.now()).isoformat(timespec="seconds"),
+        self.decisions.write({"decision_id": did, "t": round(self.t, 2), "when": stamp.isoformat(),
                               "seed": seed, "context": {"cue": cue_name, "tod": tod, "mode": self.mode},
                               "candidates": arms, "masked": sorted(masked), "probs": p["probs"], "chosen": chosen,
                               "explored": p["explored"], "learner": "bucket_ts/1",
@@ -257,7 +267,7 @@ class HeirloomBrain:
             did = f"c_{self._n_decisions:04d}"
             self._decided[did] = {"bucket": None, "arm": None, "t": self.t}
             self.rewards.start(did, self.t)
-        seed = f"{self.cartridge.droid.get('id', '')}:{did}:{(self.now or datetime.now()).isoformat()}"
+        seed = f"{self.cartridge.droid.get('id', '')}:{did}:{(self._clock_now() or self.today).isoformat()}"
         played, jitter = dialect.variant(mid, seed)
         self._decided[did]["chirp"] = (mid, jitter)
         self.decisions.write({"decision_id": did, "chirp": mid, "seed": seed, "jitter": {

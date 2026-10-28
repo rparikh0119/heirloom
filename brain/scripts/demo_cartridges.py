@@ -67,7 +67,7 @@ def main() -> None:
     for name in names:
         cart = Cartridge.open(OUT / name)
         moments = sum(len(cart.read_page(l.id, "moments").get("moments", {})) for l in cart.layers)
-        print(f"  {name:24s} {len(cart.layers)} keeper(s), {moments} habit(s)")
+        print(f"  {name:24s} {len(cart.layers)} keeper(s), {moments} routine(s)")
 
 
 if __name__ == "__main__":

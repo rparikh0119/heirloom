@@ -82,6 +82,7 @@
 
 - Dialect drift (D105), only with `--learn`: varied plays, warm reactions nudge the family chirp, identity locked, capped, old keeper's chirp frozen. tests/test_dialect_drift.py 7/7.
 - Keeper habits (D106), only with `--learn`: seven movement numbers per keeper, consolidated when it sleeps, shaping every move, capped, passed down with a 0.25 floor. tests/test_habits.py 12/12. Unity sends head roll.
+- Time skip learns too (D107): households with a taste and a keeper style, so demo droids arrive with learned moves, drifted chirps and habits. Fresh vs worn now shows all three.
 - Exact phrases for "give me a minute" and "time for bed" (Riya's on-camera check was 20/20, those two were close calls).
 
 **Learned**

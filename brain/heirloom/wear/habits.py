@@ -196,12 +196,20 @@ class HabitsWear(Wear):
         gestures, frames, still, rolls = self._gestures, self._frames, self._still_frames, self._rolls
         self._reset_day()
         if len(gestures) < MIN_GESTURES:
-            print(f"[habits] a thin day ({len(gestures)} gestures), nothing learned")
+            if frames:                                    # (silent when it never saw hands, e.g. the time skip)
+                print(f"[habits] a thin day ({len(gestures)} gestures), nothing learned")
             return False
         today = {k: statistics.median(g[k] for g in gestures) for k in ("tempo", "amplitude", "smoothness", "directness", "settle")}
         today["stillness"] = still / frames if frames else TYPICAL["stillness"][0]
         if len(rolls) >= 30:
             today["tilt"] = statistics.median(rolls)
+        self.learn_day(today)
+        print(f"[habits] dreamed on {len(gestures)} gestures: " + self.describe())
+        return True
+
+    def learn_day(self, today: dict) -> None:
+        """One counted day: the keeper's numbers move ALPHA toward today's. The time skip calls this
+        directly with a declared keeper style (it can't simulate years of hand frames)."""
         lid = self.cart.active.id
         page = self._page(lid)
         style = page["style"]
@@ -210,8 +218,8 @@ class HabitsWear(Wear):
         page["days"] = page.get("days", 0) + 1
         page["last"] = self._today().isoformat()
         self.cart.write_page(lid, self.name, page)
-        print(f"[habits] dreamed on {len(gestures)} gestures: " + self.describe())
-        return True
+        if self.brain is not None:
+            self.apply(self.brain)
 
     # ---------- what it does to motion ----------
     def apply(self, brain) -> None:

@@ -16,6 +16,8 @@ a move up (D75). The reaction's chirp stays the same, so what it means stays rea
     fading          every time a bucket learns, its old evidence is multiplied by GAMMA, so no move
                     can run away with it and old habits can be unlearned (discounted TS)
     cap             no move holds more than CAP worth of evidence in one bucket (growth cap, D78)
+    anytime         learned with no clock (a time skip household without a routine) goes in "wave|anytime",
+                    and is used at any hour that has nothing of its own yet
     quiet mask      for QUIET_S after a cold reaction, only quiet moves are allowed (intrusion, D78)
     passed down     an old keeper's tallies count at INHERIT x their layer weight, at most
                     INHERIT_CAP per move: a lean the new keeper overrides in about 10 reactions (D81)
@@ -78,6 +80,9 @@ class ResponsesWear(Wear):
         active = self.cart.active.id
         weights = self.cart.weights(getattr(self.brain, "today", None))
         pages = {layer.id: self._page(layer.id) for layer in self.cart.layers}
+        cue = bucket.split("|")[0]
+        if not any(bucket in pg["buckets"] for pg in pages.values()):
+            bucket = f"{cue}|anytime"         # nothing learned for this time of day: use what it learned without a clock
         out = {}
         for arm in arms:
             a0, b0 = (1.0 + HEAD, 1.0) if arm == default else OTHER_PRIOR
@@ -99,7 +104,8 @@ class ResponsesWear(Wear):
                         "own": (own[0], own[1]), "inherited": (inh_s, inh_f), "from": inh_from}
         return out
 
-    def propose(self, bucket: str, default: str, arms: list[str], masked: set[str], seed: str) -> dict:
+    def propose(self, bucket: str, default: str, arms: list[str], masked: set[str], seed: str,
+                estimate: bool = True) -> dict:
         """Pick a move. Returns chosen, probs (one per arm, masked = 0), explored, and the tallies."""
         allowed = [a for a in arms if a not in masked] or [default]
         tal = self.tallies(bucket, arms, default)
@@ -108,12 +114,12 @@ class ResponsesWear(Wear):
         chosen = max(allowed, key=lambda a: draw[a])
         est = random.Random(seed + ":probs")
         wins = {a: 0 for a in allowed}
-        for _ in range(DRAWS):
+        for _ in range(DRAWS if estimate else 0):          # the time skip skips the odds (no log, years of decisions)
             d = {a: est.betavariate(tal[a]["alpha"], tal[a]["beta"]) for a in allowed}
             wins[max(allowed, key=lambda a: d[a])] += 1
         mean = {a: tal[a]["alpha"] / (tal[a]["alpha"] + tal[a]["beta"]) for a in allowed}
         best = max(allowed, key=lambda a: mean[a])
-        return {"chosen": chosen, "probs": [round(wins.get(a, 0) / DRAWS, 3) for a in arms],
+        return {"chosen": chosen, "probs": [round(wins.get(a, 0) / DRAWS, 3) for a in arms] if estimate else [],
                 "explored": chosen != best, "tallies": tal}
 
     def learn(self, bucket: str, arm: str, reward: int) -> None:

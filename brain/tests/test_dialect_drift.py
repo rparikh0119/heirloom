@@ -29,8 +29,16 @@ def check(label):
 def worn(tmp: Path, learn=True, hand_down=False):
     """The desk student after a year, at 10:01, so a wave is its 10 am moment."""
     time_skip("desk_student", tmp, years=1, seed=42, quiet=True, snapshots={"year1": 365})
+    cart = Cartridge.open(tmp / "desk_student_year1")
+    for layer in cart.layers:                        # start every check from chirps as they were minted:
+        page = cart.read_page(layer.id, "dialect")    # the desk student's year already drifted them (D105 + taste)
+        for rec in page.values():
+            if rec.get("origin"):
+                rec["notes"] = rec.pop("origin")
+            rec.pop("drift", None)
+        cart.write_page(layer.id, "dialect", page)
     if hand_down:
-        Cartridge.open(tmp / "desk_student_year1").handoff("the next keeper")
+        cart.handoff("the next keeper")
     sounds = []
     b = HeirloomBrain(play_sound=sounds.append, cartridge=Cartridge.open(tmp / "desk_student_year1"), learn=learn)
     b.now = datetime.now().replace(hour=10, minute=1, second=0, microsecond=0)
